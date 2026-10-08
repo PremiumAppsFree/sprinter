@@ -1,14 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta name="author" content="Raaj">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>S Printer — Passport photos, ID card prints &amp; PDF tools</title>
 <meta name="description" content="S Printer: passport photo sheets, ID card and Aadhaar print layouts, photo prints, document crop and PDF tools. Everything runs in your browser.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="assets/sprinter/sprinter.css">
-<link rel="stylesheet" href="assets/sprinter/home.css">
+<link rel="stylesheet" href="assets/sprinter/sprinter.css?v=2">
+<script src="assets/sprinter/sprinter.js?v=2"></script>
+<link rel="stylesheet" href="assets/sprinter/home.css?v=2">
 <script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
@@ -28,6 +30,7 @@
 </header>
 
 <section class="hero">
+  <div class="ambient" aria-hidden="true"><i class="reg r1"></i><i class="reg r2"></i><i class="dot d1"></i><i class="dot d2"></i><i class="dot d3"></i><i class="dot d4"></i></div>
   <div class="sp-wrap">
     <div>
       <div class="kicker"><span class="dots"><i style="background:#0098D8"></i><i style="background:#D6247A"></i><i style="background:#F5C400"></i></span>Print desk toolkit</div>
@@ -39,8 +42,8 @@
         <a class="btn btn-ghost" href="#tools">See all tools</a>
       </div>
       <div class="facts">
-        <div><b>24</b>print tools</div>
-        <div><b>300&nbsp;DPI</b>print output</div>
+        <div><b data-count="24">24</b>print tools</div>
+        <div><b><span data-count="300">300</span>&nbsp;DPI</b>print output</div>
         <div><b>0</b>files uploaded</div>
       </div>
     </div>
@@ -58,6 +61,7 @@
   </div>
 </section>
 
+<div class="marquee" aria-label="Supported documents"><div class="track"><span>Passport photo 35×45</span><i aria-hidden="true"></i><span>Aadhaar card</span><i aria-hidden="true"></i><span>PAN card</span><i aria-hidden="true"></i><span>Voter ID</span><i aria-hidden="true"></i><span>Ayushman card</span><i aria-hidden="true"></i><span>4×6 photo</span><i aria-hidden="true"></i><span>A4 print</span><i aria-hidden="true"></i><span>PVC card crop</span><i aria-hidden="true"></i><span>Joint photo</span><i aria-hidden="true"></i><span>Remove background</span><i aria-hidden="true"></i><span>JPG ⇄ PDF</span><i aria-hidden="true"></i><span>Merge PDF</span><i aria-hidden="true"></i><span>Resume PDF</span><i aria-hidden="true"></i><span>Passport photo 35×45</span><i aria-hidden="true"></i><span>Aadhaar card</span><i aria-hidden="true"></i><span>PAN card</span><i aria-hidden="true"></i><span>Voter ID</span><i aria-hidden="true"></i><span>Ayushman card</span><i aria-hidden="true"></i><span>4×6 photo</span><i aria-hidden="true"></i><span>A4 print</span><i aria-hidden="true"></i><span>PVC card crop</span><i aria-hidden="true"></i><span>Joint photo</span><i aria-hidden="true"></i><span>Remove background</span><i aria-hidden="true"></i><span>JPG ⇄ PDF</span><i aria-hidden="true"></i><span>Merge PDF</span><i aria-hidden="true"></i><span>Resume PDF</span><i aria-hidden="true"></i></div></div>
 <div class="toolbar" id="toolbar">
   <div class="sp-wrap">
     <label class="search" for="q">
@@ -127,6 +131,14 @@
       <li><b>Print or download</b><p>Print at Actual size / 100%, or save a PDF or JPG for later.</p></li>
     </ol>
   </section>
+  <section class="maker reveal-maker" aria-label="About the developer">
+    <div class="maker-badge" aria-hidden="true"><span>R</span></div>
+    <div class="maker-text">
+      <p class="maker-k">Designed &amp; developed by</p>
+      <svg class="sp-sig big" viewBox="0 0 150 56" role="img" aria-label="Raaj"><defs><linearGradient id="sp-sig-grad-big" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="46">Raaj</text></svg>
+      <p class="maker-d">Built for print shops and cyber cafés: fast layouts, true-size prints, and no uploads.</p>
+    </div>
+  </section>
 </main>
 
 <footer class="sp-footer">
@@ -139,8 +151,11 @@
       <a href="tool/merge-pdf.html">Merge PDF</a>
     </div>
     <div class="sp-copy">&copy; <span id="yr">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 92 40" role="img" aria-label="Raaj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raaj</text></svg>
+    </div>
   </div>
 </footer>
-<script src="assets/sprinter/home.js"></script>
+<script src="assets/sprinter/home.js?v=2"></script>
 </body>
 </html>

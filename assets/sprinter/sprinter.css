@@ -41,3 +41,36 @@
 @keyframes sp-drop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.sp-header::after,.sp-open .sp-nav{animation:none}}
 #gatekeeperModal,#remotePaymentQr,#remoteCashfreePayBtn,#remotePaymentAppChoices,#remotePaymentUpi,#remotePaymentBreakup,#remotePaymentQrDownloadBtn,#crop-payment-login{display:none!important}
+
+/* ===== Motion layer & developer credit ===== */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:sp-vt-out .22s cubic-bezier(.4,0,1,1) both}
+::view-transition-new(root){animation:sp-vt-in .38s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sp-vt-out{to{opacity:0;transform:translateY(-6px)}}
+@keyframes sp-vt-in{from{opacity:0;transform:translateY(10px)}}
+
+.sp-progress{position:fixed;left:0;top:0;height:3px;width:100%;z-index:1000;pointer-events:none;transform-origin:left;transform:scaleX(var(--sp-p,0));background:linear-gradient(90deg,#0098D8,#D6247A,#F5C400);box-shadow:0 0 10px rgba(214,36,122,.45)}
+
+.sp-top{position:fixed;right:16px;bottom:16px;z-index:80;width:46px;height:46px;border-radius:50%;border:0;background:#1B2330;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 24px rgba(27,35,48,.28);opacity:0;transform:translateY(14px) scale(.9);pointer-events:none;transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1)}
+.sp-top.show{opacity:1;transform:none;pointer-events:auto}
+.sp-top:hover{transform:translateY(-3px)}
+.sp-top svg.ring{position:absolute;inset:-3px;width:52px;height:52px;transform:rotate(-90deg)}
+.sp-top svg.ring circle{fill:none;stroke:#0098D8;stroke-width:3;stroke-linecap:round;stroke-dasharray:151;stroke-dashoffset:calc(151 - 151 * var(--sp-p,0))}
+.sp-home-fab ~ .sp-top{bottom:68px}
+@media print{.sp-progress,.sp-top{display:none!important}}
+
+.sp-dev{display:flex;align-items:center;gap:10px;color:#C9D2DC;font-size:13.5px}
+.sp-sig{height:34px;width:auto;overflow:visible}
+.sp-sig text{font:700 30px 'SP Lexend',Lexend,Inter,system-ui,sans-serif;letter-spacing:.5px;fill:transparent;stroke:url(#sp-sig-grad);stroke-width:1.2;stroke-dasharray:260;stroke-dashoffset:260}
+.sp-sig.draw text{animation:sp-sig-draw 1.8s cubic-bezier(.6,.1,.2,1) forwards}
+@keyframes sp-sig-draw{70%{stroke-dashoffset:0;fill:transparent}100%{stroke-dashoffset:0;fill:#fff}}
+.sp-dev .heart{color:#D6247A;display:inline-block;animation:sp-beat 1.6s ease-in-out infinite}
+@keyframes sp-beat{0%,60%,100%{transform:scale(1)}30%{transform:scale(1.25)}}
+.sp-fab-dev{font-weight:500;opacity:.75;margin-left:2px}
+
+@media (prefers-reduced-motion:reduce){
+ ::view-transition-old(root),::view-transition-new(root){animation:none}
+ .sp-sig text{stroke-dashoffset:0;fill:#fff}
+ .sp-sig.draw text,.sp-dev .heart{animation:none}
+ .sp-top{transition:none}
+}

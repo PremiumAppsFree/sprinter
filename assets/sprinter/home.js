@@ -53,3 +53,50 @@
     var s = stage.querySelector('.sheet'); s.parentNode.replaceChild(s.cloneNode(true), s);
   });
 })();
+
+/* Motion extras: count-up, card spotlight, hero parallax, magnetic button, maker reveal. */
+(function () {
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // count-up when the stats come into view
+  var nums = [].slice.call(document.querySelectorAll('[data-count]'));
+  function count(el) {
+    var end = +el.dataset.count, t0 = null, dur = 1200;
+    function step(t) { if (!t0) t0 = t; var k = Math.min(1, (t - t0) / dur); el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); }
+    el.textContent = '0'; requestAnimationFrame(step);
+  }
+  if (!reduce) setTimeout(function () { nums.forEach(count); }, 700);
+
+  // cursor spotlight on tool cards
+  document.addEventListener('pointermove', function (e) {
+    var c = e.target.closest && e.target.closest('.tool'); if (!c) return;
+    var r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }, { passive: true });
+
+  // gentle parallax of ambient marks
+  var hero = document.querySelector('.hero'), marks = [].slice.call(document.querySelectorAll('.ambient i'));
+  if (hero && !reduce) hero.addEventListener('pointermove', function (e) {
+    var r = hero.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    marks.forEach(function (m, i) { var d = (i % 3 + 1) * 10; m.style.transform = 'translate(' + (x * d) + 'px,' + (y * d) + 'px)'; });
+  });
+
+  // magnetic primary button
+  var btn = document.querySelector('.btn-primary');
+  if (btn && !reduce && matchMedia('(hover: hover)').matches) {
+    btn.addEventListener('pointermove', function (e) {
+      var r = btn.getBoundingClientRect();
+      btn.style.transform = 'translate(' + ((e.clientX - r.left - r.width / 2) * .15) + 'px,' + ((e.clientY - r.top - r.height / 2) * .25 - 2) + 'px)';
+    });
+    btn.addEventListener('pointerleave', function () { btn.style.transform = ''; });
+  }
+
+  // maker card reveal
+  var maker = document.querySelector('.maker');
+  if (maker) {
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { maker.classList.add('in'); io.disconnect(); } }); }, { threshold: .4 });
+      io.observe(maker);
+    } else maker.classList.add('in');
+  }
+})();

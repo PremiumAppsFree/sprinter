@@ -124,3 +124,55 @@ section.group{margin-bottom:46px;scroll-margin-top:140px}
  .js .reveal .tool{opacity:1;transform:none}
 }
 @media (max-width:560px){.toolbar{position:static;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+/* ===== Motion extras ===== */
+.ambient{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ambient i{position:absolute;display:block;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.ambient .reg{width:34px;height:34px;border:2px solid rgba(27,35,48,.18);border-radius:50%;opacity:0;animation:fade .8s 1.2s forwards,drift 14s ease-in-out infinite alternate}
+.ambient .reg::before,.ambient .reg::after{content:"";position:absolute;background:rgba(27,35,48,.18)}
+.ambient .reg::before{left:50%;top:-8px;bottom:-8px;width:2px;margin-left:-1px}
+.ambient .reg::after{top:50%;left:-8px;right:-8px;height:2px;margin-top:-1px}
+.ambient .r1{left:46%;top:14%}
+.ambient .r2{right:4%;bottom:10%;animation-delay:1.4s,2s}
+.ambient .dot{width:14px;height:14px;border-radius:50%;opacity:0;animation:fade .8s 1.4s forwards,drift 11s ease-in-out infinite alternate}
+.ambient .d1{background:#0098D8;left:28%;bottom:5%;animation-delay:1.3s,0s}
+.ambient .d2{background:#D6247A;left:40%;bottom:8%;width:10px;height:10px;animation-delay:1.5s,1s}
+.ambient .d3{background:#F5C400;right:38%;top:10%;width:9px;height:9px;animation-delay:1.6s,2.5s}
+.ambient .d4{background:#1B2330;right:12%;top:22%;width:7px;height:7px;animation-delay:1.7s,.5s}
+@keyframes drift{from{translate:0 0}to{translate:18px -22px}}
+.hero .sp-wrap{z-index:1}
+
+.marquee{position:relative;overflow:hidden;background:#1B2330;color:#E7ECF1;border-block:1px solid #2C3646;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marquee .track{display:flex;align-items:center;gap:22px;width:max-content;padding:13px 0;animation:marq 38s linear infinite}
+.marquee:hover .track{animation-play-state:paused}
+.marquee span{font:600 14.5px/1 'SP Lexend',sans-serif;white-space:nowrap;letter-spacing:.01em}
+.marquee i{width:8px;height:8px;border-radius:2px;transform:rotate(45deg);flex-shrink:0;background:#0098D8}
+.marquee i:nth-of-type(3n+2){background:#D6247A}
+.marquee i:nth-of-type(3n){background:#F5C400}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+.tool{--mx:50%;--my:50%}
+.tool::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(220px circle at var(--mx) var(--my),color-mix(in srgb,var(--accent,#0098D8) 14%,transparent),transparent 70%)}
+.tool:hover::before{opacity:1}
+.tool > *{position:relative}
+
+.btn-primary{position:relative;overflow:hidden}
+.btn-primary::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);animation:shine 3.6s 3s ease-in-out infinite}
+@keyframes shine{0%{left:-60%}35%,100%{left:130%}}
+
+.maker{display:flex;align-items:center;gap:26px;background:#1B2330;color:#fff;border-radius:18px;padding:30px 34px;margin:26px 0 10px;position:relative;overflow:hidden}
+.maker::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:conic-gradient(from 0deg,#0098D8,#D6247A,#F5C400,#0098D8);opacity:.18;filter:blur(8px);animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.maker-badge{flex-shrink:0;width:74px;height:74px;border-radius:20px;display:grid;place-items:center;background:#fff;color:#1B2330;font:800 36px/1 'SP Lexend',sans-serif;box-shadow:inset 0 -6px 0 #0098D8;transform:rotate(-6deg) scale(.6);opacity:0;transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .5s}
+.maker.in .maker-badge{transform:rotate(-6deg);opacity:1}
+.maker-k{margin:0;color:#AEB9C6;font-size:14px}
+.maker-d{margin:4px 0 0;color:#C9D2DC;font-size:15px;max-width:34em}
+.sp-sig.big{height:56px}
+.sp-sig.big text{font-size:46px;stroke:url(#sp-sig-grad-big);stroke-width:1.4;stroke-dasharray:420;stroke-dashoffset:420}
+@media (max-width:560px){.maker{flex-direction:column;align-items:flex-start;padding:24px}.ambient .r1,.ambient .d3{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+ .marquee .track{animation:none}
+ .ambient i,.maker::after,.btn-primary::after{animation:none!important;opacity:1}
+ .maker-badge{transform:rotate(-6deg);opacity:1}
+}

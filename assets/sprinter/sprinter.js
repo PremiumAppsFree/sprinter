@@ -234,3 +234,34 @@
     });
   });
 })();
+
+/* Motion helpers: scroll progress, back-to-top, signature reveal. */
+(function () {
+  'use strict';
+  function ready(fn) { if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(function () {
+    var root = document.documentElement;
+    var bar = document.createElement('div'); bar.className = 'sp-progress'; bar.setAttribute('aria-hidden', 'true');
+    var top = document.createElement('button'); top.className = 'sp-top'; top.type = 'button'; top.setAttribute('aria-label', 'Back to top');
+    top.innerHTML = '<svg class="ring" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    top.addEventListener('click', function () { scrollTo({ top: 0, behavior: 'smooth' }); });
+    document.body.appendChild(bar); document.body.appendChild(top);
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var h = root.scrollHeight - innerHeight, p = h > 0 ? Math.min(1, Math.max(0, scrollY / h)) : 0;
+      root.style.setProperty('--sp-p', p.toFixed(4));
+      top.classList.toggle('show', scrollY > 600);
+    }
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    addEventListener('resize', update); update();
+
+    var sigs = document.querySelectorAll('.sp-sig');
+    if (!sigs.length) return;
+    if (!('IntersectionObserver' in window)) { sigs.forEach(function (s) { s.classList.add('draw'); }); return; }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('draw'); io.unobserve(e.target); } });
+    }, { threshold: 0.6 });
+    sigs.forEach(function (s) { io.observe(s); });
+  });
+})();
