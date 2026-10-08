@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<!-- ========================================================== -->
+<!-- HEAD SECTION -->
+<!-- यह कंटेंट आपके हर पेज के <head> में लोड होगा -->
+<!-- ========================================================== -->
+<!-- TailwindCSS 
+<script src="https://cdn.tailwindcss.com" ></script> 
+-->
+<!-- Alpine.js (ड्रॉपडाउन और मोबाइल मेनू के लिए ज़रूरी) -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<!-- Font Awesome (आइकॉन्स के लिए) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- Google Fonts -->
+<meta name="msapplication-TileColor" content="#6366f1">
+<meta name="theme-color" content="#ffffff">
+
+
+
+
+<!-- Font Awesome के लिए -->
+<!-- Tailwind CSS के लिए -->
+<style type="text/css">@font-face {font-family:'Lexend';font-style:normal;font-weight:400;src:url(../cf-fonts/v/lexend/5.2.11/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:400;src:url(../cf-fonts/v/lexend/5.2.11/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:400;src:url(../cf-fonts/v/lexend/5.2.11/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:600;src:url(../cf-fonts/v/lexend/5.2.11/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:600;src:url(../cf-fonts/v/lexend/5.2.11/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:600;src:url(../cf-fonts/v/lexend/5.2.11/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:700;src:url(../cf-fonts/v/lexend/5.2.11/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:700;src:url(../cf-fonts/v/lexend/5.2.11/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Lexend';font-style:normal;font-weight:700;src:url(../cf-fonts/v/lexend/5.2.11/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:400;src:url(../cf-fonts/v/manrope/5.2.8/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:400;src:url(../cf-fonts/v/manrope/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:400;src:url(../cf-fonts/v/manrope/5.2.8/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:400;src:url(../cf-fonts/v/manrope/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:400;src:url(../cf-fonts/v/manrope/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:400;src:url(../cf-fonts/v/manrope/5.2.8/greek/wght/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:500;src:url(../cf-fonts/v/manrope/5.2.8/greek/wght/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:500;src:url(../cf-fonts/v/manrope/5.2.8/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:500;src:url(../cf-fonts/v/manrope/5.2.8/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:500;src:url(../cf-fonts/v/manrope/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:500;src:url(../cf-fonts/v/manrope/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:500;src:url(../cf-fonts/v/manrope/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:700;src:url(../cf-fonts/v/manrope/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:700;src:url(../cf-fonts/v/manrope/5.2.8/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:700;src:url(../cf-fonts/v/manrope/5.2.8/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:700;src:url(../cf-fonts/v/manrope/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:700;src:url(../cf-fonts/v/manrope/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Manrope';font-style:normal;font-weight:700;src:url(../cf-fonts/v/manrope/5.2.8/greek/wght/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}</style>
+<!-- Custom Styles -->
+<style>
+    body { font-family: 'Manrope', sans-serif; }
+    h1, h2, h3, h4, h5, h6, button, a.font-heading, span.font-heading { font-family: 'Lexend', sans-serif; }
+    .nav-item.active-nav-link { color: #22c55e; font-weight: 600; }
+    .mobile-nav-item.active-nav-link { color: #22c55e; }
+</style>
+
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+<head>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css">
+<script src="../assets/sprinter/sprinter.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- [SECURITY] CSRF Meta Tag -->
+    <meta name="csrf-token" content="fc150c4861d0ad3117ce370bf5df621752e08f48bf65e230aae84df4268d795e">
+
+    <!-- ★★★ ADVANCED SEO TAGS ★★★ -->
+    <title>ID Card Crop & A4 Print Layout Tool | S Printer</title>
+    <meta name="description" content="Prepare user-provided card images for print layouts with AI-assisted auto crop, manual re-crop, brightness controls and up to five front/back card sets on A4. S Printer does not issue or verify documents.">
+    <meta name="keywords" content="id card crop tool, card print layout, a4 card print, manual re-crop, image brightness adjustment, pvc size print layout">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="S Printer">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <link rel="preload" href="../assets/idcard/opencv.js" as="script">
+
+    <!-- Twitter Cards -->
+    <!-- Visible-content-aligned application data for search and answer engines. -->
+    <script src="../assets/idcard/tailwind.js"></script>
+     <script>
+        if (typeof tailwind === 'undefined') {
+            console.log('Local Tailwind failed, loading CDN...');
+            var script = document.createElement('script');
+            script.src = "https://cdn.tailwindcss.com";
+            document.head.appendChild(script);
+        }
+    </script>
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- ★★★ CONFIG DATA & SECURITY FOR JS ★★★ -->
+    <script>
+                window.sysKey = "MjAyNi0xMC0wOF9Ba1ByaW50SHViX1NlY3VyZV9TeXN0ZW0=";
+        
+        window.siteConfig = {
+            documentCropAccess: {"paid":true,"subscriptionOnly":false,"quotaEnabled":false,"exhausted":false,"remaining":999999,"preferenceScope":"guest"},
+            permissionLevel: 3,
+            isLoggedIn: true,
+            userPlan: "pro",
+            userEmail: "",
+            isProPlan: true,
+                        hasAutoPrintPlan: true,
+                        hasAutoPrintSubscription: true,
+                        autoPrintSubscribeUrl: "../index.html",
+                        proSubscribeUrl: "../index.html",
+            isAutoPrintAdmin: false,
+            autoPrintAccessConfig: {"all_subscribers":true,"show_for_pro":true,"allowed_emails":[]},
+            canViewPvcCoordsModal: false,
+            canApprovePvcTemplates: false,
+            pvcLearningSaveEnabled: true,
+            gzipUploadSupported: true,
+            gzipUploadMaxBytes: 8388608,
+            credits: 999999,
+            loginUrl: "../index.html",
+            pricingUrl: "../index.html",
+            guestLimit: 999999,
+            csrfToken: "local",
+            downloadsUsed: 0,
+            gateData: {"title":"Create Free Account","msg":"You have used your free guest prints. Login now to create <strong>UNLIMITED<\/strong> ID Cards for FREE!","btn":"Login \/ Sign Up Free","icon":"fas fa-user-plus text-blue-600","bg":"bg-blue-100"},
+            realtimeConfig: {apiUrl: "", wsUrl: ""}
+        };
+        const PVC_ADMIN_CAPABILITY = "";
+        const PVC_ADMIN_ACTIONS = new Set([
+            'set_pvc_auto_crop_learning',
+            'get_pvc_auto_crop_monitor',
+            'save_pvc_default_template_override',
+            'reset_pvc_default_template_override',
+            'teach_pvc_auto_crop_template_type',
+            'approve_pvc_auto_crop_template',
+            'delete_pvc_auto_crop_template'
+        ]);
+        if (window.siteConfig.isProPlan) {
+            document.documentElement.classList.add('ak-pro-active');
+        }
+
+        
+    </script>
+
+ 
+<script>
+    function loadOpenCV() {
+        if (window.__akOpenCvLoadPromise) return window.__akOpenCvLoadPromise;
+
+        const LOCAL_URL = "../assets/idcard/opencv.js";
+        const LOCAL_RETRY_URL = LOCAL_URL + '&retry=1';
+        const CDN_URL = 'https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.9.0-release.3/dist/opencv.min.js';
+
+        function updateUI(msg, pct) {
+            const txt = document.getElementById('loaderText');
+            const per = document.getElementById('percent');
+            if (txt) txt.innerHTML = msg;
+            if (per && pct) per.innerText = pct;
+        }
+
+        const notifyReadyOnce = (resolve) => {
+            if (!(window.cv && cv.Mat && cv.imread && cv.imshow)) return false;
+            updateUI("Engine Ready!", "100%");
+            if (!window.__akOpenCvReadyNotified) {
+                window.__akOpenCvReadyNotified = true;
+                if (window.onOpenCvReady) window.onOpenCvReady();
+            }
+            // OpenCV's Module is itself a thenable. Resolving a native Promise
+            // with that object can create an endless thenable-assimilation loop.
+            // Consumers only need the readiness signal; `window.cv` stays global.
+            resolve(true);
+            return true;
+        };
+
+        window.__akOpenCvLoadPromise = new Promise((resolve, reject) => {
+            let settled = false;
+            let readyPoll = null;
+            let readyNoticeTimers = [];
+            const clearReadyChecks = () => {
+                if (readyPoll) clearInterval(readyPoll);
+                readyNoticeTimers.forEach((timerId) => clearTimeout(timerId));
+                readyPoll = null;
+                readyNoticeTimers = [];
+            };
+            const finishIfReady = () => {
+                if (settled || !notifyReadyOnce(() => {})) return false;
+                settled = true;
+                clearReadyChecks();
+                resolve(true);
+                return true;
+            };
+            const fail = (error) => {
+                if (settled) return;
+                settled = true;
+                clearReadyChecks();
+                reject(error);
+            };
+
+            if (notifyReadyOnce(resolve)) return;
+
+            const attachRuntimeReady = () => {
+                if (finishIfReady()) return;
+                if (!window.cv) {
+                    fail(new Error('OpenCV script loaded but cv was not created.'));
+                    return;
+                }
+
+                // This local OpenCV build exposes Module.then(). It safely covers
+                // both already-initialized and still-initializing runtime states.
+                if (typeof window.cv.then === 'function') {
+                    try {
+                        window.cv.then((readyCv) => {
+                            if (readyCv?.Mat) window.cv = readyCv;
+                            finishIfReady();
+                        });
+                    } catch (err) {
+                        console.warn('OpenCV readiness hook failed; polling fallback active.', err);
+                    }
+                }
+
+                const previousReady = window.cv.onRuntimeInitialized;
+                window.cv.onRuntimeInitialized = () => {
+                    if (typeof previousReady === 'function') previousReady();
+                    finishIfReady();
+                };
+            };
+
+            const appendScript = (url, fallbackUrls = []) => {
+                const script = document.createElement('script');
+                script.async = true;
+                script.dataset.akOpenCvLoader = '1';
+                script.src = url;
+                script.onload = () => setTimeout(() => {
+                    // A truncated/corrupt response can fire load without creating cv.
+                    // In that case continue with the next independent source.
+                    if (!window.cv && fallbackUrls.length > 0) {
+                        script.remove();
+                        appendScript(fallbackUrls[0], fallbackUrls.slice(1));
+                        return;
+                    }
+                    attachRuntimeReady();
+                }, 0);
+                script.onerror = () => {
+                    script.remove();
+                    if (fallbackUrls.length > 0) {
+                        console.warn('OpenCV source failed. Trying the next source...');
+                        setTimeout(() => appendScript(fallbackUrls[0], fallbackUrls.slice(1)), 700);
+                    } else {
+                        fail(new Error('OpenCV engine could not be loaded.'));
+                    }
+                };
+                document.head.appendChild(script);
+            };
+
+            // Runtime callbacks vary between OpenCV builds, so readiness is also
+            // checked directly. This prevents a missed callback from trapping the UI.
+            readyPoll = setInterval(finishIfReady, 250);
+            readyNoticeTimers.push(setTimeout(() => {
+                if (!settled) updateUI('Slow computer detected — engine abhi prepare ho raha hai...', '');
+            }, 45000));
+            readyNoticeTimers.push(setTimeout(() => {
+                if (settled) return;
+                updateUI('Engine abhi bhi load ho raha hai. Tab open rakhein ya Retry karein.', '');
+                document.getElementById('retryBtn')?.classList.remove('hidden');
+            }, 180000));
+
+            // Same-origin cache is primary. A fresh same-origin request protects
+            // flaky networks; CDN remains the final independent fallback.
+            appendScript(LOCAL_URL, [LOCAL_RETRY_URL, CDN_URL]);
+        });
+
+        let p = 0;
+        const timer = setInterval(() => {
+            if (window.__akOpenCvReadyNotified) { clearInterval(timer); return; }
+            if (p < 90) {
+                p += Math.floor(Math.random() * 10);
+                const el = document.getElementById('percent');
+                if(el) el.innerText = p + "%";
+            }
+        }, 200);
+
+        window.__akOpenCvLoadPromise.catch((err) => {
+            clearInterval(timer);
+            updateUI('Engine download nahi ho paya. Internet check karke Retry karein.', '');
+            document.getElementById('retryBtn')?.classList.remove('hidden');
+            console.error(err);
+        });
+        return window.__akOpenCvLoadPromise;
+    }
+
+    // EXECUTION: Turant chalao, wait mat karo
+    loadOpenCV();
+</script>
+
+
+<!-- Bundled assets use HTTP caching; existing site workers are untouched. -->
+    <script>
+        tailwind.config = { theme: { extend: { colors: { bg: '#f1f5f9', brand: '#2563eb', dark: '#0f172a' }, animation: { 'fade-in': 'fadeIn 0.3s ease-out' }, keyframes: { fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } } } } } }
+    </script>
+    <link rel="stylesheet" href="../assets/idcard/style.css">
+</head>
+<body class="h-[100dvh] flex flex-col lg:flex-row">
+    
+    <!-- PRINT CONTAINER (Hidden until print) -->
+    <div id="printContainer" class="hidden"></div>
+
+    <!-- LOADING SCREEN -->
+    <div id="loaderScreen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
+        <div class="loader mb-4"></div>
+        <p id="loaderText" class="text-xs text-gray-500 font-bold tracking-widest">STARTING ENGINE...</p>
+        <button id="retryBtn" onclick="location.reload()" class="hidden mt-4 px-4 py-2 bg-brand text-white rounded text-xs font-bold">RETRY</button>
+    </div>
+
+    <!-- SMART PROCESS LOADER -->
+    <div id="processLoader" class="fixed inset-0 z-[105] hidden items-center justify-center bg-slate-950/55 backdrop-blur-md px-4">
+        <div class="process-loader-card rounded-3xl p-5 text-center">
+            <div class="process-loader-head flex items-center justify-between gap-3 mb-4">
+                <span id="processLoaderChip" class="process-chip">ACTIVE</span>
+                <div class="process-dots flex items-center gap-1.5"><span></span><span></span><span></span></div>
+            </div>
+            <div class="process-stage mb-4" aria-hidden="true">
+                <div class="process-beam"></div>
+                <div class="process-sheet"></div>
+                <div class="process-printer"></div>
+            </div>
+            <div class="fast-upload-spinner mb-4" aria-hidden="true">
+                <div class="fast-upload-ring"><i id="processLoaderIcon" class="fa-solid fa-file-arrow-up"></i></div>
+            </div>
+            <div class="process-loader-copy">
+                <h3 id="processLoaderTitle" class="text-lg font-extrabold text-slate-900 leading-tight">Processing</h3>
+                <p id="processLoaderMessage" class="mt-2 text-xs font-semibold text-slate-500 leading-relaxed">Please wait, preview ready ho raha hai.</p>
+            </div>
+            <div class="process-bar mt-4"><span></span></div>
+            <p id="processLoaderSubtext" class="mt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">S Printer smart engine working</p>
+        </div>
+    </div>
+
+    <!-- ★★★ GATEKEEPER MODAL (Login/Pay Wall) ★★★ -->
+    <!-- CUSTOMER QR PRINT SCREEN -->
+    <section id="remoteCustomerShell" class="remote-shell hidden">
+        <div class="remote-phone-wrap">
+            <header class="flex items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200">
+                        <i class="fa-solid fa-print text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-black uppercase tracking-[0.18em] text-blue-600">S Printer</p>
+                        <h1 id="remoteUiTitle" class="text-xl font-black leading-tight text-slate-950">Quick Print</h1>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="remoteUiLangSelect" onchange="setRemoteCustomerUiLang(this.value)" class="h-8 rounded-full bg-white border border-slate-200 px-2 text-[10px] font-black text-slate-600 shadow-sm outline-none">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                    </select>
+                    <span id="remoteShopRuleBadge" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-[10px] font-black text-slate-600 shadow-sm">Shop Rule</span>
+                </div>
+            </header>
+
+            <div id="remoteUploadIntro" class="remote-glass rounded-[28px] p-4 mb-4">
+                <button type="button" onclick="openRemoteCustomerFilePicker()" class="remote-upload-zone w-full rounded-[24px] px-4 py-7 flex flex-col items-center justify-center text-center transition-transform">
+                    <span class="w-16 h-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200 mb-3">
+                        <i class="fa-solid fa-file-arrow-up text-2xl"></i>
+                    </span>
+                    <span id="remoteUploadTitle" class="text-lg font-black text-slate-900">Upload File</span>
+                    <span id="remoteUploadHelp" class="mt-1 text-xs font-semibold text-slate-500 leading-relaxed">PDF password, JPG, PNG and document files are supported. You can select multiple files together.</span>
+                </button>
+                <input type="file" id="remoteCustomerFileInput" class="hidden" multiple accept="image/*,.pdf,application/pdf,.txt,.csv,.json,.xml,.md,.log">
+            </div>
+
+            <div id="remoteAddMorePanel" class="hidden mb-4">
+                <button type="button" onclick="openRemoteCustomerFilePicker()" class="w-full rounded-3xl bg-white border border-blue-100 px-4 py-3 text-sm font-black text-blue-700 shadow-sm active:scale-[0.99]">
+                    <i class="fa-solid fa-plus mr-2"></i><span id="remoteAddMoreText">Add More Files</span>
+                </button>
+            </div>
+
+            <div id="remoteCustomerQueue" class="space-y-3"></div>
+            <div id="remoteBillingPanel" class="hidden mt-4 rounded-3xl border border-emerald-100 bg-white p-4 shadow-sm"></div>
+            <p id="remoteCustomerStatus" class="mt-4 text-center text-xs font-bold text-slate-500">QR connected. Select files to preview.</p>
+        </div>
+        <div class="remote-bottom-bar px-4 py-3">
+            <div class="mx-auto max-w-[560px]">
+                <div id="remoteDocTypeChoices" class="mb-2 grid grid-cols-2 gap-2">
+                    <button type="button" data-type="a4" onclick="setRemoteCustomerDocType('a4')" class="remote-doc-chip h-10 rounded-full border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 active:scale-95"><i class="fa-solid fa-file-lines mr-1"></i> <span data-remote-i18n="a4Print">A4 Print</span></button>
+                    <button type="button" data-type="idcard" onclick="setRemoteCustomerDocType('idcard')" class="remote-doc-chip h-10 rounded-full border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 active:scale-95"><i class="fa-solid fa-id-card mr-1"></i> <span data-remote-i18n="idCard">ID Card</span></button>
+                </div>
+                <div id="remotePrintModeChoices" class="mb-2 grid grid-cols-2 gap-2">
+                    <button type="button" data-mode="color" onclick="setCustomerPrintMode('color')" class="remote-mode-chip h-10 rounded-full border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 active:scale-95"><i class="fa-solid fa-palette mr-1"></i> <span data-remote-i18n="color">Color</span></button>
+                    <button type="button" data-mode="gray" onclick="setCustomerPrintMode('gray')" class="remote-mode-chip h-10 rounded-full border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 active:scale-95"><i class="fa-solid fa-circle-half-stroke mr-1"></i> <span data-remote-i18n="gray">Gray</span></button>
+                </div>
+                <div class="flex items-center gap-3">
+                <button type="button" onclick="clearRemoteCustomerQueue()" class="w-12 h-12 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center active:scale-95">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <button id="remotePrintNowBtn" type="button" onclick="submitRemoteCustomerQueue()" class="flex-1 h-12 rounded-full bg-blue-600 text-white font-black text-sm shadow-lg shadow-blue-200 active:scale-[0.99] disabled:opacity-50 disabled:shadow-none" disabled>
+                    <i class="fa-solid fa-paper-plane mr-2"></i> <span id="remoteSendBtnText">Send to Shop Printer</span>
+                </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="remotePaymentSheet" class="fixed inset-0 z-[115] hidden bg-slate-950/65 backdrop-blur-sm p-4 items-end sm:items-center justify-center">
+        <div class="w-full max-w-md rounded-[30px] bg-white p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600">Secure UPI Payment</p>
+                    <h3 class="mt-1 text-2xl font-black text-slate-950">Pay before print</h3>
+                    <p id="remotePaymentSheetSub" class="mt-1 text-xs font-bold text-slate-500">Payment complete hote hi print queue submit hogi.</p>
+                </div>
+                <button type="button" onclick="closeRemotePaymentSheet()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="mt-4 rounded-3xl border border-emerald-100 bg-emerald-50 p-4 text-center">
+                <p id="remotePaymentAmount" class="text-4xl font-black text-slate-950">Rs 0</p>
+                <p id="remotePaymentBreakup" class="mt-1 text-xs font-bold text-slate-600">Color 0, Gray 0</p>
+            </div>
+            <div class="mt-4 grid grid-cols-[150px_1fr] gap-4 items-center">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-center min-h-[150px]">
+                    <div id="remotePaymentQr" class="bg-white p-2 rounded-lg"></div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">QR Payment</p>
+                    <p id="remotePaymentUpi" class="hidden">shop@upi</p>
+                    <p class="mt-1 text-[11px] font-semibold text-slate-500 leading-relaxed">QR download karke PhonePe, Paytm, BharatPe ya kisi bhi UPI app me scan/upload se payment karein.</p>
+                    <button id="remoteCashfreePayBtn" type="button" onclick="openCashfreeRemotePayment(pendingRemotePayment)" class="hidden mt-3 w-full h-11 rounded-2xl bg-indigo-600 text-white text-[11px] font-black active:scale-95">
+                        <i class="fa-solid fa-credit-card mr-1"></i> Open Cashfree Payment
+                    </button>
+                    <button id="remotePaymentQrDownloadBtn" type="button" onclick="downloadRemotePaymentQr()" class="mt-3 w-full h-11 rounded-2xl bg-blue-600 text-white text-[11px] font-black active:scale-95">
+                        <i class="fa-solid fa-download mr-1"></i> Download Payment QR
+                    </button>
+                    <div id="remotePaymentAppChoices" class="hidden mt-3 grid grid-cols-2 gap-2">
+                        <button type="button" onclick="openPaymentAppChoice('phonepe')" class="h-9 rounded-xl bg-violet-50 border border-violet-100 text-violet-700 text-[10px] font-black active:scale-95">PhonePe</button>
+                        <button type="button" onclick="openPaymentAppChoice('paytm')" class="h-9 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 text-[10px] font-black active:scale-95">Paytm</button>
+                        <button type="button" onclick="openPaymentAppChoice('bharatpe')" class="h-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-black active:scale-95">BharatPe</button>
+                        <button type="button" onclick="openPaymentAppChoice('gpay')" class="h-9 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-black active:scale-95">GPay</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="confirmRemotePaymentAndPrint()" class="mt-5 w-full h-12 rounded-full bg-emerald-600 text-white font-black shadow-lg shadow-emerald-200 active:scale-[0.99]">
+                <i class="fa-solid fa-circle-check mr-2"></i> Payment Done & Print
+            </button>
+        </div>
+    </div>
+
+    <div id="gatekeeperModal" class="fixed inset-0 z-[110] bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center transform scale-95 opacity-0 transition-all duration-300" id="gatekeeperContent">
+            
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 mb-4">
+                <i class="fas fa-lock text-2xl text-indigo-600" id="gateIcon"></i>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-900 mb-2" id="gateTitle">Login Required</h3>
+            <p class="text-sm text-slate-500 mb-6" id="gateMessage">
+                You need to log in to process this document.
+            </p>
+
+            <a href="id-card-print.html#" id="gateBtn" class="w-full inline-flex justify-center items-center rounded-xl bg-indigo-600 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-50 transition-all mb-3">
+                Go to Login
+            </a>
+
+            <!-- Google Auth Link -->
+            <a href="../index.html" 
+               id="gateGoogleBtn" 
+               class="w-full inline-flex justify-center items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-all">
+                <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" class="w-5 h-5" alt="Google">
+                <span>Continue with Google</span>
+            </a>
+            
+            <button id="closeGateBtn" onclick="closeGatekeeper()" class="mt-4 text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+        </div>
+    </div>
+
+    <!-- GLOBAL NOTICE MODAL -->
+<div id="globalModal" class="fixed inset-0 z-[130] hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity duration-300">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center transform scale-95 transition-all duration-300" id="globalModalContent">
+            <div id="modalIconBox" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-4 shadow-sm transition-colors">
+                <i id="modalIcon" class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-800 mb-2">Notice</h3>
+            <p id="modalMsg" class="text-sm text-slate-500 mb-6 leading-relaxed px-2">Message</p>
+            <div id="modalActionsAlert" class="hidden">
+                <button onclick="hideGlobalModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-slate-300/50 transition-all active:scale-95">OK, GOT IT</button>
+            </div>
+            <div id="modalActionsConfirm" class="hidden grid grid-cols-2 gap-3">
+                <button onclick="hideGlobalModal()" class="py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                <button id="btnConfirmAction" class="py-3 bg-brand hover:bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 transition-all active:scale-95">Confirm</button>
+            </div>
+        </div>
+</div>
+
+<!-- AUTO PRINT SUBSCRIPTION MODAL -->
+<div id="autoPrintSubscriptionModal" class="fixed inset-0 z-[170] hidden items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm sm:p-4">
+    <div class="auto-pay-animate relative w-full sm:max-w-lg bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+        <div class="relative min-h-[230px] bg-gradient-to-br from-indigo-900 via-blue-800 to-blue-600 overflow-hidden text-white shrink-0">
+            <div class="auto-pay-pattern absolute inset-0"></div>
+            <div class="absolute top-3 left-3 z-10">
+                <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border border-red-400">
+                    <i class="fa-solid fa-clock mr-1"></i>Auto Print Add-on
+                </span>
+            </div>
+            <button type="button" onclick="closeAutoPrintSubscriptionModal()" class="auto-pay-close-btn w-9 h-9 rounded-full bg-white/25 hover:bg-white/35 text-white backdrop-blur-md flex items-center justify-center" style="position:absolute;top:14px;right:14px;left:auto;">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <div class="relative z-10 px-5 pt-12 pb-4 text-center">
+                <div class="mx-auto w-16 h-16 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center shadow-xl">
+                    <i class="fa-solid fa-print text-3xl text-emerald-300"></i>
+                </div>
+                <h3 class="mt-4 text-2xl font-black leading-tight">Auto Print Rs 499 Required</h3>
+                <p class="mt-2 text-sm font-semibold text-blue-100 leading-relaxed">Shop QR, silent print, background software queue aur payment approval ke sath Rs 99 PRO services bhi included rahengi.</p>
+            </div>
+            <div class="relative z-10 bg-black/20 backdrop-blur-sm border-t border-white/10 py-2 overflow-hidden">
+                <div class="flex items-center justify-center gap-5 text-[11px] font-bold text-white/90 whitespace-nowrap">
+                    <span><i class="fa-solid fa-qrcode text-emerald-300 mr-1"></i>Customer QR</span>
+                    <span><i class="fa-solid fa-bolt text-yellow-300 mr-1"></i>Silent Print</span>
+                    <span><i class="fa-solid fa-desktop text-blue-200 mr-1"></i>Background App</span>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 flex-1 overflow-y-auto">
+            <div class="rounded-xl p-4 border-2 border-gray-900 bg-gray-900 text-white shadow-xl">
+                <div class="bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                    
+                </div>
+                <div class="mt-3 flex justify-between items-end border-t border-white/10 pt-3">
+                    <div>
+                        <h4 class="font-black text-lg text-white">Auto Print Plan</h4>
+                        <p class="text-[10px] text-gray-400">For shop owners and print counters</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex items-end gap-1 justify-end">
+                            <span class="text-xs text-gray-400 mb-1">Only</span>
+                            <span class="text-3xl font-extrabold text-yellow-400">Rs 499</span>
+                            <span class="text-xs text-gray-400 mb-1">/ mo</span>
+                        </div>
+                        <p class="text-[10px] text-gray-500">Automation + PRO included</p>
+                    </div>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-y-2 gap-x-3">
+                    <div class="auto-pay-feature"><i class="fa-solid fa-check"></i>QR customer upload</div>
+                    <div class="auto-pay-feature"><i class="fa-solid fa-check"></i>Background polling</div>
+                    <div class="auto-pay-feature"><i class="fa-solid fa-check"></i>Payment list</div>
+                    <div class="auto-pay-feature"><i class="fa-solid fa-check"></i>Print approval</div>
+                    <div class="auto-pay-feature"><i class="fa-solid fa-check"></i>Color/Gray rates</div>
+                    <div class="auto-pay-feature"><i class="fa-solid fa-check"></i>All PRO tools</div>
+                </div>
+            </div>
+            <div class="mt-3 rounded-xl bg-white border border-gray-100 p-3 shadow-sm">
+                <p class="text-xs font-black text-gray-900"><i class="fa-solid fa-shield-halved text-indigo-600 mr-1"></i> Kya milega?</p>
+                <p class="mt-1 text-[11px] font-semibold text-gray-500 leading-relaxed">Customer apne phone se file bhejega, shop PC ka installed software queue receive karega, aur printer me output nikal jayega. Browser tab khula rakhna zaruri nahi.</p>
+            </div>
+        </div>
+        <div class="p-4 bg-white border-t border-gray-100 shrink-0">
+            <button onclick="goToAutoPrintInvoice()" class="w-full bg-gradient-to-r from-gray-900 to-black text-white rounded-xl py-3.5 font-bold text-sm shadow-xl hover:shadow-2xl hover:scale-[1.01] transition transform flex items-center justify-center gap-2 group">
+                <span>Activate Auto Print for Rs 499</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+            </button>
+            <div class="text-center mt-3 text-[10px] text-gray-400 flex justify-center gap-4">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-lock text-green-600"></i> Secure Payment</span>
+                <span class="flex items-center gap-1"><i class="fa-brands fa-google-pay text-blue-500"></i> UPI / Cards</span>
+            </div>
+            <button type="button" onclick="closeAutoPrintSubscriptionModal()" class="mt-3 w-full text-xs font-bold text-gray-400 hover:text-gray-600">Maybe later</button>
+        </div>
+    </div>
+</div>
+
+<!-- PDF PASSWORD MODAL -->
+<div id="pdfPasswordModal" class="fixed inset-0 z-[190] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-800">PDF Password Required</p>
+                <p id="pdfPasswordFileName" class="text-[11px] text-slate-500">Locked file</p>
+            </div>
+        </div>
+        <p class="text-xs text-slate-600 mb-2">Is PDF ko kholne ke liye password enter karein.</p>
+        <input type="password" id="pdfPasswordModalInput" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="Enter PDF password">
+        <p id="pdfPasswordErrorText" class="text-[11px] text-red-500 mt-1 min-h-[14px]"></p>
+        <div class="grid grid-cols-2 gap-2 mt-4">
+            <button type="button" id="pdfPasswordCancelBtn" class="py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Cancel</button>
+            <button type="button" id="pdfPasswordSubmitBtn" class="py-2 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- PVC DOC TYPE PICKER MODAL -->
+<div id="pvcDocTypeModal" class="fixed inset-0 z-[82] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">
+                <i class="fa-solid fa-id-card"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-800">Card Type Select Karein</p>
+                <p id="pvcDocTypeModalFileName" class="text-[11px] text-slate-500">PVC file</p>
+            </div>
+        </div>
+        <p class="text-xs text-slate-600 mb-3">Filename se card type detect nahi hua. Auto crop sahi karne ke liye type choose karein.</p>
+        <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-pvc-doc-choice="aadhaar" class="pvc-doc-choice-btn py-3 rounded-xl border border-blue-100 bg-blue-50 text-blue-700 text-xs font-black active:scale-95"><i class="fa-solid fa-address-card mr-1"></i>Aadhaar</button>
+            <button type="button" data-pvc-doc-choice="voter" class="pvc-doc-choice-btn py-3 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-700 text-xs font-black active:scale-95"><i class="fa-solid fa-check-to-slot mr-1"></i>Voter</button>
+            <button type="button" data-pvc-doc-choice="nsdl_pan" class="pvc-doc-choice-btn py-3 rounded-xl border border-purple-100 bg-purple-50 text-purple-700 text-xs font-black active:scale-95"><i class="fa-solid fa-credit-card mr-1"></i>NSDL PAN</button>
+            <button type="button" data-pvc-doc-choice="uti_pan" class="pvc-doc-choice-btn py-3 rounded-xl border border-orange-100 bg-orange-50 text-orange-700 text-xs font-black active:scale-95"><i class="fa-solid fa-credit-card mr-1"></i>UTI PAN</button>
+        </div>
+        <button type="button" id="pvcDocTypeUseSelectedBtn" class="mt-3 w-full py-2.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200">Current Selected Type Use Karein</button>
+    </div>
+</div>
+
+<!-- PVC TEMPLATE COORDS MODAL -->
+
+<!-- PVC TEMPLATE APPROVAL MODAL -->
+
+<!-- PRO DETAILS MODAL -->
+<div id="proDetailsModal" class="fixed inset-0 z-[88] hidden bg-slate-950/65 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-950 via-blue-700 to-emerald-600 px-5 py-5 flex items-start justify-between gap-3">
+            <div>
+                <p class="text-[11px] font-black uppercase tracking-wider text-amber-200">S Printer Pro Suite</p>
+                <h3 class="text-2xl font-black text-white leading-tight">Dukandar ke liye fast ID print, HD output aur PVC workflow</h3>
+                <p class="mt-2 text-xs font-semibold text-blue-100">Pro tools preview ke header se direct open hote hain: export quality, crop automation, saved pages aur custom sizes ek jagah.</p>
+            </div>
+            <button onclick="closeProDetailsModal()" class="w-9 h-9 rounded-full bg-white/15 text-white hover:bg-white/25 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-5 grid md:grid-cols-2 gap-3">
+            <div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
+                <i class="fa-solid fa-file-export text-amber-600 text-xl"></i>
+                <p class="mt-2 text-sm font-black text-slate-900">HD JPG/PDF Export</p>
+                <p class="mt-1 text-xs font-semibold text-slate-600">Normal free export ke comparison me sharper high-resolution output.</p>
+            </div>
+            <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                <i class="fa-solid fa-credit-card text-blue-600 text-xl"></i>
+                <p class="mt-2 text-sm font-black text-slate-900">PVC Auto Crop</p>
+                <p class="mt-1 text-xs font-semibold text-slate-600">Aadhaar, Voter ID aur PAN ke front/back crop workflow ke liye dedicated tools.</p>
+            </div>
+            <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+                <i class="fa-solid fa-layer-group text-emerald-600 text-xl"></i>
+                <p class="mt-2 text-sm font-black text-slate-900">All Pages Print</p>
+                <p class="mt-1 text-xs font-semibold text-slate-600">Multiple saved pages ko ek saath high-quality print pipeline me bhejein.</p>
+            </div>
+            <div class="rounded-xl border border-fuchsia-100 bg-fuchsia-50 p-4">
+                <i class="fa-solid fa-vector-square text-fuchsia-600 text-xl"></i>
+                <p class="mt-2 text-sm font-black text-slate-900">Custom Sizes</p>
+                <p class="mt-1 text-xs font-semibold text-slate-600">A5, passport, stamp, square aur custom print sizes ke liye extra presets.</p>
+            </div>
+        </div>
+        <div class="px-5 pb-5 grid md:grid-cols-3 gap-3">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-[10px] font-black uppercase tracking-wide text-slate-500">Workflow</p>
+                <p class="mt-1 text-sm font-black text-slate-900">Batch ready</p>
+                <p class="mt-1 text-xs font-semibold text-slate-600">Front/back cards, saved pages aur print queue ko ek jagah manage karne ke liye.</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-[10px] font-black uppercase tracking-wide text-slate-500">Quality</p>
+                <p class="mt-1 text-sm font-black text-slate-900">Cleaner documents</p>
+                <p class="mt-1 text-xs font-semibold text-slate-600">Sharpness, clarity, warmth aur saturation controls se scan output zyada readable.</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-[10px] font-black uppercase tracking-wide text-slate-500">Shop speed</p>
+                <p class="mt-1 text-sm font-black text-slate-900">Less manual repeat</p>
+                <p class="mt-1 text-xs font-semibold text-slate-600">Common ID, A4 aur PVC jobs ke liye faster preset switching aur repeat output.</p>
+            </div>
+        </div>
+        <div class="mx-5 mb-5 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50 p-4">
+            <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Pro me kya unlock hota hai</p>
+            <div class="mt-3 grid sm:grid-cols-4 gap-2 text-[11px] font-bold text-slate-700">
+                <span class="rounded-full bg-white px-3 py-2 border border-blue-100"><i class="fa-solid fa-check text-emerald-600 mr-1"></i> HD JPG/PDF</span>
+                <span class="rounded-full bg-white px-3 py-2 border border-blue-100"><i class="fa-solid fa-check text-emerald-600 mr-1"></i> PVC front/back</span>
+                <span class="rounded-full bg-white px-3 py-2 border border-blue-100"><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Custom paper</span>
+                <span class="rounded-full bg-white px-3 py-2 border border-blue-100"><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Multi-page print</span>
+            </div>
+        </div>
+        <div class="px-5 pb-5 flex gap-2">
+            <button onclick="requireProFeature('S Printer Pro'); closeProDetailsModal();" class="flex-1 py-3 rounded-xl bg-slate-950 text-white text-xs font-black"><i class="fa-solid fa-crown mr-2 text-amber-300"></i> View Pro Plan</button>
+            <button onclick="closeProDetailsModal()" class="px-4 py-3 rounded-xl bg-slate-100 text-slate-700 text-xs font-black">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- PAGES GALLERY MODAL -->
+<div id="pagesModal" class="fixed inset-0 z-[60] hidden bg-white flex flex-col animate-fade-in">
+        <div class="h-14 flex items-center justify-between px-4 border-b border-gray-100 bg-white">
+            <h3 class="font-bold text-slate-800 text-lg">Sheet Manager</h3>
+            <div class="flex items-center gap-2">
+                <button onclick="doPrint('normal')" class="h-8 px-3 rounded-lg bg-blue-600 text-white text-[11px] font-black shadow-sm"><i class="fa-solid fa-print mr-1"></i> Print All</button>
+                <button onclick="document.getElementById('pagesModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-slate-600 active:bg-gray-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
+            <div id="pagesGrid" class="pages-grid"></div>
+        </div>
+    </div>
+
+<!-- SHOP AUTO PRINT MODAL -->
+<div id="shopAutoPrintModal" class="fixed inset-0 z-[75] hidden bg-white text-slate-900 flex flex-col animate-fade-in">
+    <div class="h-16 px-5 lg:px-8 flex items-center justify-between border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100">
+                <i class="fa-solid fa-print"></i>
+            </div>
+            <div>
+                <p class="text-sm lg:text-base font-black leading-none">S Printer Auto Print Setup</p>
+                <p id="autoPrintProgressBadge" class="text-[10px] text-blue-600 font-bold mt-1">Step 1: Verify installed app</p>
+            </div>
+        </div>
+        <div class="hidden sm:flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-2">
+            <span class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center"><i class="fa-solid fa-wallet text-xs"></i></span>
+            <div>
+                
+                <p id="shopWalletBalanceHeader" class="text-sm font-black text-slate-950">Rs 0</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1">
+            <button type="button" id="autoPrintLangHiBtn" onclick="setAutoPrintInfoLang('hi')" class="px-3 py-2 rounded-xl bg-blue-600 text-white text-[10px] font-black">HI-EN</button>
+            <button type="button" id="autoPrintLangEnBtn" onclick="setAutoPrintInfoLang('en')" class="px-3 py-2 rounded-xl text-slate-600 text-[10px] font-black hover:bg-white">EN</button>
+        </div>
+        <button onclick="closeShopAutoPrintModal()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+    </div>
+    <div class="px-5 lg:px-8 py-3 border-b border-slate-200 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="auto-progress-track"><span id="autoPrintProgressBar" class="auto-progress-bar"></span></div>
+            <div class="mt-3 grid grid-cols-5 gap-2">
+                <button type="button" id="autoStepTabInstall" onclick="setAutoPrintStep('install')" class="auto-step-tab active"><i class="fa-solid fa-shield-halved"></i><span>Install</span></button>
+                <button type="button" id="autoStepTabSettings" onclick="setAutoPrintStep('settings')" class="auto-step-tab"><i class="fa-solid fa-sliders"></i><span>Settings</span></button>
+                <button type="button" id="autoStepTabPaytm" onclick="setAutoPrintStep('paytm')" class="auto-step-tab"><i class="fa-solid fa-building-columns"></i><span>Paytm</span></button>
+                <button type="button" id="autoStepTabQr" onclick="setAutoPrintStep('qr')" class="auto-step-tab"><i class="fa-solid fa-qrcode"></i><span>QR</span></button>
+                <button type="button" id="autoStepTabList" onclick="setAutoPrintStep('list')" class="auto-step-tab"><i class="fa-solid fa-list-check"></i><span>Print List</span></button>
+                            </div>
+        </div>
+    </div>
+    <div class="flex-1 overflow-y-auto bg-slate-50">
+        <div id="autoPrintBodyGrid" class="max-w-6xl mx-auto p-5 lg:p-8 auto-modal-grid">
+            <section id="autoPrintIntroPanel" class="space-y-5">
+                <div class="rounded-3xl auto-soft-card p-6 lg:p-7">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-wide">
+                        <i class="fa-solid fa-bolt"></i> Silent shop printing
+                    </span>
+                    <h3 id="autoInfoTitle" class="mt-4 text-2xl lg:text-3xl font-black leading-tight">Auto Print kya hai?</h3>
+                    <p id="autoInfoIntro" class="mt-3 text-sm text-slate-600 font-semibold leading-relaxed">Auto Print se customer apne phone se shop ka QR scan karta hai, file upload karta hai, crop/preview check karta hai aur print job seedha aapke shop computer ki printer queue me aa jata hai. Shop PC me S Printer agent running rahe to print silently/direct nikal sakta hai.</p>
+                    <div class="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                        <p id="autoInfoMainTitle" class="text-[11px] font-black text-blue-800 uppercase tracking-wide">Main kaam</p>
+                        <div id="autoInfoMainBody" class="mt-2 grid gap-2 text-[11px] font-bold text-slate-700 leading-relaxed">
+                            <p><b>1. Shop setup:</b> Windows PC par agent install/verify hota hai aur printer select hota hai.</p>
+                            <p><b>2. Customer QR:</b> QR scan karke customer file bhejta hai; aapko phone se file lene ki zarurat kam hoti hai.</p>
+                            <p><b>3. Payment/rate:</b> Color/Gray rate, payment mode aur approval rule set karke controlled print flow chalta hai.</p>
+                            <p><b>4. Print list:</b> Paid, pending, approved, printed ya failed jobs ka record yahin dikhta hai.</p>
+                        </div>
+                    </div>
+                    <div class="mt-5">
+                        <div class="auto-summary-row">
+                            <span class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black shrink-0">1</span>
+                            <div><p id="autoInfoVerifyTitle" class="text-sm font-black">Verify</p><p id="autoInfoVerifyText" class="text-xs text-slate-500 font-semibold mt-1">Button pehle local agent check karta hai. Agent mil gaya to printer list load hogi aur download skip ho jayega.</p></div>
+                        </div>
+                        <div class="auto-summary-row">
+                            <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-black shrink-0">2</span>
+                            <div><p id="autoInfoInstallTitle" class="text-sm font-black">Install</p><p id="autoInfoInstallText" class="text-xs text-slate-500 font-semibold mt-1">Agent missing ho to setup download hoga. Setup run karke Windows firewall/browser permission allow karein.</p></div>
+                        </div>
+                        <div class="auto-summary-row">
+                            <span class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-black shrink-0">3</span>
+                            <div><p id="autoInfoStartTitle" class="text-sm font-black">Start</p><p id="autoInfoStartText" class="text-xs text-slate-500 font-semibold mt-1">Listener start hone par customer QR active hota hai aur new jobs shop printer tak aati hain.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="space-y-4">
+                <div id="autoPrintDownloadStep" class="auto-step-panel active rounded-3xl bg-white text-slate-900 p-5 lg:p-6 shadow-xl border border-slate-200">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4 id="autoPrintDownloadTitle" class="mt-4 text-xl font-black">Pehle verify, phir setup</h4>
+                    <p id="autoPrintDownloadText" class="mt-2 text-sm text-slate-600 font-semibold leading-relaxed">Agar S Printer Auto Printer already installed aur running hai, download ki zarurat nahi. Verify & Setup button pehle local app check karega, phir website token software me save karega taki browser tab band hone par bhi auto print chale.</p>
+                    <div class="mt-4 rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-blue-50 p-3 shadow-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-wide text-emerald-700">Demo Video</p>
+                                <p class="text-xs font-black text-slate-800">Auto Print installation guide</p>
+                            </div>
+                            <a href="https://youtu.be/hZNa7VCJUaQ" target="_blank" rel="noopener" class="shrink-0 rounded-full bg-white px-3 py-2 text-[10px] font-black text-emerald-700 shadow-sm border border-emerald-100 hover:bg-emerald-50">
+                                <i class="fa-solid fa-circle-play mr-1"></i> Open Video
+                            </a>
+                        </div>
+                        <div class="mt-3 overflow-hidden rounded-2xl border border-white/80 bg-slate-900 aspect-video">
+                                                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/hZNa7VCJUaQ" title="Auto Print installation demo" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                                    </div>
+                    </div>
+                    <button onclick="setupAutoPrintOneClick()" class="mt-5 w-full py-4 rounded-2xl bg-blue-600 text-white text-sm font-black shadow-lg shadow-blue-100">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> <span id="autoPrintPrimaryLabel">Verify & Setup Auto Print</span>
+                    </button>
+                    <button onclick="downloadPrintAgentSetup({ skipVerify: true, force: true })" class="mt-2 w-full py-3 rounded-2xl bg-slate-100 text-slate-700 text-xs font-black hover:bg-slate-200">
+                        <i class="fa-solid fa-download mr-2"></i> Download Setup Again
+                    </button>
+                    <p id="autoPrintVerifyStatus" class="mt-3 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-[11px] text-slate-500 font-bold leading-relaxed">Status: verification pending. Button dabate hi local agent check hoga.</p>
+                    <div class="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                        <p id="autoInfoSetupTitle" class="text-[11px] font-black text-slate-800">Setup me kya lagega?</p>
+                        <div id="autoInfoSetupBody" class="mt-2 space-y-1 text-[11px] font-bold text-slate-500 leading-relaxed">
+                            <p>1. Windows computer me shop printer already installed/working hona chahiye.</p>
+                            <p>2. Setup file run karne ke baad local agent printer list aur queue handle karega.</p>
+                            <p>3. Same button agent verify karke shop token, runtime key, API URL aur printer rule software me save karega.</p>
+                            <p>4. Browser/firewall permission aaye to allow karein. Setup ke baad browser tab band ho sakta hai; bas computer aur software running hone chahiye.</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 rounded-2xl border border-amber-100 bg-amber-50 p-3">
+                        <p id="autoInfoSetupButtonTitle" class="text-[11px] font-black text-amber-800">Is button se kya hota hai?</p>
+                        <p id="autoInfoSetupButtonText" class="mt-1 text-[11px] font-bold text-amber-700 leading-relaxed">Verify & Setup Auto Print ek hi button me 4 kaam karta hai: pehle installed agent check, phir zarurat ho to setup download, agent ready milte hi shop token save, aur background queue start. Rs 499 Auto Print subscription active nahi hai to isi action par subscription modal khulega.</p>
+                    </div>
+                    <p class="mt-3 text-[11px] text-slate-400 font-bold">File: <span id="autoPrintSetupFileName">S Printer-Smart-AutoPrint-Setup.exe</span></p>
+                </div>
+                <div id="autoPrintConnectStep" class="auto-step-panel rounded-3xl bg-white text-slate-900 p-5 lg:p-6 shadow-xl border border-slate-200">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-wide text-blue-600">Step 2</p>
+                            <h4 class="text-xl font-black">Agent connect aur printer setting</h4>
+                        </div>
+                        <span id="shopListenerStatus" class="text-[10px] font-bold text-slate-400">Stopped</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500 font-semibold">Printer, print rule, payment mode aur approval control yahin manage karein. Same main button agent verify karke background auto print start karta hai.</p>
+                    <div class="mt-4 rounded-3xl border border-blue-100 bg-blue-50/70 p-3">
+                        <div class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Settings Demo</p>
+                                <p class="mt-1 text-xs font-bold text-slate-600 leading-relaxed">Printer rule, payment mode, rates aur approval setting ka quick guide video.</p>
+                            </div>
+                            <a href="https://youtu.be/hZNa7VCJUaQ" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-xs font-black text-white shadow-lg shadow-blue-100 hover:bg-blue-700">
+                                <i class="fa-solid fa-circle-play"></i> Watch Settings Demo
+                            </a>
+                        </div>
+                                                <div class="mt-3 overflow-hidden rounded-2xl border border-blue-100 bg-slate-900 aspect-video">
+                            <iframe class="w-full h-full" src="https://www.youtube.com/embed/hZNa7VCJUaQ" title="Auto Print settings demo" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        </div>
+                                            </div>
+                    <div class="mt-4 grid grid-cols-2 gap-2">
+                        <button onclick="setupAutoPrintOneClick()" class="py-3 text-xs font-black rounded-xl bg-blue-600 text-white hover:bg-blue-700">Verify, Install & Start</button>
+                        <button onclick="downloadPrintAgentSetup({ skipVerify: true, force: true })" class="py-3 text-xs font-black rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200">Download Setup</button>
+                    </div>
+                    <div id="autoPrintVerifiedControls" class="mt-4 grid gap-3">
+                        <div class="rounded-2xl border border-blue-100 bg-blue-50/70 p-3">
+                            <p class="text-xs font-black text-slate-800">Print Settings</p>
+                                <p class="mt-1 text-[10px] font-bold text-slate-500">Ye settings server aur installed software dono me save hoti hain, isliye browser tab band hone par bhi latest rule follow hoga.</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                            <p id="autoInfoSettingsTitle" class="text-[11px] font-black text-slate-800">Settings ka matlab</p>
+                            <div id="autoInfoSettingsBody" class="mt-2 space-y-1 text-[11px] font-bold text-slate-500 leading-relaxed">
+                                <p><b>Print Rule:</b> Customer Choice me customer Color/Gray choose karega. Only Color ya Only Gray select karne par shop ka rule force hoga.</p>
+                                <p><b>Auto Print Printer:</b> Kaunsi Windows printer use hogi. Blank chhoda to Windows Default Printer use hoga.</p>
+                                <p><b>Payment Mode:</b> No Payment/Cash/Online ke hisab se customer flow badlega. Online me payment QR aur verify step use hota hai.</p>
+                                <p><b>Approval Before Print:</b> On karne par job direct print nahi hogi; pehle Print List me approve karni padegi.</p>
+                            </div>
+                        </div>
+                        <label class="block">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Shop Print Rule</span>
+                            <select id="shopPrintModeRule" onchange="setShopPrintModeRule(this.value)" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-3 text-xs font-bold text-slate-700 bg-white focus:border-blue-500 focus:outline-none">
+                                <option value="customer">Customer Choice</option>
+                                <option value="color">Only Color Print</option>
+                                <option value="gray">Only Gray / B&W Print</option>
+                            </select>
+                        </label>
+                        <label class="block">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Auto Print Printer</span>
+                            <select id="shopPrinterSelect" onchange="setShopSelectedPrinter(this.value)" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-3 text-xs font-bold text-slate-700 bg-white focus:border-blue-500 focus:outline-none">
+                                <option value="">Windows Default Printer</option>
+                            </select>
+                        </label>
+                        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-3">
+                            <p class="mb-2 text-xs font-black text-slate-800">Payment Settings</p>
+                            
+                            <label class="block">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Payment Mode</span>
+                                <select id="shopPaymentMode" onchange="setShopPaymentMode(this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 bg-white">
+                                    <option value="none">No Payment - Direct Auto Print</option>
+                                    <option value="cash">Cash at Counter - Direct Auto Print</option>
+                                    <option value="online">Online Pay - Direct Auto Print</option>
+                                </select>
+                            </label>
+                            <label class="mt-3 flex items-center justify-between gap-3">
+                                <span>
+                                    <span class="block text-xs font-black text-slate-800">Approval Before Print</span>
+                                    <span class="block text-[10px] font-bold text-slate-500">On karne par job shop approval ke baad hi print hogi.</span>
+                                </span>
+                                <input id="shopApprovalRequired" type="checkbox" onchange="setShopApprovalRequired(this.checked)" class="w-5 h-5 accent-emerald-600">
+                            </label>
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                <label>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Color Rate</span>
+                                    <input id="shopRateColor" type="number" min="0" step="1" onchange="setShopPaymentRate('color', this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 bg-white" placeholder="10">
+                                </label>
+                                <label>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Gray Rate</span>
+                                    <input id="shopRateGray" type="number" min="0" step="1" onchange="setShopPaymentRate('gray', this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-700 bg-white" placeholder="5">
+                                </label>
+                            </div>
+                            <div class="mt-3 rounded-2xl border border-emerald-100 bg-white/70 p-3">
+                                <p id="autoInfoRateTitle" class="text-[11px] font-black text-emerald-800">Rate fields ka use</p>
+                                <p id="autoInfoRateText" class="mt-1 text-[11px] font-bold text-slate-600 leading-relaxed">Color Rate aur Gray Rate per copy amount hai. Example: Color Rate 10 aur customer 3 color copies bhejta hai to payment Rs 30 calculate hoga. Gray Rate B/W print ke liye alag rakha ja sakta hai.</p>
+                            </div>
+                            <label class="mt-2 block">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Settlement UPI ID</span>
+                                <input id="shopUpiId" type="text" onchange="setShopUpiId(this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 bg-white" placeholder="shop@upi">
+                                <span class="mt-1 block text-[10px] font-bold text-slate-500">Settlement ke liye shop UPI save rahegi. Direct shop Paytm Business payment ke liye Paytm step me Merchant UPI aur MID set karein.</span>
+                            </label>
+                            <label class="mt-2 block">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">UPI Account Name</span>
+                                <input id="shopUpiName" type="text" onchange="setShopUpiName(this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 bg-white" placeholder="Shop owner name">
+                                <span class="mt-1 block text-[10px] font-bold text-slate-500">Admin payout karte time isi naam se UPI verify karega.</span>
+                            </label>
+                        </div>
+                    </div>
+                    <p id="shopPrinterStatus" class="mt-3 text-[11px] text-slate-500 leading-relaxed font-semibold">Shop PC me S Printer Smart AutoPrint setup run karke agent ready karein.</p>
+                </div>
+                <div id="autoPrintPaytmStep" class="auto-step-panel rounded-3xl bg-white text-slate-900 p-5 lg:p-6 shadow-xl border border-slate-200">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-wide text-indigo-600">Step 3</p>
+                            <h4 class="text-xl font-black">Paytm Business payment setup</h4>
+                        </div>
+                        <span class="rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-[10px] font-black text-indigo-700">Optional</span>
+                    </div>
+                    <div class="mt-4 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
+                        <p class="text-xs font-black text-slate-800">Shop ke account me direct payment chahiye?</p>
+                            <p class="mt-1 text-[11px] font-bold text-slate-500 leading-relaxed">Agar aapke paas Paytm for Business account hai to yahan Merchant UPI aur MID dal dein. Customer ka QR usi Merchant UPI par banega, Cashfree hat jayega, payment Paytm Business account me receive hogi, aur verification MID se automatic check hogi.</p>
+                    </div>
+                    <div class="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                        <p id="autoInfoPaytmTitle" class="text-[11px] font-black text-slate-800">Receiver Mode samjhein</p>
+                        <p id="autoInfoPaytmText" class="mt-1 text-[11px] font-bold text-slate-500 leading-relaxed">Platform verified payment me payment platform/admin verification route follow karega. My Shop Paytm Business me aapka Merchant UPI QR me use hoga aur MID se transaction verify karne ki koshish hogi.</p>
+                    </div>
+                    <div class="mt-4 grid gap-3">
+                        <label class="block">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Receiver Mode</span>
+                            <select id="shopPaytmReceiverMode" onchange="setShopPaytmReceiverMode(this.value)" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-3 text-xs font-black text-slate-700 bg-white focus:border-blue-500 focus:outline-none">
+                                <option value="admin">Platform verified payment</option>
+                                <option value="shop">My Shop Paytm Business</option>
+                            </select>
+                        </label>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <label class="block">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Merchant UPI</span>
+                                <input id="shopPaytmMerchantUpi" type="text" onchange="setShopPaytmMerchantUpi(this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-3 text-xs font-bold text-slate-700 bg-white" placeholder="merchant@paytm">
+                            </label>
+                            <label class="block">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Paytm MID</span>
+                                <input id="shopPaytmMid" type="text" onchange="setShopPaytmMid(this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-3 text-xs font-bold text-slate-700 bg-white" placeholder="Your Paytm MID">
+                            </label>
+                        </div>
+                        <div class="rounded-2xl border border-amber-100 bg-amber-50 p-3">
+                            <p class="text-[11px] font-black text-amber-800">Important</p>
+                            <p class="mt-1 text-[11px] font-bold text-amber-700 leading-relaxed">Paytm Business app ya dashboard me Business/Profile details ke andar Merchant UPI/VPA aur MID milta hai. Dono same business account ke hone chahiye. Merchant UPI se QR banega, MID se payment verify hogi. Galat MID hone par payment paid dikhne ke baad bhi auto print submit nahi hoga.</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                            <p class="text-[11px] font-black text-slate-800">Kaise set karein</p>
+                            <div class="mt-2 space-y-1 text-[11px] font-bold text-slate-500 leading-relaxed">
+                                
+                                <p>2. Profile, Business Details ya Developer/API section me MID copy karein.</p>
+                                <p>3. Payment/QR/VPA detail se Merchant UPI copy karein, jaise shopname@paytm.</p>
+                                <p>4. Receiver Mode me My Shop Paytm Business select karke dono value save karein.</p>
+                                <p>5. Ek chhota test print payment karein; verify hote hi job direct queue me jayegi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="autoPrintQrStep" class="auto-step-panel rounded-3xl bg-white text-slate-900 p-5 lg:p-6 shadow-xl border border-slate-200">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-wide text-emerald-600">Step 3</p>
+                            <h4 class="text-xl font-black">QR ready for customer</h4>
+                        </div>
+                        <button onclick="setupAutoPrintOneClick()" class="px-4 py-2 text-xs font-black rounded-xl bg-blue-600 text-white hover:bg-blue-700">Verify, Install & Start</button>
+                    </div>
+                    <div class="mt-4 grid md:grid-cols-[170px_1fr] gap-4">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-center min-h-[170px]">
+                            <div id="shopQrCanvas" class="bg-white p-2 rounded-lg"></div>
+                        </div>
+                        <div class="space-y-3 min-w-0">
+                            <div class="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50 p-3">
+                                <div class="flex items-center gap-2 text-blue-700 min-w-0">
+                                    <i class="fa-solid fa-link text-xs"></i>
+                                    <span id="shopQrPrettyUrl" class="text-xs font-black truncate">S Printer/quick-print</span>
+                                </div>
+                                <input id="shopQrUrlInput" readonly class="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px] text-slate-600 bg-white/80">
+                            </div>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button onclick="copyShopQrUrl()" class="py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">Copy</button>
+                                <button onclick="downloadShopQrLabel()" class="py-2 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100">QR Label</button>
+                                <button onclick="rotateShopToken()" class="py-2 text-xs font-bold rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100">New QR</button>
+                                <button onclick="stopShopAutoPrintListener()" class="py-2 text-xs font-bold rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100">Stop</button>
+                            </div>
+                            <p class="text-[11px] text-slate-500 font-semibold leading-relaxed">Label button se shop counter par chipkane ke liye QR PNG download hoga. Background software queue check karega, isliye tab khuli rakhna zaruri nahi.</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
+                        <p id="autoInfoQrTitle" class="text-[11px] font-black text-emerald-800">QR kaise kaam karega?</p>
+                        <div id="autoInfoQrBody" class="mt-2 space-y-1 text-[11px] font-bold text-slate-600 leading-relaxed">
+                            <p><b>Copy:</b> Customer ko WhatsApp/link bhejne ke liye URL copy karein.</p>
+                            <p><b>QR Label:</b> Counter par chipkane ke liye printable QR image download hoti hai.</p>
+                            <p><b>New QR:</b> Purana QR expire jaisa ho jayega aur new secure token banega.</p>
+                            <p><b>Stop:</b> Background software polling stop hogi; customer job queue me aa sakti hai, lekin auto print tab tak nahi chalega jab tak start/verify na ho.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="autoPrintListStep" class="auto-step-panel rounded-3xl bg-white text-slate-900 p-5 lg:p-6 shadow-xl border border-slate-200">
+                    <div class="mb-3 rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                
+                                <h4 class="text-xl font-black text-slate-900">Online QR payment settlement</h4>
+                                <p id="shopWalletSummary" class="mt-1 text-xs font-bold text-slate-500">Wallet history load pending.</p>
+                            </div>
+                            <button type="button" onclick="requestShopWalletWithdrawal()" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-[11px] font-black">Withdraw Request</button>
+                        </div>
+                        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-3">
+                                <p class="text-[10px] font-black text-indigo-700 uppercase">Balance</p>
+                                <p id="shopWalletBalance" class="mt-1 text-lg font-black text-slate-950">Rs 0</p>
+                            </div>
+                            <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3">
+                                <p class="text-[10px] font-black text-emerald-700 uppercase">Received</p>
+                                <p id="shopWalletReceived" class="mt-1 text-lg font-black text-slate-950">Rs 0</p>
+                            </div>
+                            <div class="rounded-xl bg-amber-50 border border-amber-100 p-3">
+                                <p class="text-[10px] font-black text-amber-700 uppercase">Pending request</p>
+                                <p id="shopWalletPending" class="mt-1 text-lg font-black text-slate-950">Rs 0</p>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                                <p class="text-[10px] font-black text-slate-600 uppercase">Transferred</p>
+                                <p id="shopWalletTransferred" class="mt-1 text-lg font-black text-slate-950">Rs 0</p>
+                            </div>
+                        </div>
+                        <div id="shopWalletTxnList" class="mt-3 grid gap-2 text-xs"></div>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-wide text-slate-500">Dedicated Print List</p>
+                                <h4 class="text-xl font-black text-slate-900">Customer jobs aur payment history</h4>
+                                <p class="text-xs font-bold text-slate-700">Sabhi recent print, receipt, approval status aur missing/failed jobs yahin manage honge. Server load kam rakhne ke liye list manual Refresh se update hogi.</p>
+                            </div>
+                            <button onclick="renderShopPrintHistory(true)" class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] font-black text-slate-700">Refresh</button>
+                        </div>
+                        <div id="shopPrintHistoryList" class="mt-3 grid gap-2 text-xs"></div>
+                    </div>
+                    <div class="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-3">
+                        <p id="autoInfoListTitle" class="text-[11px] font-black text-blue-800">Print List me kya dikhega?</p>
+                        <p id="autoInfoListText" class="mt-1 text-[11px] font-bold text-slate-600 leading-relaxed">Yahan customer jobs ka status dikhega: payment pending, paid, approval waiting, queued, printing, printed ya failed. Approval Before Print on ho to job approve karke hi printer tak bhejni chahiye. Failed job me error message dekhkar retry/setup check kar sakte hain. List auto-refresh nahi hoti; latest status dekhne ke liye Refresh dabayein.</p>
+                    </div>
+                </div>
+                            </section>
+        </div>
+    </div>
+</div>
+ 
+    <!-- LEFT SIDEBAR (Desktop) -->
+    <!-- LEFT SIDEBAR (Desktop) -->
+    <aside class="hidden lg:flex w-[340px] bg-gradient-to-b from-white via-slate-50 to-blue-50/40 border-r border-blue-100 flex-col z-20 shadow-xl">
+        <div class="h-16 flex items-center px-5 border-b border-blue-100 gap-3 bg-white/90">
+            <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-500 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-blue-200">
+                <i class="fa-solid fa-print"></i>
+            </div>
+            <div>
+                <span id="toolBrandTitle" class="font-black text-lg block leading-none text-slate-900">S Printer</span>
+                <span id="toolBrandSubtitle" class="text-[10px] text-blue-500 font-black tracking-wide">SMART ID PRINT SUITE</span>
+            </div>
+            <a href="../index.html" title="Back to Home" class="ml-auto w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
+                <i class="fa-solid fa-house text-xs"></i>
+            </a>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 space-y-5">
+            <div id="docTypePanel" class="space-y-3">
+                <div class="flex justify-between items-center mb-3"><label class="text-[11px] font-black text-slate-500 uppercase tracking-wider">1. Select Type</label><span id="planToolBadge" class="text-[9px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-black border border-emerald-100">Free + Pro</span></div>
+                <div class="grid grid-cols-4 gap-1.5 text-slate-600">
+                    <button onclick="attemptSetDocType('smart')" id="btn-smart" class="doc-btn doc-type-card active flex flex-col items-center justify-center p-1.5 rounded-lg group"><i class="fa-solid fa-id-card text-lg mb-1"></i><span class="text-[9px] leading-none font-black whitespace-nowrap">ID Card</span></button>
+                    <button onclick="attemptSetDocType('a4')" id="btn-a4" class="doc-btn doc-type-card flex flex-col items-center justify-center p-1.5 rounded-lg group"><i class="fa-solid fa-file-lines text-lg mb-1"></i><span class="text-[9px] leading-none font-black whitespace-nowrap">A4 Page</span></button>
+                    <button onclick="attemptSetDocType('pvc')" id="btn-pvc" class="doc-btn doc-type-card flex flex-col items-center justify-center p-1.5 rounded-lg group relative"><i class="fa-solid fa-credit-card text-lg mb-1"></i><span class="text-[9px] leading-none font-black whitespace-nowrap">PVC</span><span class="ak-pro-marketing absolute -top-1 -right-1 text-[7px] px-1 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold border border-amber-200">PRO</span></button>
+                    <button onclick="attemptSetDocType('custom')" id="btn-custom" class="doc-btn doc-type-card flex flex-col items-center justify-center p-1.5 rounded-lg group relative"><i class="fa-solid fa-vector-square text-lg mb-1"></i><span class="text-[9px] leading-none font-black whitespace-nowrap">Custom</span><span class="ak-pro-marketing absolute -top-1 -right-1 text-[7px] px-1 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold border border-amber-200">PRO</span></button>
+                </div>
+                <div id="customSizePanel" class="hidden mt-3 rounded-xl border border-fuchsia-200 bg-fuchsia-50/70 p-3">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-fuchsia-800">Custom Size</span>
+                        <span class="ak-pro-marketing text-[9px] px-2 py-0.5 rounded-full bg-white text-fuchsia-700 border border-fuchsia-200 font-black">PRO</span>
+                    </div>
+                    <select id="customDocSizeSelect" onchange="setCustomDocSize(this.value)" class="w-full rounded-lg border border-fuchsia-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 focus:border-fuchsia-500 focus:outline-none"></select>
+                </div>
+                <div id="singleSideBox" class="mt-3">
+                    <div class="side-mode-crop-row">
+                        <label class="single-side-mode-control cursor-pointer bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 transition-colors">
+                            <input type="checkbox" id="chkSingleSide" onchange="toggleSingleSide()" class="accent-brand w-4 h-4">
+                            <span class="font-bold text-slate-600">Single Side Mode</span>
+                        </label>
+                        <div data-crop-workflow class="crop-workflow crop-workflow-sidebar" aria-label="Document crop mode">
+                            <div class="crop-workflow-choices" role="group" aria-label="Choose crop mode">
+                                <button type="button" data-crop-choice="auto" aria-pressed="true" onclick="setCropWorkflowMode('auto')"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Auto Crop</button>
+                                <button type="button" data-crop-choice="manual" aria-pressed="false" onclick="setCropWorkflowMode('manual')"><i class="fa-solid fa-crop-simple" aria-hidden="true"></i> Manual Crop</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center"><label class="text-xs font-bold text-gray-400 uppercase tracking-wider">2. Scan Documents</label><button onclick="clearCurrent()" class="text-[10px] text-red-500 hover:text-red-700 font-bold">CLEAR</button></div>
+                <div class="bg-blue-50 border border-blue-100 rounded px-2 py-1.5 flex items-start gap-2 mb-2">
+                    <i class="fa-solid fa-circle-info text-brand text-[10px] mt-0.5"></i>
+                    <p id="uploadMultiTip" class="text-[10px] text-blue-700 leading-tight">Tip: You can select/drag <b>Front & Back together</b>. We'll crop them one by one.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div id="dropFront" onclick="triggerUpload('front')" class="aspect-[1.6] relative rounded-lg border-2 border-dashed border-gray-300 hover:border-brand cursor-pointer flex flex-col items-center justify-center bg-slate-50 overflow-hidden transition-colors group">
+                        <img id="thumbFront" class="absolute inset-0 w-full h-full object-contain bg-white hidden z-10 p-1"><i class="fa-solid fa-camera text-2xl text-gray-300 group-hover:text-brand transition-colors"></i><span id="frontUploadLabel" class="text-[10px] mt-1 text-gray-400 font-bold">Front Side</span><div id="checkFront" class="hidden absolute top-1 right-1 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[9px] z-20 shadow-sm"><i class="fa-solid fa-check"></i></div>
+                    </div>
+                    <div id="backUploadBox" onclick="triggerUpload('back')" class="aspect-[1.6] relative rounded-lg border-2 border-dashed border-gray-300 hover:border-brand cursor-pointer flex flex-col items-center justify-center bg-slate-50 overflow-hidden transition-colors group">
+                        <img id="thumbBack" class="absolute inset-0 w-full h-full object-contain bg-white hidden z-10 p-1"><i class="fa-solid fa-rotate text-2xl text-gray-300 group-hover:text-brand transition-colors"></i><span class="text-[10px] mt-1 text-gray-400 font-bold">Back Side</span><div id="checkBack" class="hidden absolute top-1 right-1 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[9px] z-20 shadow-sm"><i class="fa-solid fa-check"></i></div>
+                    </div>
+                </div>
+                <div id="albumCoverUploadPanel" class="hidden rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-blue-50 p-3">
+                    <div class="mb-2 flex items-center justify-between gap-2">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-wider text-violet-700"><i class="fa-solid fa-book-open mr-1"></i> Last Set · Album Cover</p>
+                            <p class="mt-0.5 text-[9px] font-bold text-slate-500">Pehle Cover Front, phir Cover Back upload karein.</p>
+                        </div>
+                        <span id="albumCoverStatus" class="rounded-full bg-white px-2 py-1 text-[8px] font-black text-violet-700 ring-1 ring-violet-100">3 document sets pending</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="albumCoverFrontButton" type="button" onclick="triggerAlbumCoverUpload('front')" class="relative min-h-[70px] overflow-hidden rounded-xl border-2 border-dashed border-violet-300 bg-white px-2 py-3 text-[10px] font-black text-violet-700 disabled:cursor-not-allowed disabled:opacity-40">
+                            <img id="albumCoverFrontThumb" class="absolute inset-0 hidden h-full w-full object-cover">
+                            <span class="relative z-10 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1"><i class="fa-solid fa-image"></i> Cover Front</span>
+                        </button>
+                        <button id="albumCoverBackButton" type="button" onclick="triggerAlbumCoverUpload('back')" class="relative min-h-[70px] overflow-hidden rounded-xl border-2 border-dashed border-blue-300 bg-white px-2 py-3 text-[10px] font-black text-blue-700 disabled:cursor-not-allowed disabled:opacity-40">
+                            <img id="albumCoverBackThumb" class="absolute inset-0 hidden h-full w-full object-cover">
+                            <span class="relative z-10 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1"><i class="fa-solid fa-rotate"></i> Cover Back</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-3 pt-4 border-t border-gray-100">
+                <div class="flex justify-between items-center">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">3. Queue</label>
+                    <span id="pageIndicator" class="text-[10px] font-bold text-white bg-slate-400 px-2 py-0.5 rounded-full">Page 1</span>
+                </div>
+                <div id="batchList" class="min-h-[80px] max-h-[150px] overflow-y-auto bg-slate-50 rounded border border-gray-200 p-2 space-y-1"><p class="text-[10px] text-gray-400 text-center py-4">Queue Empty</p></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="manualNewPage()" class="queue-page-btn text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100"><i class="fa-solid fa-file-circle-plus"></i> ADD PAGE</button>
+                    <button onclick="deleteCurrentOrLastPage()" class="queue-page-btn text-red-600 bg-red-50 border border-red-100 hover:bg-red-100"><i class="fa-solid fa-file-circle-minus"></i> DELETE PAGE</button>
+                    <button onclick="openPagesModal()" class="queue-page-btn text-slate-700 bg-white border border-slate-200 hover:bg-slate-50"><i class="fa-solid fa-layer-group"></i> VIEW PAGES</button>
+                    <button onclick="fullReset()" class="queue-page-btn text-slate-600 bg-white border border-slate-200 hover:bg-slate-50"><i class="fa-solid fa-rotate-left"></i> RESET</button>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-action-panel p-4 border-t border-blue-100 space-y-3 bg-white/95">
+            <div class="flex items-center justify-between gap-2">
+                <div>
+                    <p class="text-[11px] font-black text-slate-800 uppercase tracking-wider">Export & Print</p>
+                    <p id="exportQualityHint" class="text-[10px] font-bold text-slate-400">Normal free, HD quality Pro</p>
+                </div>
+                <span id="pageTotalBadge" class="text-[10px] font-black px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">1 Page</span>
+            </div>
+            <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-2">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-black text-blue-800 uppercase tracking-wider">Free normal</span>
+                    <button onclick="openProDetailsModal()" class="ak-pro-marketing text-[9px] font-black text-amber-700 bg-amber-100 border border-amber-200 rounded-full px-2 py-0.5"><i class="fa-solid fa-crown mr-1"></i> HD Pro</button>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="downloadJPG('normal')" class="action-tile action-tile-normal"><i class="fa-solid fa-image"></i> JPG</button>
+                    <button onclick="downloadPDF('normal')" class="action-tile action-tile-normal"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+                    <button onclick="doPrint('normal')" class="action-tile action-tile-normal"><i class="fa-solid fa-print"></i> Print All</button>
+                </div>
+            </div>
+            
+        </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="flex-1 bg-[#e2e8f0] flex flex-col h-full relative overflow-hidden">
+        
+        <!-- MOBILE HEADER -->
+        <div class="lg:hidden z-10 relative">
+            <div class="bg-white h-14 border-b border-gray-200 flex items-center justify-between px-3">
+                <div class="flex items-center gap-2">
+                    <a href="../index.html" class="w-8 h-8 flex items-center justify-center text-slate-500 bg-slate-50 border border-slate-200 rounded-full active:scale-95 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <i class="fa-solid fa-house text-xs"></i>
+                    </a>
+                    <button onclick="fullReset()" class="w-8 h-8 flex items-center justify-center text-red-500 bg-red-50 border border-red-100 rounded-full active:scale-95">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                </div>
+                <div class="mobile-doc-tabs bg-slate-100 rounded-lg border border-slate-200 flex">
+                    <button onclick="attemptSetDocType('smart')" id="mob-type-smart" class="seg-btn active">ID</button>
+                    <button onclick="attemptSetDocType('custom')" id="mob-type-custom" class="seg-btn">Custom</button>
+                    <button onclick="attemptSetDocType('a4')" id="mob-type-a4" class="seg-btn">A4</button>
+                    <button onclick="attemptSetDocType('pvc')" id="mob-type-pvc" class="seg-btn">PVC</button>
+                </div>
+                <button onclick="openPagesModal()" class="flex items-center gap-1 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full active:bg-slate-200">
+                    <i class="fa-solid fa-layer-group text-slate-500 text-xs"></i>
+                    <span id="mobPageCount" class="text-xs font-bold text-slate-600">P1</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="documentAlbumModeBanner" class="hidden px-2 pt-2 lg:pt-3">
+            <div class="max-w-4xl mx-auto flex items-center gap-3 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-950 via-blue-800 to-indigo-700 px-4 py-3 text-white shadow-lg shadow-indigo-950/15">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20"><i class="fa-solid fa-book-open"></i></span>
+                <span class="min-w-0 flex-1">
+                    <strong class="block text-xs font-black sm:text-sm">Document Album Layout</strong>
+                    <span class="block truncate text-[9px] font-bold text-blue-100 sm:text-[10px]">4 front/back sets · ready-to-fold A4 · placement locked</span>
+                </span>
+                <span class="hidden rounded-full bg-emerald-400/20 px-3 py-1 text-[9px] font-black text-emerald-100 ring-1 ring-emerald-200/30 sm:inline-flex">2 × 4 ALBUM</span>
+            </div>
+        </div>
+        <div id="pvcRecropToolbar" class="hidden px-2 pt-2 lg:pt-3">
+            <div class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
+                <div class="grid grid-cols-9 gap-1.5">
+                    <button id="btnRecropDesk" onclick="startPvcRecropFromQueue()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"><span data-tool-label>Re-Crop</span></button>
+                    <button id="btnPvcConvertA4Desk" onclick="convertSelectedPvcToA4()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100"><span data-tool-label>Make A4</span></button>
+                    <button id="btnPvcSingleSideDesk" onclick="convertSelectedPvcToSingleSide()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100"><span data-tool-label>Single</span></button>
+                    <button id="btnPvcPageSizeDesk" onclick="togglePvcPageSizeMode()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"><span data-tool-label>Page A4</span></button>
+                    <button id="btnPvcMirrorDesk" onclick="togglePvcMirrorOutput()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100"><span data-tool-label>Mirror OFF</span></button>
+                    <button id="btnPvcPhotoDesk" onclick="openPvcPhotoEnhancer()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-fuchsia-300 text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100"><span data-tool-label>Enhance</span></button>
+                    <button id="btnPvcBorderDesk" onclick="openPvcBorderModal()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-cyan-300 text-cyan-700 bg-cyan-50 hover:bg-cyan-100"><span data-tool-label>Border</span></button>
+                                        <button id="btnPvcZipDesk" onclick="downloadPvcZip()" class="py-1.5 px-1 text-[10px] font-bold rounded border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"><i class="fa-solid fa-download mr-0.5"></i><span data-tool-label>PVC PNG</span></button>
+                </div>
+            </div>
+        </div>
+        <!-- CANVAS AREA -->
+        <div class="flex-1 relative overflow-auto flex flex-col items-center justify-start p-3 lg:p-5 lg:pt-16 lg:pb-3" id="printSection">
+            <div id="emptyProHeader" onclick="openProDetailsModal()" class="hidden pro-preview-strip absolute top-0 left-0 right-0 z-20 rounded-none px-5 py-2 items-center gap-3">
+                <span class="pro-header-icon"><i class="fa-solid fa-crown"></i></span>
+                <span class="relative flex-1 min-w-0">
+                    <span class="pro-header-title block">S Printer Pro Suite</span>
+                    <span class="pro-header-sub block">HD export, PVC auto crop, custom sizes, all-pages print</span>
+                </span>
+                <span class="hidden xl:inline-flex pro-header-chip"><i class="fa-solid fa-wand-magic-sparkles"></i> Premium tools</span>
+                <button onclick="event.stopPropagation(); openProDetailsModal();" class="relative w-9 h-9 rounded-full bg-white/18 text-white border border-white/30 flex items-center justify-center hover:bg-white/28" title="View more"><i class="fa-solid fa-arrow-right text-xs"></i></button>
+            </div>
+            <div id="previewZoomControls" class="preview-zoom-controls" data-preview-page-zoom title="Page zoom">
+                <button type="button" onclick="zoomPreviewPage(-1)" class="preview-zoom-btn" title="Zoom out"><i class="fa-solid fa-minus"></i></button>
+                <span class="preview-zoom-label" data-zoom-label>100%</span>
+                <button type="button" onclick="zoomPreviewPage(1)" class="preview-zoom-btn" title="Zoom in"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div id="previewPageStage" class="preview-page-stage">
+                <div id="previewPageFrame" class="relative shadow-2xl bg-white" style="height: calc(100vh - 150px); min-height: 540px; aspect-ratio: 210/297; width: auto;">
+                    <canvas id="previewCanvas" class="w-full h-full block touch-none"></canvas>
+                    <div id="previewSelectionOverlay">
+                        <div id="previewSelectBox" class="preview-select-box">
+                            <span class="preview-select-handle corner" data-handle="resize-left-top"></span>
+                            <span class="preview-select-handle edge-h" data-handle="resize-top"></span>
+                            <span class="preview-select-handle corner" data-handle="resize-right-top"></span>
+                            <span class="preview-select-handle edge-v" data-handle="resize-right"></span>
+                            <span class="preview-select-handle corner" data-handle="resize-right-bottom"></span>
+                            <span class="preview-select-handle edge-h" data-handle="resize-bottom"></span>
+                            <span class="preview-select-handle corner" data-handle="resize-left-bottom"></span>
+                            <span class="preview-select-handle edge-v" data-handle="resize-left"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="pvcPreviewQualityNote" class="preview-quality-note hidden"><i class="fa-solid fa-circle-check"></i><span>Original-quality preview active hai; print/PDF source bhi safe hai</span></div>
+            <div id="canvasControls" aria-label="Selected document tools">
+                <div id="mobPvcTools" class="hidden" aria-label="PVC tools">
+                    <button id="btnRecropMob" onclick="startPvcRecropFromQueue()" class="selection-tool-btn pvc-mode-tool" title="Re-Crop" aria-label="Re-Crop"><i class="fa-solid fa-crop-simple"></i><span class="sr-only" data-tool-label>Re-Crop</span></button>
+                    <button id="btnPvcConvertA4Mob" onclick="convertSelectedPvcToA4()" class="selection-tool-btn pvc-mode-tool" title="Make A4" aria-label="Make A4"><i class="fa-solid fa-file-lines"></i><span class="sr-only" data-tool-label>Make A4</span></button>
+                    <button id="btnPvcSingleSideMob" onclick="convertSelectedPvcToSingleSide()" class="selection-tool-btn pvc-mode-tool" title="Single side" aria-label="Single side"><i class="fa-solid fa-clone"></i><span class="sr-only" data-tool-label>Single</span></button>
+                    <button id="btnPvcPageSizeMob" onclick="togglePvcPageSizeMode()" class="selection-tool-btn pvc-mode-tool" title="Page 4x6" aria-label="Page 4x6"><i class="fa-solid fa-up-right-and-down-left-from-center"></i><span class="sr-only" data-tool-label>Page 4x6</span></button>
+                    <button id="btnPvcMirrorMob" onclick="togglePvcMirrorOutput()" class="selection-tool-btn pvc-mode-tool" title="Mirror OFF" aria-label="Mirror OFF"><i class="fa-solid fa-left-right"></i><span class="sr-only" data-tool-label>Mirror OFF</span></button>
+                    <button id="btnPvcPhotoMob" onclick="openPvcPhotoEnhancer()" class="selection-tool-btn pvc-mode-tool" title="Enhance photo or text" aria-label="Enhance photo or text"><i class="fa-solid fa-wand-magic-sparkles"></i><span class="sr-only" data-tool-label>Enhance</span></button>
+                    <button id="btnPvcBorderMob" onclick="openPvcBorderModal()" class="selection-tool-btn pvc-mode-tool" title="Border settings" aria-label="Border settings"><i class="fa-regular fa-square"></i><span class="sr-only" data-tool-label>Border</span></button>
+                                        <button id="btnPvcZipMob" onclick="downloadPvcZip()" class="selection-tool-btn pvc-mode-tool" title="Download PVC PNG" aria-label="Download PVC PNG"><i class="fa-solid fa-download"></i><span class="sr-only" data-tool-label>PVC PNG</span></button>
+                </div>
+                <button id="btnDocAlignerRecrop" onclick="startSelectedDocAlignerRecrop()" class="preview-tool-btn standard-selection-tool hidden bg-emerald-50 text-emerald-700 border-emerald-200" title="Selected AI crop ko manually theek karein"><i class="fa-solid fa-crop-simple"></i><span>Re-Crop</span></button>
+                <button id="btnDownloadSelectedCrop" onclick="downloadSelectedCropImage()" class="selection-tool-btn standard-selection-tool" title="Selected card ko single PNG me download karein"><i class="fa-solid fa-download"></i></button>
+                <button onclick="zoomSelection(-0.05)" class="selection-tool-btn standard-selection-tool" title="Size down"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                <button onclick="rotateSelection(-90)" class="selection-tool-btn standard-selection-tool" title="Image 90° left rotate karein (size same rahega)"><i class="fa-solid fa-rotate-left"></i></button>
+                <button onclick="resetSelectionPosition()" class="selection-tool-btn standard-selection-tool" title="Reset"><i class="fa-solid fa-compress"></i></button>
+                <button onclick="deleteSelection()" class="selection-tool-btn standard-selection-tool selection-tool-danger" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="rotateSelection(90)" class="selection-tool-btn standard-selection-tool" title="Image 90° right rotate karein (size same rahega)"><i class="fa-solid fa-rotate-right"></i></button>
+                <button onclick="zoomSelection(0.05)" class="selection-tool-btn standard-selection-tool" title="Size up"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+            </div>
+        </div>
+
+        <!-- MOBILE BOTTOM NAV -->
+        <nav class="lg:hidden mobile-panel bg-white border-t pb-safe z-20">
+            <div class="px-3 py-2 border-b border-gray-100 flex items-center bg-gray-50" id="mobSingleSideContainer">
+                <span class="text-[9px] font-bold text-gray-500 whitespace-nowrap">Single Side</span>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0"><input type="checkbox" id="chkSingleSideMob" onchange="toggleSingleSideMob()" class="sr-only peer"><div class="w-8 h-[18px] bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[14px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-[14px] after:w-[14px] after:transition-all peer-checked:bg-brand"></div></label>
+                <div data-crop-workflow class="crop-workflow crop-workflow-mobile" aria-label="Document crop mode">
+                    <div class="crop-workflow-choices" role="group" aria-label="Choose crop mode">
+                        <button type="button" data-crop-choice="auto" aria-pressed="true" onclick="setCropWorkflowMode('auto')"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Auto Crop</button>
+                        <button type="button" data-crop-choice="manual" aria-pressed="false" onclick="setCropWorkflowMode('manual')"><i class="fa-solid fa-crop-simple" aria-hidden="true"></i> Manual Crop</button>
+                    </div>
+                </div>
+            </div>
+            <div id="albumCoverMobilePanel" class="hidden grid grid-cols-2 gap-2 border-b border-violet-100 bg-violet-50/80 px-3 py-2">
+                <button id="albumCoverFrontButtonMob" type="button" onclick="triggerAlbumCoverUpload('front')" class="rounded-xl border border-violet-200 bg-white px-2 py-2 text-[9px] font-black text-violet-700 disabled:opacity-40"><i class="fa-solid fa-book-open mr-1"></i> Cover Front</button>
+                <button id="albumCoverBackButtonMob" type="button" onclick="triggerAlbumCoverUpload('back')" class="rounded-xl border border-blue-200 bg-white px-2 py-2 text-[9px] font-black text-blue-700 disabled:opacity-40"><i class="fa-solid fa-rotate mr-1"></i> Cover Back</button>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 gap-3">
+                <button onclick="triggerUpload('front')" class="flex-1 flex flex-col items-center gap-1 group"><div id="mobFrontIcon" class="w-full h-12 rounded-xl mob-upload-box flex items-center justify-center text-slate-400 relative overflow-hidden"><img id="mobThumbFront" class="absolute inset-0 w-full h-full object-cover hidden"><div class="flex items-center gap-2 pointer-events-none"><i class="fa-solid fa-camera text-brand"></i><span id="mobFrontUploadLabel" class="text-[10px] font-bold text-slate-500">FRONT</span></div></div></button>
+                <button id="mobBackBtn" onclick="triggerUpload('back')" class="flex-1 flex flex-col items-center gap-1 group"><div id="mobBackIcon" class="w-full h-12 rounded-xl mob-upload-box flex items-center justify-center text-slate-400 relative overflow-hidden"><img id="mobThumbBack" class="absolute inset-0 w-full h-full object-cover hidden"><div class="flex items-center gap-2 pointer-events-none"><i class="fa-solid fa-rotate text-brand"></i><span class="text-[10px] font-bold text-slate-500">BACK</span></div></div></button>
+                <div class="w-px h-8 bg-slate-200"></div>
+                <button onclick="downloadSelectedCropImage()" class="flex-none w-12 h-12 rounded-full bg-white text-blue-600 border border-blue-200 shadow-lg flex flex-col items-center justify-center active:scale-95 transition-transform" title="Selected card single PNG"><i class="fa-solid fa-download text-lg"></i><span class="text-[8px] font-bold">CARD</span></button>
+                <button onclick="downloadPDF()" class="flex-none w-12 h-12 rounded-full bg-white text-red-600 border border-gray-200 shadow-lg flex flex-col items-center justify-center active:scale-95 transition-transform ml-1"><i class="fa-solid fa-file-pdf text-xl"></i><span class="text-[8px] font-bold">PDF</span></button>
+                <button onclick="doPrint()" class="flex-none w-12 h-12 rounded-full bg-gradient-to-tr from-brand to-blue-600 shadow-lg shadow-blue-500/30 text-white flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform ml-1"><i class="fa-solid fa-print text-lg"></i><span class="text-[8px] font-bold">PRINT</span></button>
+            </div>
+            <div id="mobExportQualityHint" class="px-4 -mt-1 pb-1 text-center text-[9px] text-slate-500">Free Normal • Pro HD quality export</div>
+            <div class="px-6 pb-2 text-center text-[9px] text-gray-400"><span id="mobStatus">Select Side to Scan</span></div>
+        </nav>
+    </main>
+
+    <!-- EDITOR MODAL (Cropper) -->
+   <!-- EDITOR MODAL (Cropper) -->
+    <div id="cropperModal" class="fixed inset-0 z-50 hidden bg-white flex flex-col lg:flex-row transition-all">
+        <canvas id="magnifier" width="180" height="180" class="hidden"></canvas>
+        <div class="flex-1 relative flex flex-col overflow-hidden" onclick="toggleMobSliders(false)">
+            <div id="cropStepBadge" class="hidden absolute top-4 left-4 z-40 bg-blue-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg"></div>
+            <div id="editorZoomControls" class="absolute top-4 right-4 flex flex-col gap-2 z-40">
+                <button onclick="adjustEditorZoom(0.02); event.stopPropagation();" class="w-10 h-10 rounded-full bg-white text-slate-700 shadow-lg border border-slate-200 hover:text-brand flex items-center justify-center active:scale-95"><i class="fa-solid fa-plus"></i></button>
+                <button onclick="adjustEditorZoom(-0.02); event.stopPropagation();" class="w-10 h-10 rounded-full bg-white text-slate-700 shadow-lg border border-slate-200 hover:text-brand flex items-center justify-center active:scale-95"><i class="fa-solid fa-minus"></i></button>
+                <div class="bg-black/50 text-white text-[10px] font-bold px-2 py-1 rounded-full text-center backdrop-blur border border-white/20" id="zoomLabel">100%</div>
+            </div>
+            <div id="editorScrollArea">
+                <div id="canvasWrapper">
+                    <canvas id="cropCanvas"></canvas>
+                    <span class="crop-handle-overlay hidden" data-handle="0"></span>
+                    <span class="crop-handle-overlay hidden" data-handle="1"></span>
+                    <span class="crop-handle-overlay hidden" data-handle="2"></span>
+                    <span class="crop-handle-overlay hidden" data-handle="3"></span>
+                </div>
+            </div>
+            <div class="hidden lg:flex absolute bottom-8 left-0 right-0 justify-center gap-6 z-40 pointer-events-none">
+                <button onclick="rotateImage(-90)" class="pointer-events-auto w-12 h-12 rounded-full bg-white text-slate-700 shadow-lg border border-slate-200 hover:text-brand flex items-center justify-center"><i class="fa-solid fa-rotate-left"></i></button>
+                <button onclick="fitCropToFullImage(); event.stopPropagation();" class="pointer-events-auto crop-fit-btn h-12 px-5"><i class="fa-solid fa-expand"></i> FULL IMAGE</button>
+                <button onclick="rotateImage(90)" class="pointer-events-auto w-12 h-12 rounded-full bg-white text-slate-700 shadow-lg border border-slate-200 hover:text-brand flex items-center justify-center"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+        </div>
+        <div class="lg:hidden absolute bottom-0 left-0 right-0 z-50 flex flex-col pointer-events-none">
+                        <div id="pvcA4CorrectionMobileBar" class="hidden pointer-events-auto bg-white/95 backdrop-blur border-t border-amber-100 px-3 py-2">
+                <p class="mb-1.5 text-[9px] font-black uppercase tracking-wider text-amber-800">AI A4 detect hua. Agar card hai to mode badlein.</p>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onclick="setPvcA4CorrectionMode('a4_document')" data-pvc-a4-correction="a4_document" class="py-2 rounded-lg border text-[10px] font-black">A4</button>
+                    <button type="button" onclick="setPvcA4CorrectionMode('double_side_card')" data-pvc-a4-correction="double_side_card" class="py-2 rounded-lg border text-[10px] font-black">Double</button>
+                    <button type="button" onclick="setPvcA4CorrectionMode('single_side_card')" data-pvc-a4-correction="single_side_card" class="py-2 rounded-lg border text-[10px] font-black">Single</button>
+                </div>
+            </div>
+            <div id="documentAiRecropMobileBar" class="hidden pointer-events-auto border-t border-blue-100 bg-blue-50/95 px-3 py-2 backdrop-blur">
+                <button id="btnDocumentAiRecropMobile" type="button" onclick="runAiCropForCurrentRecrop()" class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-[11px] font-black text-white shadow-lg shadow-blue-500/20 disabled:cursor-wait disabled:opacity-60">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i><span data-ai-recrop-label>AI Crop</span>
+                </button>
+                <p class="mt-1 text-center text-[9px] font-bold text-blue-700">AI ke 4 dots lagenge; Done se pehle manually adjust kar sakte hain.</p>
+            </div>
+            <div id="mobileSliderPanel" class="pointer-events-auto bg-white/95 backdrop-blur border-t border-gray-200 px-6 py-5 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+                <div class="space-y-4">
+                    <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 mb-2">
+                        <button onclick="setMode('color')" id="mobBtnColor" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-gray-500 hover:text-slate-800">Orig</button>
+                        <button onclick="setMode('magic')" id="mobBtnMagic" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-white bg-brand shadow-sm">Magic</button>
+                        <button onclick="setMode('bw')" id="mobBtnBW" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-gray-500 hover:text-slate-800">B&W</button>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-500 mb-2"><span>Brightness</span> <span id="mobValBright" class="text-brand">0</span></div>
+                        <input type="range" min="-50" max="80" value="0" id="inpBrightMob" class="range-slider" oninput="syncMobileFilters(this.value, 'bright')">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-500 mb-2"><span>Contrast</span> <span id="mobValContrast" class="text-brand">0</span></div>
+                        <input type="range" min="0" max="100" value="0" id="inpContrastMob" class="range-slider" oninput="syncMobileFilters(this.value, 'contrast')">
+                    </div>
+                </div>
+            </div>
+            <div class="pointer-events-auto bg-white border-t border-gray-100 h-16 pb-safe flex items-center justify-between px-4 shadow-2xl relative z-50">
+                <!-- FIX: Changed text-slate-400 to text-slate-600 -->
+                <button onclick="closeCropper()" class="text-slate-600 hover:text-red-500 text-xs font-bold px-3 py-2 active:scale-95">Cancel</button>
+                <div class="flex items-center gap-3">
+                    <button onclick="rotateImage(-90)" class="w-10 h-10 rounded-full text-slate-600 hover:bg-slate-50 active:scale-90 flex items-center justify-center"><i class="fa-solid fa-rotate-left text-lg"></i></button>
+                    <button onclick="fitCropToFullImage(); event.stopPropagation();" class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 active:scale-90 flex items-center justify-center"><i class="fa-solid fa-expand text-sm"></i></button>
+                    <button onclick="toggleMobSliders(true); event.stopPropagation();" class="flex flex-col items-center gap-1 text-slate-600 active:text-brand group">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center group-active:border-brand group-active:bg-blue-50"><i class="fa-solid fa-sliders text-sm"></i></div>
+                    </button>
+                    <button onclick="rotateImage(90)" class="w-10 h-10 rounded-full text-slate-600 hover:bg-slate-50 active:scale-90 flex items-center justify-center"><i class="fa-solid fa-rotate-right text-lg"></i></button>
+                </div>
+                <button id="cropDoneMobile" onclick="applyCropAndEnhance()" class="bg-brand text-white px-5 py-2 rounded-full text-xs font-bold shadow-lg shadow-blue-500/30 active:scale-95 flex items-center gap-2"><span id="mobDoneLabel">Done</span> <i class="fa-solid fa-check"></i></button>
+            </div>
+        </div>
+        <div class="hidden lg:flex w-[360px] editor-side-panel flex-col shrink-0 h-full border-l border-slate-200 shadow-2xl z-50">
+            <div class="px-6 py-5 border-b border-slate-200 bg-white/90 backdrop-blur">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <span id="deskCropHeader" class="block text-slate-900 font-black tracking-wide text-sm">ADJUST SCAN</span>
+                        <span class="block text-[11px] font-semibold text-slate-500 mt-1">Crop, color aur print clarity</span>
+                    </div>
+                    <button onclick="closeCropper()" class="h-9 px-3 rounded-full bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 text-[11px] font-black transition-colors">CANCEL</button>
+                </div>
+                <div id="documentAiRecropDesktopBar" class="hidden mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-wider text-blue-800">Re-Crop Assistant</p>
+                            <p class="mt-1 text-[10px] font-bold text-blue-700">AI ke 4 corner dots lagayein, phir zarurat ho to manually adjust karein.</p>
+                        </div>
+                        <button id="btnDocumentAiRecropDesktop" type="button" onclick="runAiCropForCurrentRecrop()" class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-[10px] font-black text-white shadow-sm hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i><span data-ai-recrop-label>AI Crop</span>
+                        </button>
+                    </div>
+                </div>
+                                <div id="pvcA4CorrectionDesktopBar" class="hidden mt-4 rounded-2xl border border-amber-100 bg-amber-50/70 p-2">
+                    <p class="mb-2 text-[10px] font-black uppercase tracking-wider text-amber-800">AI A4 detect hua. Agar card hai to mode badlein.</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setPvcA4CorrectionMode('a4_document')" data-pvc-a4-correction="a4_document" class="py-2 rounded-lg border text-[10px] font-black">A4 Page</button>
+                        <button type="button" onclick="setPvcA4CorrectionMode('double_side_card')" data-pvc-a4-correction="double_side_card" class="py-2 rounded-lg border text-[10px] font-black">Double</button>
+                        <button type="button" onclick="setPvcA4CorrectionMode('single_side_card')" data-pvc-a4-correction="single_side_card" class="py-2 rounded-lg border text-[10px] font-black">Single</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5 space-y-5">
+                <div class="enhance-card p-3">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setMode('color')" id="btnColor" class="mode-chip py-3 text-xs font-black rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200">Orig</button>
+                        <button onclick="setMode('magic')" id="btnMagic" class="mode-chip active py-3 text-xs font-black rounded-xl">Natural</button>
+                        <button onclick="setMode('bw')" id="btnBW" class="mode-chip py-3 text-xs font-black rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200">B&W</button>
+                    </div>
+                </div>
+
+                <div class="enhance-card p-5 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] uppercase tracking-wider font-black text-slate-400">Tone</p>
+                            <p class="text-sm font-black text-slate-800">Light correction</p>
+                        </div>
+                        <button onclick="resetEnhanceSettings()" class="h-8 px-3 rounded-full bg-slate-100 text-[11px] font-black text-slate-600 hover:bg-blue-50 hover:text-blue-700">RESET</button>
+                    </div>
+                    <div class="space-y-4">
+                        <div><div class="enhance-row mb-2"><span class="text-xs font-bold text-slate-600">Brightness</span><span id="valBright" class="enhance-value">0</span></div><input type="range" min="-50" max="80" value="0" id="inpBright" class="range-slider" oninput="updateFilters()"></div>
+                        <div><div class="enhance-row mb-2"><span class="text-xs font-bold text-slate-600">Contrast</span><span id="valContrast" class="enhance-value">0</span></div><input type="range" min="0" max="100" value="0" id="inpContrast" class="range-slider" oninput="updateFilters()"></div>
+                        <div><div class="enhance-row mb-2"><span class="text-xs font-bold text-slate-600">Saturation <b class="ak-pro-marketing text-[9px] text-amber-600">PRO</b></span><span id="valSat" class="enhance-value">0</span></div><input type="range" min="-50" max="60" value="0" id="inpSaturation" class="range-slider" oninput="updateProEnhanceFilter(this)"></div>
+                        <div><div class="enhance-row mb-2"><span class="text-xs font-bold text-slate-600">Warmth <b class="ak-pro-marketing text-[9px] text-amber-600">PRO</b></span><span id="valWarmth" class="enhance-value">0</span></div><input type="range" min="-50" max="50" value="0" id="inpWarmth" class="range-slider" oninput="updateProEnhanceFilter(this)"></div>
+                    </div>
+                </div>
+
+                <div class="enhance-card p-5 space-y-4">
+                    <div>
+                        <p class="text-[11px] uppercase tracking-wider font-black text-slate-400">Detail</p>
+                        <p class="text-sm font-black text-slate-800">Text sharpness</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div><div class="enhance-row mb-2"><span class="text-xs font-bold text-slate-600">Sharpness <b class="ak-pro-marketing text-[9px] text-amber-600">PRO</b></span><span id="valSharp" class="enhance-value">0</span></div><input type="range" min="0" max="80" value="0" id="inpSharp" class="range-slider" oninput="updateProEnhanceFilter(this)"></div>
+                        <div><div class="enhance-row mb-2"><span class="text-xs font-bold text-slate-600">Clarity <b class="ak-pro-marketing text-[9px] text-amber-600">PRO</b></span><span id="valClarity" class="enhance-value">0</span></div><input type="range" min="0" max="60" value="0" id="inpClarity" class="range-slider" oninput="updateProEnhanceFilter(this)"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-5 border-t border-slate-200 bg-white pb-safe">
+                <button id="cropDoneDesktop" onclick="applyCropAndEnhance()" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-center gap-2 text-sm"><span id="deskDoneLabel">CONFIRM SCAN</span> <i class="fa-solid fa-check"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PVC PHOTO / TEXT ENHANCER -->
+    <div id="pvcPhotoEnhanceModal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-slate-950/75 p-2 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="pvcPhotoEnhanceTitle" onclick="handlePvcPhotoEnhanceBackdropClick(event)">
+        <div class="w-full max-w-4xl max-h-[96vh] overflow-auto rounded-2xl bg-white shadow-2xl border border-slate-200">
+            <div class="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
+                <div class="min-w-0">
+                    <h2 id="pvcPhotoEnhanceTitle" class="text-sm font-black text-slate-900">Photo / Text Enhance</h2>
+                    <p class="text-[10px] font-bold text-slate-500">Card ke kai photo ya text areas ko alag-alag improve karein; identity replace nahi hogi.</p>
+                </div>
+                <button type="button" onclick="closePvcPhotoEnhancer()" class="h-9 w-9 shrink-0 rounded-full border border-slate-200 bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600" aria-label="Close photo enhancer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="grid gap-3 p-3 md:grid-cols-[minmax(0,1fr)_270px] md:p-4">
+                <div class="min-w-0">
+                    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <p class="text-[10px] font-black text-slate-600"><i class="fa-solid fa-hand-pointer mr-1 text-green-600"></i>Photo या text area पर drag करें; फिर अगला area चुनें</p>
+                        <div class="flex items-center gap-1.5">
+                            <span id="pvcPhotoRegionCount" class="rounded-full bg-blue-50 px-2 py-1 text-[9px] font-black text-blue-700">0 saved</span>
+                            <button type="button" onclick="undoLastPvcPhotoEnhanceArea()" class="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[9px] font-black text-amber-700 hover:bg-amber-100">Undo Area</button>
+                            <button type="button" onclick="resetPvcPhotoSelection()" class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[9px] font-black text-slate-600 hover:border-blue-300 hover:text-blue-700">Current Reset</button>
+                        </div>
+                    </div>
+                    <div id="pvcPhotoCanvasWrap" class="pvc-photo-canvas-wrap" onpointerdown="startPvcPhotoSelection(event)" onpointermove="movePvcPhotoSelection(event)" onpointerup="endPvcPhotoSelection(event)" onpointercancel="endPvcPhotoSelection(event)">
+                        <canvas id="pvcPhotoEnhanceCanvas"></canvas>
+                        <div id="pvcPhotoSelectionBox"></div>
+                        <div id="pvcPhotoGuideOverlay" class="pvc-photo-guide" aria-hidden="true">
+                            <div class="pvc-photo-guide-card">
+                                <div class="pvc-photo-guide-face"></div>
+                                <div class="pvc-photo-guide-lines"></div>
+                                <div class="pvc-photo-guide-box"></div>
+                                <i class="pvc-photo-guide-finger fa-solid fa-hand-pointer"></i>
+                                <div class="pvc-photo-guide-text">Photo या text area के एक कोने से दूसरे कोने तक drag करें</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="pvcPhotoSelectionHelp" class="mt-2 text-center text-[10px] font-bold text-slate-500">पहले area को adjust करें, फिर नया area drag करते ही पिछला enhancement सुरक्षित हो जाएगा।</p>
+                </div>
+                <div class="space-y-3">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-2">
+                        <p class="mb-2 text-[9px] font-black uppercase tracking-wider text-slate-400">Enhance Target</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="pvcEnhanceModePhoto" type="button" onclick="setPvcEnhanceAreaMode('photo')" class="pvc-enhance-mode-btn active rounded-lg border border-slate-300 bg-white px-3 py-2 text-[10px] font-black text-slate-700"><i class="fa-solid fa-user mr-1"></i>Photo Area</button>
+                            <button id="pvcEnhanceModeText" type="button" onclick="setPvcEnhanceAreaMode('text')" class="pvc-enhance-mode-btn rounded-lg border border-slate-300 bg-white px-3 py-2 text-[10px] font-black text-slate-700"><i class="fa-solid fa-font mr-1"></i>Text / Card</button>
+                        </div>
+                        <p id="pvcEnhanceModeHelp" class="mt-2 text-[9px] font-bold leading-relaxed text-slate-500">Photo Area mode: photo ko drag-select karke sirf wahi area improve hoga.</p>
+                    </div>
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-2">
+                        <p class="mb-2 text-[9px] font-black uppercase tracking-wider text-slate-400">Card Side</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="pvcPhotoSideFront" type="button" onclick="setPvcPhotoEnhanceSide('front')" class="pvc-photo-side-btn active rounded-lg border border-blue-200 bg-white px-3 py-2 text-[10px] font-black text-blue-700">Front</button>
+                            <button id="pvcPhotoSideBack" type="button" onclick="setPvcPhotoEnhanceSide('back')" class="pvc-photo-side-btn rounded-lg border border-blue-200 bg-white px-3 py-2 text-[10px] font-black text-blue-700">Back</button>
+                        </div>
+                    </div>
+                    <details id="pvcPhotoControlsDetails" open class="group rounded-xl border border-slate-200 bg-white">
+                        <summary class="flex cursor-pointer list-none items-center justify-between px-3 py-2.5 text-[11px] font-black text-slate-800">
+                            <span><i class="fa-solid fa-sliders mr-2 text-blue-600"></i>Light Controls</span>
+                            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="space-y-3 border-t border-slate-100 px-3 py-3">
+                            <div><div class="mb-1 flex items-center justify-between text-[10px] font-bold text-slate-600"><span>Brightness</span><span id="pvcPhotoBrightnessValue" class="text-blue-700">0</span></div><input id="pvcPhotoBrightness" class="pvc-photo-range" type="range" min="-20" max="60" value="0" oninput="handlePvcPhotoEnhanceSliderInput(event)" onchange="flushPvcPhotoEnhanceSliderPreview()"></div>
+                            <div><div class="mb-1 flex items-center justify-between text-[10px] font-bold text-slate-600"><span>Contrast</span><span id="pvcPhotoContrastValue" class="text-blue-700">0</span></div><input id="pvcPhotoContrast" class="pvc-photo-range" type="range" min="-20" max="40" value="0" oninput="handlePvcPhotoEnhanceSliderInput(event)" onchange="flushPvcPhotoEnhanceSliderPreview()"></div>
+                            <div><div class="mb-1 flex items-center justify-between text-[10px] font-bold text-slate-600"><span>Overall Color</span><span id="pvcPhotoSaturationValue" class="text-blue-700">0</span></div><input id="pvcPhotoSaturation" class="pvc-photo-range" type="range" min="-20" max="30" value="0" oninput="handlePvcPhotoEnhanceSliderInput(event)" onchange="flushPvcPhotoEnhanceSliderPreview()"></div>
+                            <div class="rounded-lg border border-violet-100 bg-violet-50/60 p-2">
+                                <div class="mb-2 flex items-start justify-between gap-2 text-[10px] font-bold text-slate-600">
+                                    <span class="pt-2"><i class="fa-solid fa-palette mr-1 text-violet-600"></i>Target Pixel Color</span>
+                                    <input id="pvcPhotoToneColor" type="hidden" value="#000000">
+                                    <details id="pvcToneColorDropdown" class="relative min-w-[132px]">
+                                        <summary class="flex h-9 cursor-pointer list-none items-center gap-2 rounded-lg border border-violet-200 bg-white px-2 font-black text-slate-700 shadow-sm">
+                                            <span id="pvcToneColorSwatch" class="h-4 w-4 shrink-0 rounded border border-slate-300 bg-black"></span><span id="pvcToneColorLabel" class="flex-1 text-left">Black</span><i class="fa-solid fa-chevron-down text-[8px] text-slate-400"></i>
+                                        </summary>
+                                        <div class="absolute right-0 top-10 z-30 grid w-[190px] grid-cols-2 gap-1 rounded-xl border border-violet-200 bg-white p-2 shadow-2xl">
+                                            <button type="button" onclick="selectPvcTargetColor('#000000')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-slate-50"><span class="h-4 w-4 rounded border border-slate-400 bg-black"></span>Black</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#6b7280')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-slate-50"><span class="h-4 w-4 rounded border border-slate-400 bg-gray-500"></span>Gray</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#ffffff')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-slate-50"><span class="h-4 w-4 rounded border border-slate-400 bg-white"></span>White</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#dc2626')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-red-50"><span class="h-4 w-4 rounded border border-red-700 bg-red-600"></span>Red</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#2563eb')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-blue-50"><span class="h-4 w-4 rounded border border-blue-700 bg-blue-600"></span>Blue</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#16a34a')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-green-50"><span class="h-4 w-4 rounded border border-green-700 bg-green-600"></span>Green</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#eab308')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-yellow-50"><span class="h-4 w-4 rounded border border-yellow-600 bg-yellow-500"></span>Yellow</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#f97316')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-orange-50"><span class="h-4 w-4 rounded border border-orange-700 bg-orange-500"></span>Orange</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#9333ea')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-purple-50"><span class="h-4 w-4 rounded border border-purple-700 bg-purple-600"></span>Purple</button>
+                                            <button type="button" onclick="selectPvcTargetColor('#06b6d4')" class="flex items-center gap-2 rounded-lg px-2 py-2 text-left font-black hover:bg-cyan-50"><span class="h-4 w-4 rounded border border-cyan-700 bg-cyan-500"></span>Cyan</button>
+                                            <label class="col-span-2 flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-violet-100 px-2 py-2 font-black hover:bg-violet-50">
+                                                <input id="pvcCustomToneColor" type="color" value="#a855f7" class="h-6 w-9 cursor-pointer rounded border border-violet-300 bg-white p-0.5" onpointerdown="markPvcCustomColorPickerOpen()" onclick="markPvcCustomColorPickerOpen()" onchange="handlePvcCustomToneColorChange(event)" oncancel="handlePvcCustomToneColorCancel()">
+                                                <span>Custom Color</span><span class="text-[8px] font-bold text-slate-400">अपनी पसंद</span>
+                                            </label>
+                                        </div>
+                                    </details>
+                                </div>
+                                <div class="mb-1 flex items-center justify-between text-[10px] font-bold text-slate-600"><span>Selected Color Light / Dark</span><span id="pvcPhotoToneStrengthValue" class="text-violet-700">0</span></div>
+                                <input id="pvcPhotoToneStrength" class="pvc-photo-range" type="range" min="-100" max="100" value="0" oninput="handlePvcPhotoEnhanceSliderInput(event)" onchange="flushPvcPhotoEnhanceSliderPreview()">
+                                <div class="mb-1 mt-2 flex items-center justify-between text-[10px] font-bold text-slate-600"><span>Matching Range</span><span id="pvcPhotoToneToleranceValue" class="text-violet-700">60</span></div>
+                                <input id="pvcPhotoToneTolerance" class="pvc-photo-range" type="range" min="0" max="100" value="60" oninput="handlePvcPhotoEnhanceSliderInput(event)" onchange="flushPvcPhotoEnhanceSliderPreview()">
+                                <p class="mt-1 text-[8px] font-semibold leading-relaxed text-violet-700">Har color ki Light/Dark aur Matching Range setting alag save rahegi. Custom Color box se list ke bahar ka koi bhi rang chun sakte hain; effect केवल उसी matching रंग पर लगेगा.</p>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 pt-1">
+                                <button type="button" onclick="applyPvcPhotoNaturalPreset()" class="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-2 text-[9px] font-black text-emerald-700">Natural Light</button>
+                                <button type="button" onclick="applyPvcTextClearPreset()" class="rounded-lg border border-blue-200 bg-blue-50 px-2 py-2 text-[9px] font-black text-blue-700">Text Clear</button>
+                                <button type="button" onclick="resetPvcPhotoEnhanceValues()" class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-[9px] font-black text-slate-600">Reset Light</button>
+                            </div>
+                        </div>
+                    </details>
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[9px] font-bold leading-relaxed text-amber-800"><i class="fa-solid fa-circle-info mr-1"></i>नया area drag करने पर पिछला area save रहेगा। Apply करने पर सभी selected areas एक साथ update होंगे।</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="closePvcPhotoEnhancer()" class="rounded-xl border border-slate-300 bg-white px-3 py-3 text-[11px] font-black text-slate-700">Cancel</button>
+                        <button id="pvcPhotoApplyButton" type="button" onclick="applyPvcPhotoEnhancement()" class="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-3 text-[11px] font-black text-white shadow-lg shadow-blue-500/20">Apply All (Front/Back)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTIONAL PVC CARD BORDER -->
+    <div id="pvcBorderModal" class="fixed inset-0 z-[92] hidden items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true" aria-labelledby="pvcBorderTitle">
+        <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl">
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div><h2 id="pvcBorderTitle" class="text-sm font-black text-slate-900">PVC Card Border</h2><p class="mt-1 text-[10px] font-bold text-slate-500">Selected card ke front aur back par border. Default OFF rahega.</p></div>
+                <button type="button" onclick="closePvcBorderModal()" class="h-9 w-9 shrink-0 rounded-full border border-slate-200 bg-slate-50 text-slate-600" aria-label="Close border settings"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <label class="mb-4 flex cursor-pointer items-center justify-between rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-3 text-[11px] font-black text-cyan-900"><span><i class="fa-solid fa-border-all mr-2"></i>Enable Border</span><input id="pvcBorderEnabled" type="checkbox" class="h-5 w-5 accent-cyan-600" onchange="syncPvcBorderControls()"></label>
+            <div id="pvcBorderControls" class="space-y-4 opacity-50">
+                <div class="flex items-center justify-between gap-3"><label for="pvcBorderColor" class="text-[10px] font-black text-slate-600">Border Color</label><input id="pvcBorderColor" type="color" value="#111827" class="h-9 w-16 cursor-pointer rounded border border-slate-200 bg-white p-1"></div>
+                <div><div class="mb-1 flex items-center justify-between text-[10px] font-black text-slate-600"><label for="pvcBorderWidth">Thickness</label><span id="pvcBorderWidthValue" class="text-cyan-700">6 px</span></div><input id="pvcBorderWidth" type="range" min="2" max="24" value="6" class="pvc-photo-range" oninput="syncPvcBorderControls()"></div>
+            </div>
+            <div class="mt-5 grid grid-cols-2 gap-2"><button type="button" onclick="closePvcBorderModal()" class="rounded-xl border border-slate-300 bg-white px-3 py-3 text-[11px] font-black text-slate-700">Cancel</button><button type="button" onclick="applyPvcBorderSettings()" class="rounded-xl bg-cyan-600 px-3 py-3 text-[11px] font-black text-white shadow-lg shadow-cyan-500/20">Apply Border</button></div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*,.pdf,application/pdf" class="hidden" multiple>
+    <input type="file" id="albumCoverInput" accept="image/*" class="hidden">
+    <img id="tempImgSource" class="hidden">
+
+    <!-- Keep server-rendered values outside the large client script so that the
+         main JavaScript stays in its cacheable asset and can be protected separately. -->
+    <script>
+        window.AK_ID_CARD_RUNTIME_CONFIG = Object.freeze({
+            docAlignerTestMode: true,
+            language: "en"        });
+    </script>
+
+    <script defer src="../assets/idcard/transport.js"></script>
+    <script defer src="../assets/idcard/app.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof maybeAutoStartShopListener === 'function') {
+        maybeAutoStartShopListener();
+    }
+    
+    // Global Click Listener
+    document.body.addEventListener('click', function(e) {
+        
+        // Button dhoondo
+        const target = e.target.closest('[onclick], [id], button, a');
+        if (!target) return;
+
+        const actionCode = target.getAttribute('onclick') || '';
+        const elementId = target.id || '';
+        const buttonText = target.innerText || '';
+
+        // 1. DOWNLOAD JPG
+        if (actionCode.includes('downloadJPG') || buttonText.includes('Save JPG')) {
+            sendGA4Event('download_click', { file_type: 'JPG', tool: 'id_card_maker' });
+        }
+
+        // 2. DOWNLOAD PDF
+        if (actionCode.includes('downloadPDF') || buttonText.includes('Save PDF')) {
+            sendGA4Event('download_click', { file_type: 'PDF', tool: 'id_card_maker' });
+        }
+
+        // 3. PRINT
+        if (actionCode.includes('doPrint') || buttonText.includes('PRINT SHEET')) {
+            sendGA4Event('print_click', { tool: 'id_card_maker' });
+        }
+
+        // 4. UPLOAD
+        if (actionCode.includes('triggerUpload') || elementId === 'dropFront' || elementId === 'backUploadBox' || elementId === 'mobFrontIcon' || elementId === 'mobBackIcon') {
+            const side = actionCode.includes('back') ? 'back' : 'front';
+            sendGA4Event('upload_click', { side: side });
+        }
+
+        // 5. CROP DONE
+        if (actionCode.includes('applyCropAndEnhance')) {
+            sendGA4Event('crop_completed', { tool: 'id_card_maker' });
+        }
+
+        // 6. TYPE CHANGE
+        if (actionCode.includes('setDocType') || actionCode.includes('attemptSetDocType')) {
+            let type = 'unknown';
+            if(actionCode.includes('smart')) type = 'smart_card';
+            else if(actionCode.includes('a4')) type = 'a4_page';
+            else if(actionCode.includes('big')) type = 'large_doc';
+            else if(actionCode.includes('pvc')) type = 'pvc_card';
+            
+            sendGA4Event('tool_type_change', { selected_type: type });
+        }
+    });
+
+    // Helper Function
+    function sendGA4Event(eventName, params) {
+        if (typeof gtag === 'function') {
+            gtag('event', eventName, params);
+           // console.log('✅ GA4 Event Sent:', eventName, params);
+        } else {
+            // console.log('⚠️ GA4 Not Loaded Yet');
+        }
+    }
+});
+</script>
+<dialog id="documentCropLimitDialog" class="crop-limit-dialog" aria-labelledby="cropLimitTitle" aria-describedby="cropLimitDescription" oncancel="event.preventDefault(); chooseFreeManualCrop()">
+    <div class="crop-limit-topbar">
+        <div class="crop-limit-brand">
+            <span class="crop-limit-brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><path d="m8 12 3 3 5-6"/></svg></span>
+            <span>S Printer<small>SMART PRINT TOOLS</small></span>
+        </div>
+        <div id="cropDialogLanguages" class="crop-limit-languages" role="group" aria-label="Dialog language">
+            <button type="button" lang="hi" data-crop-language="hi" aria-pressed="false" onclick="setCropDialogLanguage('hi')">हिन्दी</button>
+            <button type="button" lang="en" data-crop-language="en" aria-pressed="true" onclick="setCropDialogLanguage('en')">EN</button>
+        </div>
+        <button type="button" id="cropLimitCloseButton" class="crop-limit-close" aria-label="Close and continue with free Manual Crop" onclick="chooseFreeManualCrop()">&#215;</button>
+    </div>
+    <div class="crop-limit-intro">
+        <span class="crop-limit-eyebrow"><span aria-hidden="true"></span><span data-crop-i18n="eyebrow">KEEP YOUR WORK MOVING</span></span>
+        <h2 id="cropLimitTitle" data-crop-i18n="title">Your free Auto Crop limit is used up.</h2>
+        <p id="cropLimitDescription" data-crop-i18n="description">Continue for free with Manual Crop, or unlock automatic processing with the Pro Plan.</p>
+    </div>
+    <div class="crop-limit-options">
+        <section class="crop-limit-option">
+            <div class="crop-limit-card-head"><span class="crop-limit-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v13a2 2 0 0 0 2 2h13M3 6h13a2 2 0 0 1 2 2v13M10 10h4v4"/></svg></span><span class="crop-limit-option-label" data-crop-i18n="manualBadge">ALWAYS FREE</span></div>
+            <h3 data-crop-i18n="manualTitle">Manual Crop</h3>
+            <p class="crop-limit-card-description" data-crop-i18n="manualDescription">A little adjustment. The same great print.</p>
+            <ul class="crop-limit-features"><li data-crop-i18n="manualFeature1">Adjust the four corners yourself</li><li data-crop-i18n="manualFeature2">Keep your existing print layout</li><li data-crop-i18n="manualFeature3">Continue without paying</li></ul>
+            <button type="button" id="cropLimitManualButton" class="crop-limit-manual" data-crop-i18n="manualButton" onclick="chooseFreeManualCrop()" autofocus>Continue with free Manual Crop</button>
+            <small data-crop-i18n="noNag">We’ll remember your choice. No repeated popups.</small>
+        </section>
+        <section class="crop-limit-option crop-limit-premium">
+            <div class="crop-limit-card-head"><span class="crop-limit-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 20 12-12 4 4L8 24" transform="translate(0 -3)"/><path d="m8 3 .7 2.3L11 6l-2.3.7L8 9l-.7-2.3L5 6l2.3-.7L8 3Zm11-1v3m-1.5-1.5h3"/></svg></span><span class="crop-limit-option-label" data-crop-i18n="autoBadge">LESS WORK. MORE SPEED.</span></div>
+            <h3 data-crop-i18n="autoTitle">Auto Crop</h3>
+            
+            <div class="crop-limit-pro-label"><i class="fa-solid fa-crown" aria-hidden="true"></i><span data-crop-i18n="proLabel">INCLUDED WITH PRO</span></div>
+            <ul class="crop-limit-features"><li data-crop-i18n="autoFeature1">Automatic document cropping</li><li data-crop-i18n="autoFeature2">Straighten and enhance together</li><li data-crop-i18n="autoFeature3">Go straight to your print preview</li></ul>
+            <button type="button" id="cropLimitProButton" class="crop-limit-pay" onclick="openCropProPlan()"><span data-crop-i18n="proButton">Get Pro Plan</span><span aria-hidden="true">→</span></button>
+            <button type="button" id="cropLimitRefresh" class="crop-limit-refresh" data-crop-i18n="refresh" onclick="refreshDocumentCropAccess(true)">Already paid? Check access</button>
+        </section>
+    </div>
+    <div class="crop-limit-footer"><p class="crop-limit-safe"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><span data-crop-i18n="safe">Your image and print layout stay safe.</span></p><p data-crop-i18n="footer">Switch back to Auto Crop anytime from the same panel.</p></div>
+    <p id="cropLimitStatus" class="crop-limit-status" role="status" aria-live="polite" hidden></p>
+</dialog>
+<a class="sp-home-fab" href="../index.html" title="All S Printer tools"><span class="sp-logo sp-logo-sm">S</span> All tools</a>
+</body>
+</html>

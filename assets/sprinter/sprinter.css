@@ -1,0 +1,43 @@
+/* S Printer shared chrome */
+@font-face{font-family:'SP Lexend';font-weight:600 700;font-display:swap;src:url(../../cf-fonts/v/lexend/5.2.11/latin/wght/normal.woff2) format('woff2')}
+.sp-header{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid #E1E6EC;font-family:'SP Lexend',Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+.sp-header::after{content:"";display:block;height:3px;background:linear-gradient(90deg,#0098D8 0 25%,#D6247A 25% 50%,#F5C400 50% 75%,#1B2330 75%)}
+.sp-wrap{max-width:1200px;margin:0 auto;padding:0 18px}
+.sp-header .sp-wrap{display:flex;align-items:center;gap:20px;height:60px}
+.sp-brand{display:flex;align-items:center;gap:10px;text-decoration:none!important;color:#1B2330!important;flex-shrink:0}
+.sp-logo{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:9px;background:#1B2330;color:#fff;font-weight:800;font-size:19px;line-height:1;box-shadow:inset 0 -4px 0 #0098D8}
+.sp-logo-sm{width:24px;height:24px;font-size:13px;border-radius:6px;box-shadow:inset 0 -3px 0 #0098D8;vertical-align:middle}
+.sp-name{font-weight:700;font-size:19px;letter-spacing:-.01em}
+.sp-nav{display:flex;gap:4px;margin-left:auto;align-items:center}
+.sp-nav a{color:#3A4554!important;text-decoration:none!important;font-size:14px;font-weight:600;padding:8px 11px;border-radius:8px;white-space:nowrap}
+.sp-nav a:hover,.sp-nav a:focus-visible{background:#EEF1F4;color:#1B2330!important}
+.sp-nav a[aria-current=page]{color:#0078AD!important;background:#E5F4FB}
+.sp-menu-btn{display:none;margin-left:auto;background:none;border:1px solid #D5DCE4;border-radius:8px;width:40px;height:38px;font-size:18px;color:#1B2330;cursor:pointer}
+@media (max-width:860px){
+ .sp-menu-btn{display:block}
+ .sp-nav{display:none;position:absolute;left:0;right:0;top:63px;background:#fff;flex-direction:column;align-items:stretch;padding:8px 14px 14px;border-bottom:1px solid #E1E6EC;box-shadow:0 12px 24px rgba(27,35,48,.08)}
+ .sp-open .sp-nav{display:flex}
+ .sp-nav a{padding:12px}
+}
+.sp-footer{background:#1B2330;color:#C9D2DC;font:14px/1.6 Inter,system-ui,sans-serif;margin-top:48px}
+.sp-foot{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;padding:26px 18px}
+.sp-foot b{color:#fff}
+.sp-foot-links{display:flex;gap:18px;flex-wrap:wrap}
+.sp-foot-links a{color:#C9D2DC!important;text-decoration:none!important}
+.sp-foot-links a:hover{color:#fff!important}
+.sp-copy{width:100%;font-size:12.5px;color:#8E9AA8;border-top:1px solid #2C3646;padding-top:14px}
+@media print{.sp-header,.sp-footer{display:none!important}}
+/* hide leftovers of the old account / payment UI */
+#header-login,#header-profile,.pricing-link,.account-link,#crop-payment-dialog,#watermark-warning-box,.paywall,.pro-badge-lock{display:none!important}
+.sp-home-fab{position:fixed;right:14px;bottom:14px;z-index:90;display:inline-flex;align-items:center;gap:8px;background:#1B2330;color:#fff!important;text-decoration:none!important;font:600 13px/1 Inter,system-ui,sans-serif;padding:8px 14px 8px 8px;border-radius:999px;box-shadow:0 6px 18px rgba(27,35,48,.25)}
+.sp-home-fab .sp-logo-sm{background:#fff;color:#1B2330}
+@media print{.sp-home-fab{display:none!important}}
+.sp-header::after{transform-origin:left;animation:sp-bar .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sp-bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.sp-nav a{transition:background .2s,color .2s}
+.sp-logo{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.sp-brand:hover .sp-logo{transform:rotate(-8deg)}
+@media (max-width:860px){.sp-open .sp-nav{animation:sp-drop .25s cubic-bezier(.2,.8,.2,1)}}
+@keyframes sp-drop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sp-header::after,.sp-open .sp-nav{animation:none}}
+#gatekeeperModal,#remotePaymentQr,#remoteCashfreePayBtn,#remotePaymentAppChoices,#remotePaymentUpi,#remotePaymentBreakup,#remotePaymentQrDownloadBtn,#crop-payment-login{display:none!important}

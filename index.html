@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S Printer — Passport photos, ID card prints &amp; PDF tools</title>
+<meta name="description" content="S Printer: passport photo sheets, ID card and Aadhaar print layouts, photo prints, document crop and PDF tools. Everything runs in your browser.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="assets/sprinter/sprinter.css">
+<link rel="stylesheet" href="assets/sprinter/home.css">
+<script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="index.html" aria-label="S Printer home"><span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span></a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="service/passport-photo.html">Passport Photo</a>
+      <a href="service/id-card-print.html">ID Card Print</a>
+      <a href="service/a4-photo-print.html">Photo Print</a>
+      <a href="service/document-auto-crop.html">Document Crop</a>
+      <a href="tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="sp-wrap">
+    <div>
+      <div class="kicker"><span class="dots"><i style="background:#0098D8"></i><i style="background:#D6247A"></i><i style="background:#F5C400"></i></span>Print desk toolkit</div>
+      <h1><span class="ln"><span>Print-ready photos</span></span><span class="ln"><span>and documents,</span></span><span class="ln"><span>in a few clicks.</span></span></h1>
+      <p class="sub">Passport photo sheets, Aadhaar, PAN and ID card prints, document crop and PDF tools. Files are processed on this computer and never uploaded.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="service/passport-photo.html">Make passport photos
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost" href="#tools">See all tools</a>
+      </div>
+      <div class="facts">
+        <div><b>24</b>print tools</div>
+        <div><b>300&nbsp;DPI</b>print output</div>
+        <div><b>0</b>files uploaded</div>
+      </div>
+    </div>
+    <div class="stage" aria-hidden="true" title="Click to print again">
+      <div class="sheet">
+        <i class="ph" style="--i:0"></i><i class="ph" style="--i:1"></i><i class="ph" style="--i:2"></i><i class="ph" style="--i:3"></i>
+        <i class="ph" style="--i:4"></i><i class="ph" style="--i:5"></i><i class="ph" style="--i:6"></i><i class="ph" style="--i:7"></i>
+        <div class="cmyk"></div><div class="rule"></div><div class="rule s"></div>
+        <div class="head"></div>
+        <span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"></span>
+      </div>
+      <div class="chip a"><i style="background:#0098D8"></i>3.5 × 4.5 cm</div>
+      <div class="chip b"><i style="background:#22a06b"></i>A4 · 8 copies</div>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar" id="toolbar">
+  <div class="sp-wrap">
+    <label class="search" for="q">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Find a tool: passport, aadhaar, pdf…" autocomplete="off" aria-label="Find a tool">
+      <kbd>/</kbd>
+    </label>
+    <div class="tabs" role="tablist" aria-label="Tool categories">
+      <span class="pill"></span>
+      <button role="tab" aria-selected="true" data-f="all">All</button>
+      <button role="tab" aria-selected="false" data-f="photo">Photo prints</button>
+      <button role="tab" aria-selected="false" data-f="card">ID &amp; documents</button>
+      <button role="tab" aria-selected="false" data-f="pdf">PDF tools</button>
+    </div>
+  </div>
+</div>
+
+<main class="sp-wrap" id="tools">
+  <p class="empty" id="empty">No tool matches that search. Try “photo”, “card” or “pdf”.</p>
+  <section class="group reveal" data-g="photo" style="--accent:#0098D8">
+<h2><span class="sw" style="background:#0098D8"></span>Photo prints</h2>
+<p class="lead">Passport and portrait photos sized for printing.</p>
+<div class="grid">
+<a class="tool" href="service/passport-photo.html" data-k="passport photo sheet visa size crop suit dress"><span class="ic"><img src="indexicons/portrait.png" alt="" loading="lazy"></span><div><b>Passport Photo Sheet<em class="tag">Popular</em></b><span>Crop, change dress, set size and fill an A4 or 4×6 sheet.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/a4-photo-print.html" data-k="a4 full photo print portrait frame"><span class="ic"><img src="indexicons/a4-photo-print.png" alt="" loading="lazy"></span><div><b>A4 Full Photo</b><span>One photo on a full A4 page with border and frame options.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/4x6-photo-print.html" data-k="4x6 photo print postcard"><span class="ic"><img src="indexicons/4x6-photo-print.png" alt="" loading="lazy"></span><div><b>4×6 Photo Print</b><span>Print on 4×6 inch photo paper.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/4x6-photos-on-a4.html" data-k="4x6 photos on a4 multiple"><span class="ic"><img src="indexicons/4x6-photos-on-a4.png" alt="" loading="lazy"></span><div><b>4×6 Photos on A4</b><span>Fit several 4×6 photos on one A4 sheet.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/notary-photo-maker.html" data-k="notary photo affidavit stamp"><span class="ic"><img src="indexicons/notary-photo-maker.png" alt="" loading="lazy"></span><div><b>Notary Photo</b><span>Photo layouts for affidavits and notary papers.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/joint-photo-maker.html" data-k="joint photo couple marriage two people"><span class="ic"><img src="indexicons/joint-photo-maker.png" alt="" loading="lazy"></span><div><b>Joint Photo</b><span>Put two people side by side in one photo.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/remove-background.html" data-k="remove background bg white transparent png"><span class="ic"><img src="indexicons/remove-background.png" alt="" loading="lazy"></span><div><b>Remove Background<em class="tag">AI</em></b><span>Cut out the person; download PNG, JPG or PDF.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/photo-crop-resize.html" data-k="photo crop resize compress kb signature form"><span class="ic"><img src="indexicons/resizing.png" alt="" loading="lazy"></span><div><b>Photo Crop &amp; Resize</b><span>Set exact pixels and KB size for online forms.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+</div>
+</section>
+<section class="group reveal" data-g="card" style="--accent:#D6247A">
+<h2><span class="sw" style="background:#D6247A"></span>ID cards &amp; documents</h2>
+<p class="lead">Crop front and back, then print at actual card size.</p>
+<div class="grid">
+<a class="tool" href="service/id-card-print.html" data-k="id card print front back auto crop smart"><span class="ic"><img src="indexicons/id-card%20(1).png" alt="" loading="lazy"></span><div><b>ID Card Print<em class="tag">Auto crop</em></b><span>Auto-crop card scans and place front and back on A4.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/id-card-print.html?mode=pvc_crop" data-k="pvc card crop"><span class="ic"><img src="indexicons/pvc-auto-crop.png" alt="" loading="lazy"></span><div><b>PVC Card Crop</b><span>Crop cards for PVC card printers.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/id-card-print.html?mode=document_album" data-k="document album a4 pages"><span class="ic"><img src="indexicons/document-album.png" alt="" loading="lazy"></span><div><b>Document Album</b><span>Arrange several documents into print pages.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/aadhaar-print.html" data-k="aadhaar aadhar card print pdf password"><span class="ic"><img src="indexicons/document.png" alt="" loading="lazy"></span><div><b>Aadhaar Card Print</b><span>Open the e-Aadhaar PDF and print the card on A4.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/pan-card-print.html" data-k="pan card print"><span class="ic"><img src="indexicons/document.png" alt="" loading="lazy"></span><div><b>PAN Card Print</b><span>Print e-PAN at real card size.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/voter-id-print.html" data-k="voter id card epic print"><span class="ic"><img src="indexicons/document.png" alt="" loading="lazy"></span><div><b>Voter ID Print</b><span>Print the e-EPIC voter card.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/ayushman-print.html" data-k="ayushman card abha print"><span class="ic"><img src="indexicons/document.png" alt="" loading="lazy"></span><div><b>Ayushman Card Print</b><span>Print the Ayushman Bharat card.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/document-auto-crop.html" data-k="document crop scan a4 receipt"><span class="ic"><img src="indexicons/doc-auto-crop.png" alt="" loading="lazy"></span><div><b>Document Crop</b><span>Straighten and crop phone scans for printing.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="service/resume-print.html" data-k="resume cv biodata print"><span class="ic"><img src="indexicons/cv.png" alt="" loading="lazy"></span><div><b>Resume Maker</b><span>Fill in details and download a PDF resume.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+</div>
+</section>
+<section class="group reveal" data-g="pdf" style="--accent:#E0A800">
+<h2><span class="sw" style="background:#F5C400"></span>PDF &amp; image converters</h2>
+<p class="lead">Convert and combine files without uploading them.</p>
+<div class="grid">
+<a class="tool" href="tool/jpg-to-pdf.html" data-k="jpg to pdf image convert"><span class="ic"><img src="indexicons/pdf.png" alt="" loading="lazy"></span><div><b>JPG to PDF</b><span>Combine photos into one PDF.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="tool/png-to-pdf.html" data-k="png to pdf convert"><span class="ic"><img src="indexicons/pdf%20(1).png" alt="" loading="lazy"></span><div><b>PNG to PDF</b><span>Turn PNG images into a PDF.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="tool/pdf-to-jpg.html" data-k="pdf to jpg image pages"><span class="ic"><img src="indexicons/jpg-file.png" alt="" loading="lazy"></span><div><b>PDF to JPG</b><span>Save every PDF page as an image.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="tool/merge-pdf.html" data-k="merge pdf combine join"><span class="ic"><img src="indexicons/document.png" alt="" loading="lazy"></span><div><b>Merge PDF</b><span>Join several PDFs into one.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="tool/delete-pdf-pages.html" data-k="delete pdf pages remove"><span class="ic"><img src="indexicons/delete.png" alt="" loading="lazy"></span><div><b>Delete PDF Pages</b><span>Remove pages you don’t need.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="tool/jpg-to-png.html" data-k="jpg to png convert"><span class="ic"><img src="indexicons/png.png" alt="" loading="lazy"></span><div><b>JPG to PNG</b><span>Convert JPG images to PNG.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+<a class="tool" href="tool/png-to-jpg.html" data-k="png to jpg convert"><span class="ic"><img src="indexicons/jpg-file.png" alt="" loading="lazy"></span><div><b>PNG to JPG</b><span>Convert PNG images to JPG.</span></div><svg class="go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+</div>
+</section>
+  <section class="steps" id="steps">
+    <h2>How a print job works</h2>
+    <ol>
+      <li><b>Add the photo or document</b><p>Drop a photo, scan or PDF onto any tool. It opens right on this computer.</p></li>
+      <li><b>Adjust the layout</b><p>Crop, pick a size, set copies and margins. The preview shows the real paper.</p></li>
+      <li><b>Print or download</b><p>Print at Actual size / 100%, or save a PDF or JPG for later.</p></li>
+    </ol>
+  </section>
+</main>
+
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="service/passport-photo.html">Passport Photo</a>
+      <a href="service/id-card-print.html">ID Card</a>
+      <a href="service/aadhaar-print.html">Aadhaar Print</a>
+      <a href="tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span id="yr">2026</span> S Printer. Files are processed in your browser.</div>
+  </div>
+</footer>
+<script src="assets/sprinter/home.js"></script>
+</body>
+</html>
