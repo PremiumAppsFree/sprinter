@@ -196,6 +196,7 @@
     function fixText(node) {
       var t = node.nodeValue;
       if (!t || t.length > 600) return;
+      if (/GPU offline tha/i.test(t)) { node.nodeValue = t.replace(/GPU offline tha;?\s*browser ne photo ko automatically crop kiya\.?/i, 'Cropped automatically in your browser. Use Manual Crop to adjust.'); return; }
       if (BRAND.test(t)) { BRAND.lastIndex = 0; node.nodeValue = t.replace(BRAND, 'SPrinter'); }
       BRAND.lastIndex = 0;
       if (GPU_NOTE.test(t)) {
@@ -430,4 +431,87 @@
         get: function () { return held; }, set: function (v) { held = patchPdf(v); } });
     } catch (e) {}
   });
+})();
+
+/* Card print tools (Aadhaar/PAN/Voter/Ayushman): print without a pop-up window,
+ * at the exact paper size chosen in "Page", so cards come out true-to-size. */
+(function () {
+  'use strict';
+  var SIZES = { A4: [210, 297], A5: [148, 210], A3: [297, 420], '4x6': [101.6, 152.4], '5x7': [127, 177.8], Legal: [215.9, 355.6] };
+  function isCardTool() { return document.getElementById('pageSizeSelect') && document.getElementById('outputModal'); }
+  function paper() {
+    var sel = document.getElementById('pageSizeSelect'), v = sel ? sel.value : 'A4';
+    if (v === 'Custom') {
+      var w = parseFloat((document.getElementById('customPageWidth') || {}).value), h = parseFloat((document.getElementById('customPageHeight') || {}).value);
+      if (w > 20 && h > 20) return [w, h];
+    }
+    return SIZES[v] || SIZES.A4;
+  }
+  function printImages(srcs) {
+    if (!srcs.length) return;
+    var first = new Image();
+    first.onload = function () {
+      var p = paper(), w = p[0], h = p[1];
+      if ((first.naturalWidth > first.naturalHeight) !== (w > h)) { var t = w; w = h; h = t; }
+      var css = '@page{size:' + w + 'mm ' + h + 'mm;margin:0}html,body{margin:0;padding:0;background:#fff}' +
+        'img{display:block;width:' + w + 'mm;height:' + h + 'mm;object-fit:contain;break-after:page;page-break-after:always}img:last-child{break-after:auto;page-break-after:auto}';
+      var html = '<!doctype html><html><head><meta charset="utf-8"><title>S Printer</title><style>' + css + '</style></head><body>' +
+        srcs.map(function (s) { return '<img src="' + s + '">'; }).join('') + '</body></html>';
+      var f = document.createElement('iframe');
+      f.setAttribute('aria-hidden', 'true');
+      f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+      document.body.appendChild(f);
+      var d = f.contentWindow.document; d.open(); d.write(html); d.close();
+      var imgs = d.images, left = imgs.length;
+      function go() {
+        try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {}
+        setTimeout(function () { f.remove(); }, 60000);
+      }
+      if (!left) go(); else [].forEach.call(imgs, function (im) { if (im.complete) { if (!--left) go(); } else im.onload = im.onerror = function () { if (!--left) go(); }; });
+    };
+    first.src = srcs[0];
+  }
+  var realOpen = window.open;
+  window.open = function (url) {
+    if (isCardTool() && (!url || url === 'about:blank')) {
+      var buf = '', done = false, onload = null;
+      var finish = function () {
+        if (done) return; done = true;
+        var srcs = [], re = /<img[^>]+src=["']([^"']+)["']/gi, m;
+        while ((m = re.exec(buf))) srcs.push(m[1]);
+        printImages(srcs);
+      };
+      var doc = { write: function (h) { buf += h; }, writeln: function (h) { buf += h + '\n'; }, open: function () { buf = ''; return doc; },
+        close: function () { setTimeout(function () { if (onload) { try { onload(); } catch (e) {} } finish(); }, 50); },
+        createElement: function (t) { return document.createElement(t); }, body: null, title: '' };
+      var sink = { document: doc, closed: false, focus: function () {}, blur: function () {}, close: function () { sink.closed = true; },
+        print: function () { finish(); }, addEventListener: function (t, fn) { if (t === 'load') onload = fn; }, removeEventListener: function () {},
+        setTimeout: function (fn, ms) { return setTimeout(fn, ms); }, opener: window, location: { href: 'about:blank' } };
+      Object.defineProperty(sink, 'onload', { get: function () { return onload; }, set: function (fn) { onload = fn; } });
+      return sink;
+    }
+    return realOpen.apply(this, arguments);
+  };
+})();
+
+/* ID Card Print: paper size follows the print sheet (no extra blank page). */
+(function () {
+  'use strict';
+  function fit() {
+    var pc = document.getElementById('printContainer'); if (!pc) return;
+    var sheet = pc.querySelector('.print-sheet'); if (!sheet) return;
+    var w = sheet.style.width, h = sheet.style.height; if (!w || !h) return;
+    var st = document.getElementById('sp-print-page');
+    if (!st) { st = document.createElement('style'); st.id = 'sp-print-page'; }
+    st.textContent = '@media print{@page{size:' + w + ' ' + h + ';margin:0}' +
+      'html,body{height:auto!important;overflow:visible!important;margin:0!important;padding:0!important}' +
+      '#printContainer .print-sheet{height:calc(' + h + ' - 0.6mm)!important;overflow:hidden!important;break-after:page;page-break-after:always;margin:0!important}' +
+      '#printContainer .print-sheet:last-child{break-after:auto;page-break-after:auto}}';
+    document.body.appendChild(st); // last in the document so it wins
+  }
+  window.addEventListener('beforeprint', fit);
+  var mq = window.matchMedia && matchMedia('print');
+  if (mq && mq.addEventListener) mq.addEventListener('change', function (e) { if (e.matches) fit(); });
+  var real = window.print;
+  window.print = function () { try { fit(); } catch (e) {} return real.apply(this, arguments); };
 })();
