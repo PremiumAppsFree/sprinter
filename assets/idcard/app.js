@@ -111,7 +111,7 @@
         const IMAGE_TYPE_RE = /^image\//i;
         const TEXT_TYPE_RE = /^(text\/|application\/(json|xml|javascript|csv))/i;
         let currentType = 'smart', currentSide = 'front', srcMat = null, displayMat = null;
-        let cropperPoints = [], rotationAngle = 0, editorZoom = 1.0, currentMode = 'magic', dragIdx = -1;
+        let cropperPoints = [], rotationAngle = 0, editorZoom = 1.0, currentMode = 'color', dragIdx = -1;
         let fixedCardBoxDragStart = null;
         let editorScale = 1.0; // <--- NEW UPDATE: Yeh line add karni he
         let selectedItem = { index: -1, side: null }; 
@@ -10005,7 +10005,7 @@
             availableGpuExposure = descriptor.gpuExposure
                 ? { illumination, strength: illumination ? 0 : Math.max(0, Math.min(.55, Number(descriptor.gpuExposure.strength) || 0)) }
                 : null;
-            setMode(['magic', 'bw', 'color'].includes(descriptor.enhanceMode) ? descriptor.enhanceMode : 'magic', false);
+            setMode(['magic', 'bw', 'color'].includes(descriptor.enhanceMode) ? descriptor.enhanceMode : 'color', false);
             for (const [key, id] of [['brightness','inpBright'],['contrast','inpContrast'],['saturation','inpSaturation'],['warmth','inpWarmth'],['sharpness','inpSharp'],['clarity','inpClarity']]) {
                 if (Number.isFinite(Number(saved[key]))) setEnhanceValue(id, Number(saved[key]));
             }
@@ -11139,14 +11139,14 @@
                 activeGpuExposure = null;
                 rotationAngle = 0; 
                 resetPvcDualSession();
-                currentMode = 'magic';
+                currentMode = 'color';
                 const lockPvcTwoPageRecrop = options.lockPvcTwoPageRecrop === true || pvcTwoPageRecropState.active;
                 if (lockPvcTwoPageRecrop) {
                     // This source belongs to an already-created 2-page PVC pair.
                     // Open only the PVC four-corner editor; do not run upload-time
                     // type detection, template auto-apply, DocAligner, or A4 routing.
                     if (currentType !== 'pvc') switchCurrentTypeForActiveCrop('pvc');
-                    setMode('magic', false);
+                    setMode('color', false);
                     toggleMobSliders(false);
                     refreshEditor(true);
                     document.getElementById('cropperModal').classList.remove('hidden');
@@ -11155,7 +11155,7 @@
                 // GPU-first test flow me source/OpenCV ready rakho, lekin AI ka
                 // final yes/no aane se pehle cropper kabhi screen par mat dikhao.
                 if (options.deferCropper === true) {
-                    setMode('magic', false);
+                    setMode('color', false);
                     toggleMobSliders(false);
                     refreshEditor(true);
                     return;
@@ -11180,7 +11180,7 @@
                     pendingPvcPdfDualFlow = false;
                     return;
                 }
-                setMode('magic', false);
+                setMode('color', false);
                 toggleMobSliders(false);
                 refreshEditor(true);
                 document.getElementById('cropperModal').classList.remove('hidden');

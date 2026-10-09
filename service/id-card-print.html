@@ -1324,8 +1324,8 @@
             <div id="mobileSliderPanel" class="pointer-events-auto bg-white/95 backdrop-blur border-t border-gray-200 px-6 py-5 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
                 <div class="space-y-4">
                     <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 mb-2">
-                        <button onclick="setMode('color')" id="mobBtnColor" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-gray-500 hover:text-slate-800">Orig</button>
-                        <button onclick="setMode('magic')" id="mobBtnMagic" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-white bg-brand shadow-sm">Magic</button>
+                        <button onclick="setMode('color')" id="mobBtnColor" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-white bg-brand shadow-sm">Orig</button>
+                        <button onclick="setMode('magic')" id="mobBtnMagic" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-gray-500 hover:text-slate-800">Magic</button>
                         <button onclick="setMode('bw')" id="mobBtnBW" class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-gray-500 hover:text-slate-800">B&W</button>
                     </div>
                     <div>
@@ -1384,8 +1384,8 @@
             <div class="flex-1 overflow-y-auto p-5 space-y-5">
                 <div class="enhance-card p-3">
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="setMode('color')" id="btnColor" class="mode-chip py-3 text-xs font-black rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200">Orig</button>
-                        <button onclick="setMode('magic')" id="btnMagic" class="mode-chip active py-3 text-xs font-black rounded-xl">Natural</button>
+                        <button onclick="setMode('color')" id="btnColor" class="mode-chip active py-3 text-xs font-black rounded-xl">Orig</button>
+                        <button onclick="setMode('magic')" id="btnMagic" class="mode-chip py-3 text-xs font-black rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200">Enhance</button>
                         <button onclick="setMode('bw')" id="btnBW" class="mode-chip py-3 text-xs font-black rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200">B&W</button>
                     </div>
                 </div>
@@ -1561,7 +1561,7 @@
     </script>
 
     <script defer src="../assets/idcard/transport.js"></script>
-    <script defer src="../assets/idcard/app.js"></script>
+    <script defer src="../assets/idcard/app.js?v=9"></script>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof maybeAutoStartShopListener === 'function') {
