@@ -9,16 +9,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download official roots from cca.gov.in
+        shell: bash {0}
         run: |
           mkdir -p assets/sigverify/roots
           cd assets/sigverify/roots
           B=https://cca.gov.in/cca/sites/default/files/files
           for f in "CCAIndia2022.cer" "CCAIndia2022SPL.cer" "CCAIndia2015.cer" "CCAIndia2014.cer" "cca%20india%202011.cer" "cca%20india%202007.cer"; do
             out=$(echo "$f" | sed 's/%20/-/g')
-            curl -fsSL --retry 3 -A "Mozilla/5.0" -o "$out" "$B/$f" || echo "FAILED $f"
+            curl -sSL --retry 2 -m 60 -A "Mozilla/5.0" -o "$out" -w "$f %{http_code} %{size_download}\n" "$B/$f" >> fetch.log 2>&1 || echo "FAILED $f" >> fetch.log
           done
           ls -la
-          for c in *.cer; do echo "== $c"; (openssl x509 -inform DER -in "$c" -noout -subject -issuer -dates -fingerprint -sha256 2>/dev/null || openssl x509 -in "$c" -noout -subject -issuer -dates -fingerprint -sha256); done
+          for c in *.cer; do echo "== $c" >> fetch.log; (openssl x509 -inform DER -in "$c" -noout -subject -issuer -dates -fingerprint -sha256 2>/dev/null || openssl x509 -in "$c" -noout -subject -issuer -dates -fingerprint -sha256) >> fetch.log 2>&1; done; curl -sS -m 30 -o /dev/null -w "home %{http_code}\n" https://cca.gov.in/ >> fetch.log 2>&1; cat fetch.log; true
       - name: Commit
         run: |
           git config user.name PremiumAppsFree
