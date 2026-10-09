@@ -349,3 +349,85 @@
     addEventListener('resize', soon); setInterval(place, 1500); place();
   });
 })();
+
+/* Easier manual cropping.
+ * 1) Tap (or click) on the photo outside the crop frame: zoom in there and move the frame onto that spot.
+ * 2) Cap PDF page renders at print quality (A4 @ 300 DPI) so phones can handle e-Aadhaar/PAN PDFs. */
+(function () {
+  'use strict';
+  var down = null;
+  document.addEventListener('pointerdown', function (e) {
+    var area = e.target.closest && e.target.closest('.cropper-container');
+    down = area ? { x: e.clientX, y: e.clientY, t: Date.now(), area: area, onBox: !!e.target.closest('.cropper-crop-box'), n: e.isPrimary } : null;
+  }, true);
+  document.addEventListener('pointerup', function (e) {
+    var d = down; down = null;
+    if (!d || d.onBox || !d.n || Date.now() - d.t > 400 || Math.abs(e.clientX - d.x) > 8 || Math.abs(e.clientY - d.y) > 8) return;
+    var img = d.area.previousElementSibling, cr = img && img.cropper;
+    if (!cr || !cr.ready || cr.disabled) return;
+    try {
+      var r = d.area.getBoundingClientRect(), px = d.x - r.left, py = d.y - r.top;
+      var cv = cr.getCanvasData();
+      if (px < cv.left || py < cv.top || px > cv.left + cv.width || py > cv.top + cv.height) return; // tapped outside the photo
+      var k = cr.getContainerData(), im = cr.getImageData();
+      var cur = cv.width / (cv.naturalWidth || im.naturalWidth || cv.width);
+      var target = cur * 1.8, maxR = 8 * Math.min(k.width / (cv.naturalWidth || 1), k.height / (cv.naturalHeight || 1));
+      if (cv.width < k.width * 3) cr.zoomTo(Math.min(target, maxR), { x: px, y: py });
+      // bring the tapped spot to the middle of the view
+      cr.move(k.width / 2 - px, k.height / 2 - py);
+      px = k.width / 2; py = k.height / 2;
+      // centre the crop frame there (same size, kept inside the photo)
+      var cb = cr.getCropBoxData(); cv = cr.getCanvasData();
+      var w = Math.min(cb.width, cv.width), h = Math.min(cb.height, cv.height);
+      var left = Math.max(cv.left, Math.min(px - w / 2, cv.left + cv.width - w));
+      var top = Math.max(cv.top, Math.min(py - h / 2, cv.top + cv.height - h));
+      cr.setCropBoxData({ left: left, top: top, width: w, height: h });
+    } catch (err) {}
+  }, true);
+
+  // PDF render cap
+  var MAX_SIDE = 3508;
+  function wrapPage(pg) {
+    if (!pg || pg.__spCap) return pg;
+    var gv = pg.getViewport.bind(pg);
+    pg.getViewport = function (o) {
+      var v = gv(o);
+      try {
+        var m = Math.max(v.width, v.height);
+        if (o && o.scale && m > MAX_SIDE) return gv(Object.assign({}, o, { scale: o.scale * MAX_SIDE / m }));
+      } catch (e) {}
+      return v;
+    };
+    pg.__spCap = true; return pg;
+  }
+  function wrapDoc(doc) {
+    if (!doc || doc.__spCap) return doc;
+    var gp = doc.getPage.bind(doc);
+    doc.getPage = function () { return gp.apply(null, arguments).then(wrapPage); };
+    doc.__spCap = true; return doc;
+  }
+  function wrapGetDocument(gd) {
+    return function () {
+      var task = gd.apply(this, arguments);
+      try { var p = task.promise.then(wrapDoc); Object.defineProperty(task, 'promise', { value: p, configurable: true }); } catch (e) {}
+      return task;
+    };
+  }
+  var proxied = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function patchPdf(lib) {
+    if (!lib || typeof lib !== 'object' || !lib.getDocument || typeof Proxy !== 'function') return lib;
+    if (lib.__spProxy) return lib;
+    if (proxied && proxied.has(lib)) return proxied.get(lib);
+    var wrapped = wrapGetDocument(lib.getDocument);
+    var px = new Proxy(lib, { get: function (t, k) { if (k === 'getDocument') return wrapped; if (k === '__spProxy') return true; return t[k]; } });
+    if (proxied) proxied.set(lib, px);
+    return px;
+  }
+  ['pdfjsLib', 'pdfjs-dist/build/pdf'].forEach(function (name) {
+    var held = window[name] ? patchPdf(window[name]) : undefined;
+    try {
+      Object.defineProperty(window, name, { configurable: true, enumerable: true,
+        get: function () { return held; }, set: function (v) { held = patchPdf(v); } });
+    } catch (e) {}
+  });
+})();

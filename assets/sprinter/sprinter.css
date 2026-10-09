@@ -96,3 +96,10 @@
  .cropper-line.line-e{right:-7px!important}.cropper-line.line-w{left:-7px!important}
  .cropper-line.line-n{top:-7px!important}.cropper-line.line-s{bottom:-7px!important}
 }
+.sp-crop-tip{margin:10px 2px 0;font:13px/1.45 Inter,system-ui,sans-serif;color:#475569;background:#F1F5F9;border-left:3px solid #0098D8;border-radius:6px;padding:8px 10px}
+@media (max-width:640px){
+ #cropModal.fixed{padding:8px!important;padding-top:64px!important}
+ #cropModal #cropper-image-container{height:54vh!important}
+ .sp-crop-tip{font-size:12px;padding:6px 8px;margin-top:8px}
+ #cropModal .max-h-\[85vh\]{max-height:calc(100vh - 72px)!important}
+}
