@@ -13,7 +13,8 @@
     pan: { name: 'PAN', pass: 'e-PAN password: date of birth as DDMMYYYY. Example: 15081995' },
     voter: { name: 'Voter ID', pass: 'Enter the password for this PDF.' },
     ayushman: { name: 'Ayushman', pass: 'Enter the password for this PDF.' },
-    card: { name: 'ID card', pass: 'Enter the password for this PDF.' }
+    card: { name: 'ID card', pass: 'Enter the password for this PDF.' },
+    sign: { name: 'Document', pass: 'e-Aadhaar: first 4 letters of the name in CAPITALS + birth year · e-PAN: date of birth DDMMYYYY.' }
   };
   var docKey = document.body.getAttribute('data-doc') || 'card';
   var DOC = DOCS[docKey] || DOCS.card;
@@ -24,7 +25,7 @@
   // ---------- state ----------
   var st = {
     size: 'small', sources: [], slots: {}, full: [],
-    page: 0, pages: [], warn: ''
+    page: 0, pages: [], warn: '', sigs: []
   };
   var srcSeq = 0;
 
@@ -93,6 +94,7 @@
     var box = $('cp-slots'); box.innerHTML = '';
     var full = st.size === 'full';
     $('cp-fullnote').hidden = !full;
+    if ($('cp-opts-full')) $('cp-opts-full').hidden = !full;
     $('cp-opts-back').hidden = !(st.size === 'small' || st.size === 'custom');
     $('cp-opts-long').hidden = st.size !== 'long';
     $('cp-custom').hidden = st.size !== 'custom';
@@ -135,7 +137,25 @@
   }
 
   // ---------- sources (files) ----------
+  function renderSig() {
+    var box = $('cp-sig'); if (!box) return;
+    st.sigs = st.sigs.filter(function (g) { return st.sources.some(function (s) { return s.fileKey === g.key; }); });
+    var list = st.sigs.filter(function (g) { return g.res && (g.res.status !== 'unsigned' || docKey === 'sign'); });
+    box.hidden = !list.length; box.innerHTML = '';
+    list.forEach(function (g) {
+      var el = document.createElement('div'); el.className = 'cp-sigitem';
+      el.innerHTML = (list.length > 1 || st.sigs.length > 1 ? '<p class="cp-sigfile"></p>' : '') + SPSig.describe(g.res);
+      if (el.querySelector('.cp-sigfile')) el.querySelector('.cp-sigfile').textContent = g.name;
+      if (g.res.status !== 'unsigned' && st.size !== 'full') {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'cp-btn cp-sigfull'; b.textContent = 'Print the full document';
+        b.onclick = function () { var r = document.querySelector('input[name=cp-size][value=full]'); r.checked = true; r.dispatchEvent(new Event('change')); };
+        el.appendChild(b);
+      }
+      box.appendChild(el);
+    });
+  }
   function renderSources() {
+    renderSig();
     var box = $('cp-sources'); box.innerHTML = ''; box.hidden = !st.sources.length;
     st.sources.forEach(function (s) {
       var el = document.createElement('div'); el.className = 'cp-src';
@@ -238,12 +258,12 @@
     return null;
   }
 
-  async function addCanvasSource(canvas, name) {
+  async function addCanvasSource(canvas, name, extra) {
     var url = await canvasToURL(canvas, 'image/jpeg', 0.92);
     var t = document.createElement('canvas'), k = 160 / Math.max(canvas.width, canvas.height);
     t.width = Math.max(1, Math.round(canvas.width * k)); t.height = Math.max(1, Math.round(canvas.height * k));
     t.getContext('2d').drawImage(canvas, 0, 0, t.width, t.height);
-    st.sources.push({ id: ++srcSeq, name: name, url: url, thumb: t.toDataURL('image/jpeg', 0.8), w: canvas.width, h: canvas.height, cards: detectCards(canvas) });
+    st.sources.push({ id: ++srcSeq, name: name, url: url, thumb: t.toDataURL('image/jpeg', 0.8), w: canvas.width, h: canvas.height, cards: detectCards(canvas), mmW: extra && extra.mmW, mmH: extra && extra.mmH, fileKey: extra && extra.fileKey, signed: extra && extra.signed });
   }
 
   async function addImageFile(file) {
@@ -269,7 +289,13 @@
     if (!lib) { toast('PDF reader could not load. Check the internet and refresh.'); return; }
     try { lib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js'; } catch (e) {}
     var data = new Uint8Array(await file.arrayBuffer());
-    var task = lib.getDocument({ data: data });
+    var fileKey = 'f' + (++srcSeq) + '-' + file.name, sig = null;
+    if (window.SPSig) {
+      busy(true, 'Checking digital signature…');
+      try { sig = await SPSig.verify(data); } catch (e) { sig = { status: 'error', signatures: [] }; }
+      st.sigs.push({ key: fileKey, name: file.name, res: sig });
+    }
+    var task = lib.getDocument({ data: data.slice() });
     var cancelled = false;
     task.onPassword = function (update, reason) {
       busy(false);
@@ -279,7 +305,7 @@
       });
     };
     var pdf;
-    try { pdf = await task.promise; } catch (e) { if (!cancelled) toast('Could not open this PDF.'); return; }
+    try { pdf = await task.promise; } catch (e) { st.sigs = st.sigs.filter(function (g) { return g.key !== fileKey; }); if (!cancelled) toast('Could not open this PDF.'); return; }
     var n = Math.min(pdf.numPages, 20);
     for (var i = 1; i <= n; i++) {
       busy(true, 'Reading page ' + i + ' of ' + n + '…');
@@ -290,7 +316,10 @@
       var c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
       var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
       await page.render({ canvasContext: x, viewport: vp }).promise;
-      await addCanvasSource(c, file.name.replace(/\.pdf$/i, '') + (n > 1 ? ' · p' + i : ''));
+      var painted = 0;
+      if (sig && sig.status === 'valid') { try { painted = await SPSig.paint(x, page, vp, sig); } catch (e) {} }
+      await addCanvasSource(c, file.name.replace(/\.pdf$/i, '') + (n > 1 ? ' · p' + i : ''),
+        { mmW: v1.width / 72 * MM, mmH: v1.height / 72 * MM, fileKey: fileKey, signed: painted > 0 });
     }
     if (pdf.numPages > 20) toast('Only the first 20 pages were added.');
   }
@@ -450,8 +479,11 @@
         var land = orient === 'landscape' || (orient === 'auto' && iw > ih);
         var W = land ? Math.max(p0[0], p0[1]) : Math.min(p0[0], p0[1]), H = land ? Math.min(p0[0], p0[1]) : Math.max(p0[0], p0[1]);
         if (isPVC) { W = 85.6; H = 54; }
-        var aw = W - 2 * m, ah = H - 2 * m, k = Math.min(aw / iw, ah / ih), w = iw * k, h = ih * k;
-        for (var c = 0; c < copies; c++) pages.push({ W: W, H: H, items: [{ full: it, x: (W - w) / 2, y: pos === 'top' ? m : (H - h) / 2, w: w, h: h }] });
+        var aw = W - 2 * m, ah = H - 2 * m, k = Math.min(aw / iw, ah / ih), w = iw * k, h = ih * k, y = pos === 'top' ? m : (H - h) / 2;
+        // a PDF page that fits the paper prints at its real size (100%)
+        var mw = turned ? it.src.mmH : it.src.mmW, mh = turned ? it.src.mmW : it.src.mmH;
+        if (!isPVC && mw && $('cp-actual') && $('cp-actual').checked && mw <= W + 0.5 && mh <= H + 0.5) { w = mw; h = mh; y = (H - h) / 2; }
+        for (var c = 0; c < copies; c++) pages.push({ W: W, H: H, items: [{ full: it, x: (W - w) / 2, y: y, w: w, h: h }] });
       });
       return pages;
     }
@@ -649,8 +681,10 @@
   // ---------- wiring ----------
   function init() {
     loadPrefs();
+    var ds = document.body.getAttribute('data-size'), dr = ds && document.querySelector('input[name=cp-size][value=' + ds + ']');
+    if (dr) { dr.checked = true; st.size = ds; if (ds === 'full') $('cp-margin').value = Math.min(num('cp-margin', 8), 5); }
     [].forEach.call(document.querySelectorAll('input[name=cp-size]'), function (r) {
-      r.addEventListener('change', function () { if (r.checked) { st.size = r.value; if (st.size === 'full') $('cp-margin').value = Math.min(num('cp-margin', 8), 5); renderSlots(); update(); } });
+      r.addEventListener('change', function () { if (r.checked) { st.size = r.value; if (st.size === 'full') $('cp-margin').value = Math.min(num('cp-margin', 8), 5); renderSlots(); renderSig(); update(); } });
     });
     $('cp-file').addEventListener('change', function (e) { addFiles(e.target.files); e.target.value = ''; });
     var drop = $('cp-drop');
@@ -658,6 +692,7 @@
     ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('drag'); }); });
     drop.addEventListener('drop', function (e) { e.preventDefault(); addFiles(e.dataTransfer.files); });
     ['cp-back', 'cp-longsep', 'cp-cw', 'cp-ch'].forEach(function (id) { $(id).addEventListener('change', function () { renderSlots(); update(); }); });
+    if ($('cp-actual')) $('cp-actual').addEventListener('change', update);
     ['cp-paper', 'cp-orient', 'cp-arrange', 'cp-pos', 'cp-margin', 'cp-gap', 'cp-cut', 'cp-round', 'cp-fold', 'cp-bw', 'cp-copies'].forEach(function (id) {
       $(id).addEventListener('change', function () { savePrefs(); update(); }); $(id).addEventListener('input', update);
     });

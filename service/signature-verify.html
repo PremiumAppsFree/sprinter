@@ -4,8 +4,8 @@
 <meta name="author" content="Raj">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Aadhaar Card Print — S Printer</title>
-<meta name="description" content="Print Aadhaar in PVC small size or long foldable size from e-Aadhaar PDF or photo.">
+<title>Digital Signature Check &amp; Print — S Printer</title>
+<meta name="description" content="Check the digital signature of e-Aadhaar, e-PAN and other signed PDFs and print the full document with the verified tick.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=9">
@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
 <link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=9">
 </head>
-<body class="cp-body" data-doc="aadhaar" data-size="small">
+<body class="cp-body" data-doc="sign" data-size="full">
 <header class="sp-header" id="sp-header">
   <div class="sp-wrap">
     <a class="sp-brand" href="../index.html" aria-label="S Printer home">
@@ -33,12 +33,12 @@
 
 <main class="cp-wrap" id="cp-app">
   <nav class="cp-docs" aria-label="Document type">
-    <a href="aadhaar-print.html" aria-current="page">Aadhaar</a><a href="pan-card-print.html">PAN</a><a href="voter-id-print.html">Voter ID</a><a href="ayushman-print.html">Ayushman</a><a href="card-print.html">Any card</a><a href="signature-verify.html">✓ Signature check</a>
+    <a href="aadhaar-print.html">Aadhaar</a><a href="pan-card-print.html">PAN</a><a href="voter-id-print.html">Voter ID</a><a href="ayushman-print.html">Ayushman</a><a href="card-print.html">Any card</a><a href="signature-verify.html" aria-current="page">✓ Signature check</a>
   </nav>
 
   <div class="cp-head">
-    <h1>Aadhaar card print — small &amp; long size</h1>
-    <p>Open your e-Aadhaar PDF (password: first 4 letters of name in CAPITALS + birth year) or a photo, crop front and back, and print at the real card size on PC or mobile.</p>
+    <h1>Digital signature check &amp; print</h1>
+    <p>Open a digitally signed PDF (e-Aadhaar, e-PAN, DigiLocker…). If it has not been changed since signing, the signature gets the green ✓ — if it was edited, it stays “?”. Then print the full document.</p>
   </div>
 
   <div class="cp-grid">
@@ -150,7 +150,7 @@
       </section>
     </div>
   </div>
-  <p class="cp-classic"><a href="aadhaar-print-classic.html">Old version of this tool</a></p>
+  <p class="cp-classic"></p>
 </main>
 
 <!-- crop window -->

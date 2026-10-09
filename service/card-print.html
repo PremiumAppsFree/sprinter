@@ -8,12 +8,12 @@
 <meta name="description" content="Print any ID card, license or document — small, long, full page or custom size.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=8">
-<script src="../assets/sprinter/sprinter.js?v=8"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=9">
+<script src="../assets/sprinter/sprinter.js?v=9"></script>
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
-<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=8">
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=9">
 </head>
-<body class="cp-body" data-doc="card">
+<body class="cp-body" data-doc="card" data-size="small">
 <header class="sp-header" id="sp-header">
   <div class="sp-wrap">
     <a class="sp-brand" href="../index.html" aria-label="S Printer home">
@@ -33,7 +33,7 @@
 
 <main class="cp-wrap" id="cp-app">
   <nav class="cp-docs" aria-label="Document type">
-    <a href="aadhaar-print.html">Aadhaar</a><a href="pan-card-print.html">PAN</a><a href="voter-id-print.html">Voter ID</a><a href="ayushman-print.html">Ayushman</a><a href="card-print.html" aria-current="page">Any card</a>
+    <a href="aadhaar-print.html">Aadhaar</a><a href="pan-card-print.html">PAN</a><a href="voter-id-print.html">Voter ID</a><a href="ayushman-print.html">Ayushman</a><a href="card-print.html" aria-current="page">Any card</a><a href="signature-verify.html">✓ Signature check</a>
   </nav>
 
   <div class="cp-head">
@@ -76,12 +76,17 @@
           <small>e-Aadhaar / e-PAN PDF (password OK), JPG, PNG · or take a photo</small>
         </label>
         <div class="cp-sources" id="cp-sources" hidden></div>
+        <div class="cp-sig" id="cp-sig" hidden></div>
 
         <div class="cp-opts" id="cp-opts-back">
           <label class="cp-switch"><input type="checkbox" id="cp-back" checked><span></span>Print the back side too</label>
         </div>
         <div class="cp-opts" id="cp-opts-long" hidden>
           <label class="cp-switch"><input type="checkbox" id="cp-longsep"><span></span>Front and back are separate (crop each)</label>
+        </div>
+
+        <div class="cp-opts" id="cp-opts-full" hidden>
+          <label class="cp-switch"><input type="checkbox" id="cp-actual" checked><span></span>Actual size (100%) when the page fits the paper</label>
         </div>
 
         <div class="cp-slots" id="cp-slots"></div>
@@ -200,6 +205,9 @@
 <script src="../assets/vendor/cropper.min.js"></script>
 <script src="../assets/vendor/pdf.min.js"></script>
 <script src="../assets/vendor/jspdf.umd.min.js"></script>
-<script src="../assets/cardprint/cardprint.js?v=8"></script>
+<script src="../assets/vendor/forge.min.js"></script>
+<script src="../assets/sigverify/roots.js?v=9"></script>
+<script src="../assets/sigverify/sigverify.js?v=9"></script>
+<script src="../assets/cardprint/cardprint.js?v=9"></script>
 </body>
 </html>
