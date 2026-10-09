@@ -306,6 +306,17 @@
     };
     var pdf;
     try { pdf = await task.promise; } catch (e) { st.sigs = st.sigs.filter(function (g) { return g.key !== fileKey; }); if (!cancelled) toast('Could not open this PDF.'); return; }
+    if (sig && sig.status === 'unsigned') {
+      // explain *why* there is no signature: a signature box without data, or an official document that lost it
+      try {
+        var p1 = await pdf.getPage(1), an = await p1.getAnnotations(), hasSigBox = an.some(function (a) { return a.fieldType === 'Sig'; });
+        var tc = await p1.getTextContent(), txt = tc.items.map(function (t) { return t.str; }).join(' ');
+        var meta = await pdf.getMetadata().catch(function () { return {}; }), info = (meta && meta.info) || {};
+        var official = /Unique\s*Identification\s*Authority|UIDAI|Aadhaar|आधार|Income\s*Tax\s*Department|Permanent\s*Account\s*Number|DigiLocker/i.test(txt + ' ' + (info.Title || '') + ' ' + (info.Author || '') + ' ' + (info.Subject || ''));
+        if (hasSigBox) sig.status = 'stripped'; else if (official) sig.status = 'unsigned-official';
+        sig.producer = info.Producer || info.Creator || '';
+      } catch (e) {}
+    }
     var n = Math.min(pdf.numPages, 20);
     for (var i = 1; i <= n; i++) {
       busy(true, 'Reading page ' + i + ' of ' + n + '…');

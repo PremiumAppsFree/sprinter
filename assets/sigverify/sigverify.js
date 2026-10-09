@@ -66,10 +66,10 @@
     while ((m = re.exec(text))) {
       var br = [+m[1], +m[2], +m[3], +m[4]], key = br.join(',');
       if (seen[key]) continue; seen[key] = 1;
-      if (br[0] + br[1] > u8.length || br[2] + br[3] > u8.length || br[2] <= br[0] + br[1]) continue;
+      var broken = br[0] + br[1] > u8.length || br[2] + br[3] > u8.length || br[2] <= br[0] + br[1];
       var lt = br[0] + br[1], gt = br[2] - 1;
-      while (lt < gt && u8[lt] !== 0x3c) lt++;            // '<'
-      while (gt > lt && u8[gt] !== 0x3e) gt--;            // '>'
+      if (!broken && (u8[lt] !== 0x3c || u8[gt] !== 0x3e)) broken = true;   // the hole must be exactly <hex>
+      if (broken) { out.push({ byteRange: br, broken: true, at: m.index }); continue; }
       var hex = latin(u8, lt + 1, gt).replace(/[^0-9a-fA-F]/g, '');
       // signature dictionary around it: look for /SubFilter, /M, /Name, /Reason, /Location
       var from = Math.max(0, m.index - 4000), dict = text.slice(from, Math.min(text.length, br[2] + 2000));
@@ -156,6 +156,7 @@
 
   async function checkOne(u8, sig) {
     var r = { byteRange: sig.byteRange, at: sig.at, status: 'error', problems: [], signer: '', org: '', time: null, chain: [], reason: sig.reason, location: sig.location };
+    if (sig.broken) { r.wholeFile = false; r.status = 'modified'; r.problems.push('The file was re-saved after signing, so the signature no longer matches its bytes.'); return r; }
     var br = sig.byteRange;
     var parts = [u8.subarray(br[0], br[0] + br[1]), u8.subarray(br[2], br[2] + br[3])];
     var tail = latin(u8, br[2] + br[3], u8.length).replace(/[\s\0%EOF]/g, '');
@@ -297,6 +298,8 @@
       'changed-after': ['bad', '?', 'Changed after signing', 'Something was added to this PDF after it was signed, so the tick is not added.'],
       untrusted: ['warn', '?', 'Signature not verified', 'The content is intact, but the signer certificate does not lead to an official India PKI root (or was not valid at signing time).'],
       unsigned: ['none', '–', 'No digital signature', 'This PDF has no digital signature, so there is nothing to verify.'],
+      'unsigned-official': ['bad', '?', 'This copy has lost its digital signature', 'An e-Aadhaar / e-PAN downloaded from the official site is always digitally signed. This file was saved again by another app or website (for example a "remove password" / unlock tool, a PDF editor or "Print to PDF"), which deletes the signature. Download a fresh copy from the official site and open that original file here, with its password.'],
+      stripped: ['bad', '?', 'Signature removed', 'The signature box is there, but the signature data was removed when this file was saved again by another app. The tick cannot be added — open the original downloaded file.'],
       error: ['warn', '?', 'Could not check the signature', 'The signature in this file could not be read.']
     }[st] || ['warn', '?', 'Could not check', ''];
     var h = '<div class="sp-dsig sp-dsig-' + head[0] + '" role="status"><div class="sp-dsig-ic" aria-hidden="true">' + head[1] + '</div><div class="sp-dsig-tx"><b>' + head[2] + '</b><span>' + esc(head[3]) + '</span>';
@@ -311,6 +314,7 @@
       h += '<dt>Note</dt><dd>Checked offline in your browser. Certificate revocation (CRL/OCSP) is not checked.</dd>';
       h += '</dl></details>';
     }
+    if (!sig.signer && result.producer && /unsigned|stripped/.test(st)) h += '<small class="sp-dsig-prod">This file was last saved with: ' + esc(result.producer) + '</small>';
     return h + '</div></div>';
   }
 
