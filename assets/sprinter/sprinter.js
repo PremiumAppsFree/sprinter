@@ -265,3 +265,87 @@
     sigs.forEach(function (s) { io.observe(s); });
   });
 })();
+
+/* Crop & rotate fixes.
+ * 1) After any rotate, re-fit the crop frame around the whole rotated photo
+ *    (keeps a fixed aspect ratio when the tool uses one).
+ * 2) Keep the floating "All tools" badge from covering tool buttons. */
+(function () {
+  'use strict';
+  // Fit the whole (rotated) photo in view, then put the crop frame around it.
+  function spFit(cr) {
+    try {
+      var k = cr.getContainerData(), c = cr.getCanvasData();
+      if (c.width && c.height) {
+        cr.setCropBoxData({ left: k.width / 2 - 10, top: k.height / 2 - 10, width: 20, height: 20 });
+        c = cr.getCanvasData();
+        var asp = c.width / c.height, w = Math.min(k.width, k.height * asp) * 0.98;
+        cr.setCanvasData({ width: w });
+        c = cr.getCanvasData();
+        cr.setCanvasData({ left: (k.width - c.width) / 2, top: (k.height - c.height) / 2 });
+      }
+      spRefit(cr);
+    } catch (e) {}
+  }
+  function spRefit(cr) {
+    try {
+      var c = cr.getCanvasData(), k = cr.getContainerData();
+      var L = Math.max(c.left, 0), T = Math.max(c.top, 0);
+      var R = Math.min(c.left + c.width, k.width), B = Math.min(c.top + c.height, k.height);
+      var w = (R - L) * 0.96, h = (B - T) * 0.96, ar = cr.options.aspectRatio;
+      if (ar > 0) { if (w / h > ar) w = h * ar; else h = w / ar; }
+      if (w > 10 && h > 10) cr.setCropBoxData({ left: L + (R - L - w) / 2, top: T + (B - T - h) / 2, width: w, height: h });
+    } catch (e) {}
+  }
+  window.__spRefitCropper = spRefit;
+  function patchCropper(C) {
+    if (!C || !C.prototype || C.prototype.__spPatched) return;
+    var rotate = C.prototype.rotate;
+    C.prototype.rotate = function (deg) {
+      var r = rotate.apply(this, arguments);
+      var self = this;
+      if (this.ready && this.cropped) requestAnimationFrame(function () {
+        spFit(self);
+        try { self.element.dispatchEvent(new CustomEvent('sp:rotated', { detail: self })); } catch (e) {}
+      });
+      return r;
+    };
+    C.prototype.__spPatched = true;
+  }
+  if (window.Cropper) patchCropper(window.Cropper);
+  else {
+    var held;
+    try {
+      Object.defineProperty(window, 'Cropper', {
+        configurable: true, enumerable: true,
+        get: function () { return held; },
+        set: function (v) { held = v; patchCropper(v); }
+      });
+    } catch (e) {}
+  }
+
+  // Badge avoidance: if the badge sits on top of something clickable, move it; if both corners are busy, hide it.
+  function ready(fn) { if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(function () {
+    var fab = document.querySelector('.sp-home-fab');
+    if (!fab) return;
+    var CLICKABLE = 'button,a,input,select,textarea,label,[role=button],[onclick],canvas';
+    function blocked() {
+      var r = fab.getBoundingClientRect(); if (!r.width) return false;
+      var pts = [[r.left + 6, r.top + r.height / 2], [r.right - 6, r.top + r.height / 2], [r.left + r.width / 2, r.top + 4], [r.left + r.width / 2, r.bottom - 4]];
+      fab.style.pointerEvents = 'none'; var prev = fab.style.visibility; fab.style.visibility = 'hidden';
+      var hit = pts.some(function (p) { var e = document.elementFromPoint(p[0], p[1]); return e && e !== document.body && e.closest(CLICKABLE) && !e.closest('.sp-home-fab'); });
+      fab.style.visibility = prev; fab.style.pointerEvents = '';
+      return hit;
+    }
+    function place() {
+      fab.classList.remove('sp-fab-left', 'sp-fab-hide');
+      if (!blocked()) return;
+      fab.classList.add('sp-fab-left');
+      if (blocked()) { fab.classList.remove('sp-fab-left'); fab.classList.add('sp-fab-hide'); }
+    }
+    var t; function soon() { clearTimeout(t); t = setTimeout(place, 120); }
+    new MutationObserver(soon).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
+    addEventListener('resize', soon); setInterval(place, 1500); place();
+  });
+})();

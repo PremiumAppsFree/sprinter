@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=3">
-<script src="../assets/sprinter/sprinter.js?v=3"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=4">
+<script src="../assets/sprinter/sprinter.js?v=4"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -212,9 +212,11 @@
                     <img id="image-to-crop">
                 </div>
                 <div class="flex justify-center gap-2 mt-4">
-                    <button id="zoomInBtn" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
-                    <button id="zoomOutBtn" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
-                    <button id="resetCropBtn" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700"><i class="fa-solid fa-arrows-rotate"></i></button>
+                    <button id="zoomInBtn" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700" title="Zoom in" aria-label="Zoom in"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                    <button id="zoomOutBtn" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700" title="Zoom out" aria-label="Zoom out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                    <button type="button" id="sp-rot-left" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700" title="Rotate left 90°" aria-label="Rotate left 90°" onclick="var c=document.getElementById('image-to-crop').cropper;c&&c.rotate(-90)"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button type="button" id="sp-rot-right" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700" title="Rotate right 90°" aria-label="Rotate right 90°" onclick="var c=document.getElementById('image-to-crop').cropper;c&&c.rotate(90)"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button id="resetCropBtn" class="px-3 py-2 rounded-lg text-sm bg-slate-200 hover:bg-slate-300 text-slate-700" title="Reset crop" aria-label="Reset crop"><i class="fa-solid fa-arrows-rotate"></i></button>
                 </div>
             </div>
             <footer class="p-4 bg-slate-50 border-t border-slate-200 text-right flex-shrink-0">

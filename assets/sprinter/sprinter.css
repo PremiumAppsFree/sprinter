@@ -74,3 +74,25 @@
  .sp-sig.draw text,.sp-dev .heart{animation:none}
  .sp-top{transition:none}
 }
+
+/* ===== Crop & touch usability ===== */
+.sp-home-fab{transition:opacity .2s,transform .25s}
+.sp-home-fab.sp-fab-left{right:auto;left:14px}
+.sp-home-fab.sp-fab-hide{opacity:0;pointer-events:none;transform:translateY(8px)}
+/* bigger, easier crop handles on touch screens (all cropper-based tools) */
+@media (pointer:coarse){
+ .cropper-point{width:20px!important;height:20px!important;border-radius:50%;opacity:.95!important;background:#39f;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+ .cropper-point.point-e{right:-10px!important;margin-top:-10px!important}
+ .cropper-point.point-w{left:-10px!important;margin-top:-10px!important}
+ .cropper-point.point-n{top:-10px!important;margin-left:-10px!important}
+ .cropper-point.point-s{bottom:-10px!important;margin-left:-10px!important}
+ .cropper-point.point-ne{right:-10px!important;top:-10px!important}
+ .cropper-point.point-nw{left:-10px!important;top:-10px!important}
+ .cropper-point.point-sw{left:-10px!important;bottom:-10px!important}
+ .cropper-point.point-se{right:-10px!important;bottom:-10px!important;width:24px!important;height:24px!important}
+ .cropper-line{opacity:.2!important}
+ .cropper-line.line-e,.cropper-line.line-w{width:14px!important}
+ .cropper-line.line-n,.cropper-line.line-s{height:14px!important}
+ .cropper-line.line-e{right:-7px!important}.cropper-line.line-w{left:-7px!important}
+ .cropper-line.line-n{top:-7px!important}.cropper-line.line-s{bottom:-7px!important}
+}
