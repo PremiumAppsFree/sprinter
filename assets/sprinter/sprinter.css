@@ -103,3 +103,22 @@
  .sp-crop-tip{font-size:12px;padding:6px 8px;margin-top:8px}
  #cropModal .max-h-\[85vh\]{max-height:calc(100vh - 72px)!important}
 }
+/* Preview & Print call-to-action in card print tools */
+.sp-pp{display:none}
+@media (max-width:1023px){
+ .sp-pp:not([hidden]){display:flex;align-items:center;justify-content:center;gap:10px;position:fixed;left:16px;right:16px;bottom:80px;z-index:45;
+  border:0;border-radius:14px;padding:15px 18px;color:#fff;font:700 16px/1 Inter,system-ui,sans-serif;cursor:pointer;
+  background:linear-gradient(90deg,#4F46E5,#7C3AED);box-shadow:0 12px 28px rgba(79,70,229,.38),inset 0 -3px 0 rgba(0,0,0,.15)}
+ .sp-pp .sp-pp-n{font-style:normal;font-weight:600;font-size:13px;background:rgba(255,255,255,.2);border-radius:999px;padding:4px 9px}
+ .sp-pp.sp-pp-pop{animation:sp-pp-pop .6s cubic-bezier(.2,.8,.2,1)}
+ body:has(.sp-pp:not([hidden])) .sp-footer{padding-bottom:150px}
+}
+@keyframes sp-pp-pop{0%{transform:translateY(24px);opacity:0}60%{transform:translateY(-4px);opacity:1}100%{transform:none}}
+@media print{.sp-pp{display:none!important}}
+.sp-back-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;padding:12px 14px;border-radius:12px;background:#FFF7E6;border:1px solid #F5C400;color:#5B4300;font:14px/1.4 Inter,system-ui,sans-serif;animation:sp-pp-pop .5s cubic-bezier(.2,.8,.2,1)}
+.sp-back-bar[hidden]{display:none}
+.sp-back-bar p{margin:0;flex:1 1 220px}
+.sp-back-bar div{display:flex;gap:8px;flex-wrap:wrap}
+.sp-back-bar button{border:0;border-radius:9px;padding:10px 14px;font:700 14px/1 Inter,system-ui,sans-serif;cursor:pointer}
+.sp-back-bar .sp-bb-add{background:#1B2330;color:#fff}
+.sp-back-bar .sp-bb-front{background:#fff;color:#1B2330;border:1px solid #D6C27A}

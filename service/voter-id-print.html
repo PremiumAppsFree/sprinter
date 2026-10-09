@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=5">
-<script src="../assets/sprinter/sprinter.js?v=5"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=6">
+<script src="../assets/sprinter/sprinter.js?v=6"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -117,8 +117,9 @@
     </p>
 </div>
                 <div id="printQueue" class="text-slate-500"><p class="p-4 text-center">Queue is empty.</p></div>
+                <button type="button" id="spPreviewPrint" class="sp-pp" hidden><i class="fa-solid fa-print"></i><span>Preview &amp; Print</span><em class="sp-pp-n"></em></button>
                 <div class="hidden lg:flex justify-center gap-4 mt-6">
-                    <button id="generatePreviewBtn" class="px-5 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 shadow-md transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" disabled><i class="fa-solid fa-cogs mr-2"></i>Generate Preview</button>
+                    <button id="generatePreviewBtn" class="px-5 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 shadow-md transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" disabled><i class="fa-solid fa-print mr-2"></i>Preview &amp; Print</button>
                     <button id="clearQueueBtn" class="px-5 py-3 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 shadow-md transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" disabled><i class="fa-solid fa-trash-can mr-2"></i>Clear Queue</button>
                 </div>
             </div>
@@ -194,7 +195,7 @@
             <button id="mobileCardSettingsBtn" class="flex flex-col items-center justify-center text-xs text-slate-600 w-full h-full transition-colors hover:text-indigo-600"><i class="fa-solid fa-id-card text-xl mb-1"></i><span>Card</span></button>
             <div class="relative w-16 h-16 flex justify-center"><button id="mobileUploadBtn" class="absolute bottom-4 flex items-center justify-center text-xs text-white bg-indigo-600 rounded-full w-14 h-14 shadow-lg transform hover:scale-110 transition-transform"><i class="fa-solid fa-plus text-2xl"></i></button></div>
             <button id="mobilePageSettingsBtn" class="flex flex-col items-center justify-center text-xs text-slate-600 w-full h-full transition-colors hover:text-indigo-600"><i class="fa-solid fa-print text-xl mb-1"></i><span>Page</span></button>
-            <button id="mobileGenerateBtn" disabled class="flex flex-col items-center justify-center text-xs text-slate-600 w-full h-full transition-colors hover:text-indigo-600 disabled:text-slate-300"><i class="fa-solid fa-cogs text-xl mb-1"></i><span>Generate</span></button>
+            <button id="mobileGenerateBtn" disabled class="flex flex-col items-center justify-center text-xs text-slate-600 w-full h-full transition-colors hover:text-indigo-600 disabled:text-slate-300"><i class="fa-solid fa-print text-xl mb-1"></i><span>Print</span></button>
         </div>
     </nav>
     <div id="cardSettingsDrawer" class="fixed inset-0 bg-black/40 z-50 hidden lg:hidden"><div class="drawer-content absolute bottom-0 left-0 w-full bg-white rounded-t-2xl p-6 transition-transform duration-300 transform translate-y-full max-h-[80vh] overflow-y-auto"></div></div>
@@ -277,5 +278,15 @@
   </div>
 </footer>
 <script>document.querySelectorAll('.sp-year').forEach(function(e){e.textContent=new Date().getFullYear()});</script>
+<script>
+/* S Printer: obvious "Preview & Print" step after cropping */
+(function(){var btn=document.getElementById('spPreviewPrint'),title=document.getElementById('queueTitle');if(!btn||!title)return;var last=0;
+function count(){var m=(title.textContent||'').match(/\((\d+)\)/);return m?+m[1]:0}
+function sync(){var n=count();btn.hidden=n<1;btn.querySelector('.sp-pp-n').textContent=n>0?n+(n>1?' cards':' card'):'';
+ if(n>last){btn.classList.remove('sp-pp-pop');void btn.offsetWidth;btn.classList.add('sp-pp-pop');}last=n;}
+new MutationObserver(sync).observe(title,{childList:true,subtree:true,characterData:true});sync();
+btn.addEventListener('click',function(){var d=document.getElementById('generatePreviewBtn'),m=document.getElementById('mobileGenerateBtn');
+ var t=(d&&d.offsetParent&&!d.disabled)?d:(m&&m.offsetParent&&!m.disabled)?m:(d||m);if(t){t.disabled=false;t.click();}});})();
+</script>
 </body>
 </html>
