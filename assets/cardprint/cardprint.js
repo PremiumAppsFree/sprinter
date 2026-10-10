@@ -288,20 +288,39 @@
   }
 
   async function addCanvasSource(canvas, name, extra) {
-    var url = await canvasToURL(canvas, 'image/jpeg', 0.92);
+    var url = await canvasToURL(canvas, 'image/png');   // lossless — no quality is lost before printing
     var t = document.createElement('canvas'), k = 160 / Math.max(canvas.width, canvas.height);
     t.width = Math.max(1, Math.round(canvas.width * k)); t.height = Math.max(1, Math.round(canvas.height * k));
     t.getContext('2d').drawImage(canvas, 0, 0, t.width, t.height);
-    st.sources.push({ id: ++srcSeq, name: name, url: url, thumb: t.toDataURL('image/jpeg', 0.8), w: canvas.width, h: canvas.height, cards: detectCards(canvas), mmW: extra && extra.mmW, mmH: extra && extra.mmH, fileKey: extra && extra.fileKey, signed: extra && extra.signed, sigBoxes: extra && extra.sigBoxes, pdfref: extra && extra.pdfref });
+    st.sources.push({ id: ++srcSeq, name: name, url: url, thumb: t.toDataURL('image/jpeg', 0.8), w: canvas.width, h: canvas.height, cards: detectCards(canvas), mmW: extra && extra.mmW, mmH: extra && extra.mmH, fileKey: extra && extra.fileKey, signed: extra && extra.signed, sigBoxes: extra && extra.sigBoxes, pdfref: extra && extra.pdfref, orig: extra && extra.orig });
   }
 
+  // original JPEG/PNG bytes can go into the PDF untouched when the picture needs no turning
+  function origImage(u8) {
+    if (u8[0] === 0x89 && u8[1] === 0x50 && u8[2] === 0x4E && u8[3] === 0x47) return { bytes: u8, png: true };
+    if (u8[0] !== 0xFF || u8[1] !== 0xD8) return null;
+    var i = 2, orient = 1, comps = 0;
+    while (i + 4 < u8.length) {
+      if (u8[i] !== 0xFF) { i++; continue; }
+      var m = u8[i + 1], len = (u8[i + 2] << 8) | u8[i + 3];
+      if (m === 0xD9 || m === 0xDA) break;
+      if (m === 0xE1 && u8[i + 4] === 0x45 && u8[i + 5] === 0x78 && u8[i + 6] === 0x69 && u8[i + 7] === 0x66) {   // EXIF orientation
+        var t = i + 10, le = u8[t] === 0x49, rd = function (o, n) { return n === 2 ? (le ? u8[t + o] | (u8[t + o + 1] << 8) : (u8[t + o] << 8) | u8[t + o + 1]) : (le ? (u8[t + o] | (u8[t + o + 1] << 8) | (u8[t + o + 2] << 16) | (u8[t + o + 3] << 24)) : ((u8[t + o] << 24) | (u8[t + o + 1] << 16) | (u8[t + o + 2] << 8) | u8[t + o + 3])) >>> 0; };
+        try { var ifd = rd(4, 4), n = rd(ifd, 2); for (var e = 0; e < n; e++) { var q = ifd + 2 + e * 12; if (rd(q, 2) === 0x0112) orient = rd(q + 8, 2); } } catch (er) {}
+      }
+      if (m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC) comps = u8[i + 9];
+      i += 2 + len;
+    }
+    return orient === 1 && (comps === 1 || comps === 3) ? { bytes: u8, png: false } : null;
+  }
   async function addImageFile(file) {
+    var raw = null; try { raw = origImage(new Uint8Array(await file.arrayBuffer())); } catch (e) {}
     var url = URL.createObjectURL(file), img = await loadImg(url);
-    var MAX = 3600, k = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+    var MAX = window.SPMaxSide || 4800, k = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
     var c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
     var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
-    await addCanvasSource(c, file.name);
+    await addCanvasSource(c, file.name, { orig: raw });
   }
 
   function askPassword(retry) {
@@ -370,7 +389,7 @@
       }
       await addCanvasSource(c, file.name.replace(/\.pdf$/i, '') + (n > 1 ? ' · p' + i : ''),
         { mmW: v1.width / 72 * MM, mmH: v1.height / 72 * MM, fileKey: fileKey, signed: painted > 0, sigBoxes: sigBoxes,
-          pdfref: { bytes: data, doc: pdf, page: i, sig: sig, key: fileKey, locked: !!(usedPw || (sig && sig.encrypted)) } });
+          pdfref: { bytes: data, doc: pdf, page: i, sig: sig, key: fileKey, pw: usedPw, rotate: page.rotate || 0, locked: !!(usedPw || (sig && sig.encrypted)) } });
     }
     if (pdf.numPages > 20) toast('Only the first 20 pages were added.');
   }
@@ -471,6 +490,7 @@
     x.imageSmoothingQuality = 'high';
     if (free) { var k = Math.min(W / src.width, H / src.height), w = src.width * k, h = src.height * k; x.drawImage(src, (W - w) / 2, (H - h) / 2, w, h); }
     else x.drawImage(src, 0, 0, W, H);
+    out.__crop = { srcId: cropSrc.id, data: cropper.getData(), free: free };
     st.slots[def.key] = { canvas: out, thumb: out.toDataURL('image/jpeg', 0.7), srcId: cropSrc.id, data: cropper.getData(), w: def.w, h: def.h, free: free };
     closeCrop(); renderSlots(); update();
     var next = slotDefs().find(function (d) { return !(st.slots[d.key] && st.slots[d.key].canvas && st.slots[d.key].w === d.w); });
@@ -795,80 +815,160 @@
     setTimeout(function () { window.print(); }, 60);
   }
 
-  // ---------- original-quality PDF (the document's own page is embedded, not re-drawn as a picture) ----------
-  function origMode() { return !window.SPPaper || SPPaper.get().paper === 'exact'; }
+  // ---------- original-quality PDF ----------
+  // The PDF button never turns the document into a picture: PDF pages (also password-protected
+  // e-Aadhaar, opened with qpdf) are placed as the original vector page with its own images,
+  // fonts and colours; photos go in as the original JPEG/PNG file. Crops, rounded corners,
+  // mirroring and rotation are done with PDF clipping and transforms, so nothing is re-encoded.
+  function origMode() {
+    return (!window.SPPaper || SPPaper.get().paper === 'exact') && !($('cp-bw') && $('cp-bw').checked) && !num('cp-bright', 0) && !num('cp-contrast', 0);
+  }
+  var ASSETS = (function () { var sc = document.querySelector('script[src*="cardprint/cardprint.js"]'); return sc ? sc.src.replace(/cardprint\/cardprint\.js.*$/, '') : '../assets/'; })();
+  var qpdfP = null, decSeq = 0, plainPdf = {};
+  function loadQpdf() {
+    if (qpdfP) return qpdfP;
+    qpdfP = new Promise(function (res, rej) {
+      var go = function () { window.SPQpdfFactory({ locateFile: function () { return ASSETS + 'vendor/qpdf/qpdf.wasm'; } }).then(res, rej); };
+      if (window.SPQpdfFactory) { go(); return; }
+      var sc = document.createElement('script'); sc.src = ASSETS + 'vendor/qpdf/qpdf.js?v=1'; sc.onload = go; sc.onerror = rej; document.head.appendChild(sc);
+    });
+    qpdfP.catch(function () { qpdfP = null; });
+    return qpdfP;
+  }
+  async function decryptPdf(bytes, pw) {
+    var q = await loadQpdf(), n = ++decSeq, a = '/in' + n + '.pdf', b = '/out' + n + '.pdf', out = null;
+    q.FS.writeFile(a, bytes);
+    try { q.callMain(['--password=' + (pw || ''), '--decrypt', a, b]); } catch (e) {}
+    try { out = q.FS.readFile(b); } catch (e) {}
+    try { q.FS.unlink(a); } catch (e) {} try { q.FS.unlink(b); } catch (e) {}
+    if (!out || !out.length) throw new Error('could not unlock the PDF');
+    return out;
+  }
+  async function urlBytes(u) { return new Uint8Array(await (await fetch(u)).arrayBuffer()); }
+  function canvasPng(c) { return new Promise(function (res) { c.toBlob(function (b) { b.arrayBuffer().then(function (x) { res(new Uint8Array(x)); }); }, 'image/png'); }); }
+
   async function vectorPdf() {
-    var PL = window.PDFLib; if (!PL || st.size !== 'full' || !origMode()) return null;
+    var PL = window.PDFLib; if (!PL || !origMode()) return null;
     var pages = buildPages(); if (!pages.length) return null;
-    var PT = 72 / MM, out = await PL.PDFDocument.create(), docs = {}, emb = {}, cboxes = {}, any = false;
+    var O = PL, PT = 72 / MM, out = await PL.PDFDocument.create(), docs = {}, bySrc = new Map(), byCanvas = new Map(), names = {}, now = new Date(), helv = null;
+    var cm = function (a, b, c, d, e, f) { return O.concatTransformationMatrix(a, b, c, d, e, f); };
+    var useObj = function (pg, obj) { var k = pg.ref.toString() + '|' + obj.ref.toString(); return names[k] || (names[k] = pg.node.newXObject('SPObj', obj.ref)); };
+
+    // how to paint a source: XObject + matrix from its own space into the source picture's pixel space (y down)
+    async function forSrc(src) {
+      if (bySrc.has(src)) return bySrc.get(src);
+      var r = null, ref = src.pdfref;
+      if (ref && !ref.rotate) {
+        try {
+          var plain = plainPdf[ref.key] || (plainPdf[ref.key] = ref.locked ? await decryptPdf(ref.bytes, ref.pw) : ref.bytes.slice());
+          var d = docs[ref.key] || (docs[ref.key] = await PL.PDFDocument.load(plain, { updateMetadata: false }));
+          var sp = d.getPage(ref.page - 1);
+          if (!sp.getRotation().angle) {
+            var cb = sp.getCropBox();
+            var e = await out.embedPage(sp, { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height }, [1, 0, 0, 1, 0, 0]);
+            var wl = [];
+            if (src.signed && ref.sig && window.SPSig && SPSig.sigWidgets) { try { wl = await SPSig.sigWidgets(await ref.doc.getPage(ref.page), ref.sig); } catch (er) {} }
+            var kx = src.w / cb.width, ky = src.h / cb.height;
+            r = { obj: e, m: [kx, 0, 0, -ky, -cb.x * kx, (cb.y + cb.height) * ky], sig: wl, vector: true };
+          }
+        } catch (err) { try { console.warn('original page not used:', err); } catch (_) {} }
+      }
+      if (!r && src.orig) { try { var im = src.orig.png ? await out.embedPng(src.orig.bytes) : await out.embedJpg(src.orig.bytes); r = { obj: im, m: [src.w, 0, 0, -src.h, 0, src.h] }; } catch (err) {} }
+      if (!r) { var b = await urlBytes(src.url), im2 = b[0] === 0x89 ? await out.embedPng(b) : await out.embedJpg(b); r = { obj: im2, m: [src.w, 0, 0, -src.h, 0, src.h] }; }
+      bySrc.set(src, r); return r;
+    }
+    async function forCanvas(c) {
+      if (byCanvas.has(c)) return byCanvas.get(c);
+      var im = await out.embedPng(await canvasPng(c)), r = { obj: im, m: [c.width, 0, 0, -c.height, 0, c.height] };
+      byCanvas.set(c, r); return r;
+    }
+    // signature box in the page's own space (PDF points)
+    function sigOps(pg, w) {
+      var r = w.rect, k = Math.min((r[2] - r[0]) / 50, (r[3] - r[1]) / 30);
+      var spec = SPSig.boxSpec(w.s, now, function (t, z) { return helv.widthOfTextAtSize(t, z); });
+      pg.pushOperators(O.pushGraphicsState(), cm(k, 0, 0, k, r[0], r[3] - 30 * k));
+      pg.drawRectangle({ x: 0, y: 30 - (r[3] - r[1]) / k, width: (r[2] - r[0]) / k, height: (r[3] - r[1]) / k, color: O.rgb(1, 1, 1) });
+      [[spec.tick.black, [0, 0, 0]], [spec.tick.green, spec.tick.rgb]].forEach(function (t) {
+        var ops = [O.pushGraphicsState(), cm(spec.tick.k, 0, 0, spec.tick.k, spec.tick.x, spec.tick.y), O.setFillingRgbColor(t[1][0], t[1][1], t[1][2])];
+        t[0].forEach(function (p, i) { ops.push(i ? O.lineTo(p[0], p[1]) : O.moveTo(p[0], p[1])); });
+        ops.push(O.closePath(), O.fill(), O.popGraphicsState()); pg.pushOperators.apply(pg, ops);
+      });
+      spec.lines.forEach(function (l) { pg.drawText(l.text, { x: l.x, y: l.y, size: l.size, font: helv, color: O.rgb(0, 0, 0) }); });
+      pg.drawText(spec.title.text, { x: spec.title.x, y: spec.title.y, size: spec.title.size, font: helv, color: O.rgb(0, 0, 0) });
+      pg.pushOperators(O.popGraphicsState());
+    }
+    // paths (PDF points, y up)
+    function rectPath(x, y, w, h) { return [O.rectangle(x, y, w, h)]; }
+    function rrPath(x, y, w, h, r) {
+      var c = r * 0.5523;
+      return [O.moveTo(x + r, y), O.lineTo(x + w - r, y), O.appendBezierCurve(x + w - r + c, y, x + w, y + r - c, x + w, y + r),
+        O.lineTo(x + w, y + h - r), O.appendBezierCurve(x + w, y + h - r + c, x + w - r + c, y + h, x + w - r, y + h),
+        O.lineTo(x + r, y + h), O.appendBezierCurve(x + r - c, y + h, x, y + h - r + c, x, y + h - r),
+        O.lineTo(x, y + r), O.appendBezierCurve(x, y + r - c, x + r - c, y, x + r, y), O.closePath()];
+    }
+    // put a region of a source (pixels of its picture) into dest (points), optionally turned / mirrored / clipped
+    async function place(pg, R, region, dest, opt) {
+      var rot = opt.rot || 0, th = -rot * Math.PI / 180, turned = rot % 180 !== 0;
+      var dw = turned ? dest.h : dest.w, dh = turned ? dest.w : dest.h;
+      var ops = [O.pushGraphicsState()];
+      if (opt.clip) ops = ops.concat(opt.clip, [O.clip(), O.endPath()]);
+      ops.push(cm(1, 0, 0, 1, dest.x + dest.w / 2, dest.y + dest.h / 2), cm(Math.cos(th), Math.sin(th), -Math.sin(th), Math.cos(th), 0, 0));
+      if (opt.mirror) ops.push(cm(-1, 0, 0, 1, 0, 0));
+      var a = dw / region.w, b = dh / region.h, cx = region.x + region.w / 2, cy = region.y + region.h / 2;
+      ops.push(cm(a, 0, 0, -b, -cx * a, cy * b), cm.apply(null, R.m), O.drawObject(useObj(pg, R.obj)));
+      pg.pushOperators.apply(pg, ops);
+      if (R.sig && R.sig.length) R.sig.forEach(function (w) { sigOps(pg, w); });
+      pg.pushOperators(O.popGraphicsState());
+    }
+    function strokeOps(path, rgb, lw, dash) {
+      return [O.pushGraphicsState(), O.setStrokingRgbColor(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255), O.setLineWidth(lw)].concat(dash ? [O.setDashPattern(dash, 0)] : [], path, [O.stroke(), O.popGraphicsState()]);
+    }
+
+    helv = await out.embedFont(PL.StandardFonts.Helvetica);
+    var cut = $('cp-cut') && $('cp-cut').checked, vectorUsed = false;
     for (var pi = 0; pi < pages.length; pi++) {
       busy(true, 'Saving page ' + (pi + 1) + ' of ' + pages.length + ' in original quality…');
       await new Promise(function (r) { setTimeout(r, 0); });
-      var P = pages[pi], pg = out.addPage([P.W * PT, P.H * PT]);
+      var P = pages[pi], PH = P.H * PT, pg = out.addPage([P.W * PT, PH]);
+      var box = function (X, Y, w, h) { return { x: X * PT, y: PH - (Y + h) * PT, w: w * PT, h: h * PT }; };
       for (var ii = 0; ii < P.items.length; ii++) {
-        var it = P.items[ii], f = it.full, src = f.src, rot = f.rot, ref = src.pdfref;
-        var wpt = it.w * PT, hpt = it.h * PT, cx = it.x * PT + wpt / 2, cy = P.H * PT - (it.y * PT + hpt / 2);
-        var turned = rot % 180 !== 0, dw = turned ? hpt : wpt, dh = turned ? wpt : hpt, th = -rot * Math.PI / 180;
-        var o = { x: cx - (dw / 2 * Math.cos(th) - dh / 2 * Math.sin(th)), y: cy - (dw / 2 * Math.sin(th) + dh / 2 * Math.cos(th)), width: dw, height: dh, rotate: PL.degrees(-rot) };
-        var key = ref && ref.key + ':' + ref.page, e = key && emb[key];
-        if (ref && !e && !ref.locked) {
-          try {
-            var d = docs[ref.key] || (docs[ref.key] = await PL.PDFDocument.load(ref.bytes.slice()));
-            var sp = d.getPage(ref.page - 1);
-            if (sp.getRotation().angle) throw new Error('rotated page');
-            var cb = sp.getCropBox(); cboxes[key] = cb;
-            e = emb[key] = await out.embedPage(sp, { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height }, [1, 0, 0, 1, -cb.x, -cb.y]);
-          } catch (err) { e = null; }
+        var it = P.items[ii];
+        if (it.full) {
+          var src = it.full.src, R = await forSrc(src); vectorUsed = vectorUsed || !!R.vector;
+          await place(pg, R, { x: 0, y: 0, w: src.w, h: src.h }, box(it.x, it.y, it.w, it.h), { rot: it.full.rot });
+          continue;
         }
-        if (e) {
-          pg.drawPage(e, o); var cbox = cboxes[key];
-          // the verified tick and live date/time, drawn as real PDF text and shapes (sharp at any zoom)
-          if (src.signed && ref.sig && window.SPSig && SPSig.sigWidgets) {
-            try {
-              var page = await ref.doc.getPage(ref.page), wl = await SPSig.sigWidgets(page, ref.sig);
-              if (wl.length) {
-                var helv = out.__helv || (out.__helv = await out.embedFont(PL.StandardFonts.Helvetica));
-                var sx = dw / e.width, sy = dh / e.height, cs = Math.cos(-th), sn = Math.sin(-th), now = new Date();
-                wl.forEach(function (w) {
-                  var r = w.rect, k = Math.min((r[2] - r[0]) / 50, (r[3] - r[1]) / 30);
-                  var sp = SPSig.boxSpec(w.s, now, function (t, z) { return helv.widthOfTextAtSize(t, z); });
-                  var O = PL;
-                  pg.pushOperators(O.pushGraphicsState(),
-                    O.concatTransformationMatrix(1, 0, 0, 1, o.x, o.y),
-                    O.concatTransformationMatrix(Math.cos(th), Math.sin(th), -Math.sin(th), Math.cos(th), 0, 0),
-                    O.concatTransformationMatrix(sx, 0, 0, sy, 0, 0),
-                    O.concatTransformationMatrix(1, 0, 0, 1, -cbox.x, -cbox.y),
-                    O.concatTransformationMatrix(k, 0, 0, k, r[0], r[3] - 30 * k));
-                  var poly = function (pts, rgb) {
-                    var ops = [O.pushGraphicsState(), O.concatTransformationMatrix(sp.tick.k, 0, 0, sp.tick.k, sp.tick.x, sp.tick.y), O.setFillingRgbColor(rgb[0], rgb[1], rgb[2])];
-                    pts.forEach(function (p, i) { ops.push(i ? O.lineTo(p[0], p[1]) : O.moveTo(p[0], p[1])); });
-                    ops.push(O.closePath(), O.fill(), O.popGraphicsState()); pg.pushOperators.apply(pg, ops);
-                  };
-                  pg.drawRectangle({ x: 0, y: 30 - (r[3] - r[1]) / k, width: (r[2] - r[0]) / k, height: (r[3] - r[1]) / k, color: O.rgb(1, 1, 1) });
-                  poly(sp.tick.black, [0, 0, 0]); poly(sp.tick.green, sp.tick.rgb);
-                  sp.lines.forEach(function (l) { pg.drawText(l.text, { x: l.x, y: l.y, size: l.size, font: helv, color: O.rgb(0, 0, 0) }); });
-                  pg.drawText(sp.title.text, { x: sp.title.x, y: sp.title.y, size: sp.title.size, font: helv, color: O.rgb(0, 0, 0) });
-                  pg.pushOperators(O.popGraphicsState());
-                });
-              }
-            } catch (err) { try { console.warn('sig box', err); } catch (_) {} }
+        var u = it.unit, ox = it.x, oy = it.y, isLong = u.kind === 'long', round = !!u.round, RAD = 3.18;
+        var parts = it.back ? [{ c: u.back, x: 0, y: 0, w: u.w, h: u.h }] : u.parts;
+        var ub = box(ox, oy, u.w, u.h), unitClip = isLong && round ? rrPath(ub.x, ub.y, ub.w, ub.h, RAD * PT) : null;
+        for (var pj = 0; pj < parts.length; pj++) {
+          var p = parts[pj]; if (!p.c) continue;
+          var X = ox + (u.mirror ? (u.w - p.x - p.w) : p.x), Y = oy + p.y, pb = box(X, Y, p.w, p.h);
+          var clip = round && !isLong ? rrPath(pb.x, pb.y, pb.w, pb.h, RAD * PT) : (unitClip || rectPath(pb.x, pb.y, pb.w, pb.h));
+          var cr = p.c.__crop, cs = cr && st.sources.find(function (x) { return x.id === cr.srcId; }), d = cr && cr.data;
+          if (cs && d && !((d.rotate || 0) % 360) && (d.scaleX || 1) === 1 && (d.scaleY || 1) === 1 && d.width > 0 && d.height > 0) {
+            var Rs = await forSrc(cs), dest = pb; vectorUsed = vectorUsed || !!Rs.vector;
+            if (cr.free) { var kk = Math.min(pb.w / d.width, pb.h / d.height), ww = d.width * kk, hh = d.height * kk; dest = { x: pb.x + (pb.w - ww) / 2, y: pb.y + (pb.h - hh) / 2, w: ww, h: hh }; }
+            await place(pg, Rs, { x: d.x, y: d.y, w: d.width, h: d.height }, dest, { clip: clip, mirror: u.mirror });
+          } else {
+            await place(pg, await forCanvas(p.c), { x: 0, y: 0, w: p.c.width, h: p.c.height }, pb, { clip: clip, mirror: u.mirror });
           }
-          any = true;
-        } else {
-          // photo / locked PDF: the full-resolution picture of that page
-          var u = src.url, im = /^data:image\/png/.test(u) ? await out.embedPng(u) : await out.embedJpg(u);
-          pg.drawImage(im, o);
+          if (cut && !isLong) pg.pushOperators.apply(pg, strokeOps(round ? rrPath(pb.x, pb.y, pb.w, pb.h, RAD * PT) : rectPath(pb.x, pb.y, pb.w, pb.h), [140, 150, 163], 0.2 * PT));
+        }
+        if (isLong) {
+          if (cut) pg.pushOperators.apply(pg, strokeOps(round ? rrPath(ub.x, ub.y, ub.w, ub.h, RAD * PT) : rectPath(ub.x, ub.y, ub.w, ub.h), [140, 150, 163], 0.2 * PT));
+          if (u.fold != null) { var fx = (ox + u.fold) * PT; pg.pushOperators.apply(pg, strokeOps([O.moveTo(fx, ub.y - 2 * PT), O.lineTo(fx, ub.y + ub.h + 2 * PT)], [154, 164, 176], 0.25 * PT, [2 * PT, 1.5 * PT])); }
         }
       }
     }
-    if (!any) return null;
-    out.setProducer('S Printer'); out.setCreator('S Printer'); out.setTitle(DOC.name + ' (original quality)');
-    return out.save();
+    out.setProducer('S Printer'); out.setCreator('S Printer'); out.setTitle(DOC.name);
+    st.lastVector = vectorUsed;
+    return out.save({ useObjectStreams: true });
   }
   async function doPdf() {
     try {
       var bytes = await vectorPdf();
-      if (bytes) { busy(false); var u = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); save(fileBase() + '.pdf', u); setTimeout(function () { URL.revokeObjectURL(u); }, 20000); toast('PDF saved in original quality.'); return; }
+      if (bytes) { busy(false); var u = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); save(fileBase() + '.pdf', u); setTimeout(function () { URL.revokeObjectURL(u); }, 20000); toast(st.lastVector ? 'PDF saved in original quality (sharp at any zoom).' : 'PDF saved — original photo quality.'); return; }
     } catch (e) { try { console.warn('vector pdf failed', e); } catch (_) {} } finally { busy(false); }
     var out; try { out = await renderAll(); } finally { busy(false); }
     if (!out.length) return;
