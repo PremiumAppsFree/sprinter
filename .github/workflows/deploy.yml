@@ -23,6 +23,13 @@ jobs:
           mkdir _site
           rsync -a --exclude .git --exclude .github --exclude _site ./ _site/
           touch _site/.nojekyll
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Protect scripts (compact + obfuscate the published copies)
+        run: |
+          npm install --no-save --no-audit --no-fund javascript-obfuscator@4 >/dev/null
+          node .github/build/protect.js _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

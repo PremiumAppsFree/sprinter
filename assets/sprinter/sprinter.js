@@ -1,3 +1,5 @@
+/* frame-guard: S Printer pages cannot be shown inside another site's frame */
+try { if (window.top !== window.self) { var spSame = false; try { spSame = window.top.location.host === location.host; } catch (e) {} if (!spSame) window.top.location.replace(window.self.location.href); } } catch (e) {}
 /* PDF passwords you type on a page are remembered for this tab only (never saved or sent),
  * so "Arrange on page" can open the same protected PDF without asking again. */
 (function () {
