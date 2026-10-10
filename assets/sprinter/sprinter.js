@@ -388,7 +388,76 @@
 
   // PDF render cap
   var MAX_SIDE = 3508;
-  function wrapPage(pg) {
+  // ---- automatic digital-signature check for every tool that opens a PDF ----
+  var SP_BASE = (function () {
+    var sc = document.currentScript && document.currentScript.src;
+    if (!sc) { var all = document.querySelectorAll('script[src*="assets/sprinter/sprinter.js"]'); sc = all.length ? all[all.length - 1].src : ''; }
+    return sc ? sc.replace(/assets\/sprinter\/sprinter\.js.*$/, '') : '';
+  })();
+  var sigLibs = null;
+  function loadSigLibs() {
+    if (window.SPSig && window.forge && window.SP_TRUSTED_ROOTS) return Promise.resolve();
+    if (sigLibs) return sigLibs;
+    var one = function (src) {
+      return new Promise(function (res, rej) { var s = document.createElement('script'); s.src = SP_BASE + src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    };
+    sigLibs = (window.forge ? Promise.resolve() : one('assets/vendor/forge.min.js'))
+      .then(function () { return window.SP_TRUSTED_ROOTS ? 0 : one('assets/sigverify/roots.js?v=12'); })
+      .then(function () { return window.SPSig ? 0 : one('assets/sigverify/sigverify.js?v=12'); });
+    return sigLibs;
+  }
+  function sigManaged() { return document.body && document.body.classList.contains('cp-body'); } // the card tool does its own check
+  function bytesOf(src) {
+    try {
+      var d = src && (src.data !== undefined ? src.data : src);
+      if (d instanceof ArrayBuffer) return Promise.resolve(new Uint8Array(d.slice(0)));
+      if (ArrayBuffer.isView(d)) return Promise.resolve(new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength)));
+      var url = typeof src === 'string' ? src : (src && src.url) || (src instanceof URL ? String(src) : null);
+      if (url) return fetch(String(url)).then(function (r) { return r.arrayBuffer(); }).then(function (b) { return new Uint8Array(b); });
+    } catch (e) {}
+    return Promise.resolve(null);
+  }
+  function sigToast(res) {
+    var st = res && res.status; if (!st || st === 'unsigned' || st === 'error') return;
+    var t = {
+      valid: ['#16a34a', '✓', 'Digital signature valid — the green tick is added to the signature.'],
+      modified: ['#dc2626', '?', 'Document was changed after signing — signature not valid, tick not added.'],
+      'changed-after': ['#dc2626', '?', 'Something was added after signing — signature not valid, tick not added.'],
+      untrusted: ['#b7791f', '?', 'Signature could not be verified (not an official India PKI certificate).']
+    }[st]; if (!t) return;
+    var el = document.getElementById('sp-sig-toast');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'sp-sig-toast'; el.setAttribute('role', 'status');
+      el.style.cssText = 'position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483000;max-width:min(92vw,560px);display:flex;gap:10px;align-items:center;padding:10px 14px 10px 10px;border-radius:14px;background:#fff;color:#1B2330;box-shadow:0 10px 30px rgba(0,0,0,.18);font:600 14px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer';
+      el.onclick = function () { el.remove(); };
+      document.body.appendChild(el);
+    }
+    el.innerHTML = '<span style="flex-shrink:0;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;color:#fff;font-size:16px;background:' + t[0] + '">' + t[1] + '</span><span></span>';
+    el.lastChild.textContent = t[2];
+    clearTimeout(el._t); el._t = setTimeout(function () { el.remove(); }, 7000);
+  }
+  function addSigPaint(pg, doc) {
+    if (pg.__spSigPaint || !pg.render) return;
+    var rr = pg.render.bind(pg);
+    pg.render = function (params) {
+      var task = rr.apply(null, arguments);
+      try {
+        var sig = doc && doc.__spSig;
+        if (sig && sig.status === 'valid' && params && params.canvasContext && params.viewport && window.SPSig) {
+          var done = task.promise.then(function (v) {
+            var ctx = params.canvasContext; ctx.save();
+            try { if (params.transform) ctx.transform.apply(ctx, params.transform); } catch (e) {}
+            return window.SPSig.paint(ctx, pg, params.viewport, sig).then(function () { ctx.restore(); return v; }, function () { ctx.restore(); return v; });
+          });
+          Object.defineProperty(task, 'promise', { value: done, configurable: true });
+        }
+      } catch (e) {}
+      return task;
+    };
+    pg.__spSigPaint = true;
+  }
+  function wrapPage(pg, doc) {
+    if (pg && doc && doc.__spSig) addSigPaint(pg, doc);
     if (!pg || pg.__spCap) return pg;
     var gv = pg.getViewport.bind(pg);
     pg.getViewport = function (o) {
@@ -404,13 +473,30 @@
   function wrapDoc(doc) {
     if (!doc || doc.__spCap) return doc;
     var gp = doc.getPage.bind(doc);
-    doc.getPage = function () { return gp.apply(null, arguments).then(wrapPage); };
+    doc.getPage = function () { return gp.apply(null, arguments).then(function (pg) { return wrapPage(pg, doc); }); };
     doc.__spCap = true; return doc;
   }
   function wrapGetDocument(gd) {
     return function () {
+      var check = null;
+      if (!sigManaged()) {
+        try {
+          var got = bytesOf(arguments[0]);   // copy before pdf.js hands the buffer to its worker
+          check = Promise.all([got, loadSigLibs()]).then(function (r) { return r[0] && window.SPSig ? window.SPSig.verify(r[0]) : null; }).catch(function () { return null; });
+        } catch (e) { check = null; }
+      }
       var task = gd.apply(this, arguments);
-      try { var p = task.promise.then(wrapDoc); Object.defineProperty(task, 'promise', { value: p, configurable: true }); } catch (e) {}
+      try {
+        var p = task.promise.then(function (doc) {
+          if (!check) return wrapDoc(doc);
+          var limit = new Promise(function (r) { setTimeout(function () { r(null); }, 9000); });
+          return Promise.race([check, limit]).then(function (res) {
+            if (res) { doc.__spSig = res; sigToast(res); }
+            return wrapDoc(doc);
+          });
+        });
+        Object.defineProperty(task, 'promise', { value: p, configurable: true });
+      } catch (e) {}
       return task;
     };
   }
@@ -424,6 +510,7 @@
     if (proxied) proxied.set(lib, px);
     return px;
   }
+  window.__spPatchPdf = patchPdf;   // for tools that import pdf.js as an ES module
   ['pdfjsLib', 'pdfjs-dist/build/pdf'].forEach(function (name) {
     var held = window[name] ? patchPdf(window[name]) : undefined;
     try {
