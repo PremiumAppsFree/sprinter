@@ -836,3 +836,121 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan); else scan();
   setTimeout(scan, 1500);
 })();
+
+/* Small premium icons in front of action buttons (Print, PDF, Download, Crop, Rotate …)
+ * so every button says at a glance what it does. Also hides leftover "PRO" badges:
+ * every feature on this site is free. */
+(function () {
+  'use strict';
+  var A = function (d, acc) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (acc || '') + '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</g></svg>'; };
+  var I = {
+    print: A('<path d="M7 9V3h10v6"/><path d="M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/>', '<rect x="4" y="10" width="16" height="3" rx="1" fill="#0098D8" opacity=".85"/><circle cx="17.5" cy="11.5" r="1" fill="#22c55e"/>'),
+    pdf: A('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>', '<rect x="6.5" y="12" width="11" height="6" rx="1.2" fill="#e5383b"/><text x="12" y="16.6" font-size="4.6" font-family="Arial" font-weight="700" text-anchor="middle" fill="#fff">PDF</text>'),
+    img: A('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 17l5-5 4 4 3-3 6 6"/>', '<circle cx="8.5" cy="9" r="2" fill="#f5b400"/><path d="M4 18.5l4-4 4 4 3-3 5 5H5z" fill="#22b573" opacity=".35"/>'),
+    zip: A('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M11 4v2M11 8v2M11 12v2"/>', '<rect x="9.5" y="14" width="3" height="4" rx=".8" fill="#f59e0b"/>'),
+    download: A('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>', '<rect x="5" y="19" width="14" height="2.2" rx="1.1" fill="#16a34a"/>'),
+    share: A('<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/>', '<circle cx="6" cy="12" r="2.5" fill="#0098D8" opacity=".5"/>'),
+    upload: A('<path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/>', '<rect x="5" y="19" width="14" height="2.2" rx="1.1" fill="#0098D8"/>'),
+    crop: A('<path d="M6 2v14a2 2 0 0 0 2 2h14M2 6h14a2 2 0 0 1 2 2v14"/>', '<rect x="8" y="8" width="8" height="8" fill="#0098D8" opacity=".25"/>'),
+    rotate: A('<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/>', '<circle cx="12" cy="12" r="2.6" fill="#D6247A" opacity=".55"/>'),
+    reset: A('<path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/>', '<circle cx="12" cy="12" r="2.6" fill="#f59e0b" opacity=".6"/>'),
+    trash: A('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', '<path d="M7.3 9h9.4l-.8 10H8.1z" fill="#e5383b" opacity=".2"/>'),
+    magic: A('<path d="M4 20l10-10M14 6l4 4"/>', '<path d="M17 2l.9 2.1L20 5l-2.1.9L17 8l-.9-2.1L14 5l2.1-.9z" fill="#f5b400"/><path d="M6 4l.6 1.4L8 6l-1.4.6L6 8l-.6-1.4L4 6l1.4-.6z" fill="#D6247A"/>'),
+    plus: A('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', '<circle cx="12" cy="12" r="9" fill="#16a34a" opacity=".15"/>'),
+    eye: A('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', '<circle cx="12" cy="12" r="3" fill="#0098D8" opacity=".55"/>'),
+    zin: A('<circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6M20 20l-4-4"/>'),
+    zout: A('<circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/>'),
+    next: A('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+    back: A('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
+    merge: A('<path d="M6 3v6a6 6 0 0 0 6 6h0a6 6 0 0 1 6 6M18 3v6"/><path d="M12 15v6"/>', '<circle cx="12" cy="15" r="2.2" fill="#D6247A"/>'),
+    convert: A('<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>'),
+    settings: A('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>', '<circle cx="10" cy="12" r="2" fill="#0098D8"/>'),
+    check: A('<path d="M5 12.5l4.5 4.5L19 7.5"/>', '<circle cx="12" cy="12" r="10" fill="#16a34a" opacity=".16"/>'),
+    close: A('<path d="M6 6l12 12M18 6L6 18"/>'),
+    copy: A('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>', '<rect x="8" y="8" width="12" height="12" rx="2" fill="#0098D8" opacity=".15"/>'),
+    flip: A('<path d="M12 3v18"/><path d="M8 7L3 12l5 5zM16 7l5 5-5 5z"/>', '<path d="M16 7l5 5-5 5z" fill="#0098D8" opacity=".4"/>'),
+    lock: A('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>', '<circle cx="12" cy="16" r="1.6" fill="#f59e0b"/>'),
+    help: A('<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/>'),
+    camera: A('<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>', '<circle cx="12" cy="13" r="3.5" fill="#0098D8" opacity=".35"/>'),
+    erase: A('<path d="M16 3l5 5-11 11H5l-2-2z"/><path d="M14 5l5 5"/>', '<path d="M3 17l2 2h5l3-3-5-5z" fill="#D6247A" opacity=".3"/>'),
+    text: A('<path d="M5 6V4h14v2M12 4v16M9 20h6"/>'),
+    color: A('<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-1.2-1-1.5-1-2.6 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.4 17 3 12 3z"/>', '<circle cx="7.5" cy="11" r="1.4" fill="#e5383b"/><circle cx="10" cy="7" r="1.4" fill="#f5b400"/><circle cx="14.5" cy="7" r="1.4" fill="#16a34a"/><circle cx="17" cy="11" r="1.4" fill="#0098D8"/>')
+  };
+  var RULES = [
+    [/remove (the )?(bg|background)|prepare joint|magic|enhance|auto ?crop|auto ?detect|scan/, 'magic'],
+    [/\bprint\b/, 'print'],
+    [/\bpdf\b/, 'pdf'],
+    [/\bzip\b|download all/, 'zip'],
+    [/\b(jpg|jpeg|png|webp|image)\b/, 'img'],
+    [/download|save|export/, 'download'],
+    [/share|whatsapp/, 'share'],
+    [/take a photo|camera/, 'camera'],
+    [/upload|choose|browse|select (a )?(file|photo|image)|add (a )?(photo|file|image|document)|open file/, 'upload'],
+    [/\bcrop\b|straighten/, 'crop'],
+    [/rotate|\bturn\b/, 'rotate'],
+    [/reset|restore|undo|start again|default/, 'reset'],
+    [/clear|delete|remove/, 'trash'],
+    [/eraser|erase/, 'erase'],
+    [/mirror|flip/, 'flip'],
+    [/compare|preview|\bview\b|show/, 'eye'],
+    [/zoom in/, 'zin'], [/zoom out/, 'zout'],
+    [/merge|combine|join/, 'merge'],
+    [/convert/, 'convert'],
+    [/setting|option|layout|adjust/, 'settings'],
+    [/password|unlock/, 'lock'],
+    [/guide|how to|help/, 'help'],
+    [/colou?r|background/, 'color'],
+    [/\btext\b|name|font/, 'text'],
+    [/copy|duplicate/, 'copy'],
+    [/^(\+ ?)?(add|new)\b|add (another|a page|page)|\+ ?page/, 'plus'],
+    [/next|continue|forward/, 'next'],
+    [/back|previous|prev\b/, 'back'],
+    [/done|apply|confirm|ok\b|generate|create|make|finish|unlock|open/, 'check'],
+    [/cancel|close/, 'close']
+  ];
+  var SKIP_IN = '[role=tab],[role=tablist],nav,header,footer,.tool,.sh-bar,.sh-ctx,.sh-tpls,.sh-zoom,.cp-docs,.cp-size,.cp-stepper,.cp-pager,.cp-tools,.pp-crop-tools,.sh-croptools,.sz-chip,.sz-seg,.pp-swatches,.sp-swrow,.pp-person,.cp-src,.cp-qi,.sz-acts,.sp-dsig,.cp-sigitem,.chips,.track,.sp-pa,select,option';
+  function bad(b) {
+    if (b.dataset.spAi || b.closest(SKIP_IN)) return true;
+    if (b.querySelector('svg,img,i[class*="fa"],.sp-gi,.sp-ai,canvas,video')) return true;
+    var t = (b.textContent || '').replace(/\s+/g, ' ').trim();
+    if (t.length < 2 || t.length > 42) return true;
+    if (/^(front|back)( side)?$/i.test(t)) return true;
+    return false;
+  }
+  function pick(t) {
+    t = t.toLowerCase();
+    for (var i = 0; i < RULES.length; i++) if (RULES[i][0].test(t)) return RULES[i][1];
+    return null;
+  }
+  function deco(b) {
+    if (bad(b)) return;
+    var k = pick((b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '')); if (!k) return;
+    b.dataset.spAi = k;
+    var s = document.createElement('span'); s.className = 'sp-ai sp-ai-' + k; s.setAttribute('aria-hidden', 'true'); s.innerHTML = I[k];
+    b.insertBefore(s, b.firstChild);
+    var cs = getComputedStyle(b);
+    if (cs.display === 'inline' || cs.display === 'inline-block') b.classList.add('sp-ai-host');
+    else if (cs.display === 'block') b.classList.add('sp-ai-block');
+  }
+  var SEL = 'button,a[role=button],a[class*="btn"],a[class*="button"],input[type=submit]';
+  function scan(root) { if (!root || !root.querySelectorAll) return; if (root.matches && root.matches(SEL)) deco(root); [].forEach.call(root.querySelectorAll(SEL), deco); }
+  function hidePro(root) {
+    [].forEach.call((root || document).querySelectorAll('.ak-pro-marketing,[class*="pro-badge"],[class*="upgrade-"]'), function (e) { e.style.display = 'none'; });
+    [].forEach.call((root || document).querySelectorAll('b,span,small,em,sup'), function (e) {
+      if (/^(pro|premium|upgrade)$/i.test((e.textContent || '').trim()) && e.children.length === 0) e.style.display = 'none';
+    });
+  }
+  var q = [], qd = false;
+  function flush() { qd = false; var l = q; q = []; l.forEach(function (n) { if (n.isConnected) { scan(n); hidePro(n.nodeType === 1 ? n : null); } }); }
+  function start() {
+    scan(document.body); hidePro();
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        m.addedNodes.forEach(function (n) { if (n.nodeType === 1 && !(n.classList && (n.classList.contains('sp-ai') || n.classList.contains('sp-gi')))) q.push(n); });
+        if (m.type === 'characterData' && m.target.parentElement) { var b = m.target.parentElement.closest(SEL); if (b) q.push(b); }
+      });
+      if (!qd && q.length) { qd = true; (window.requestAnimationFrame || setTimeout)(flush); }
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();

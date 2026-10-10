@@ -131,3 +131,12 @@ button .sp-gi,a .sp-gi{margin:0 .1em}
 .sp-swrow .sp-sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #cfd8e3;cursor:pointer;padding:0;transition:transform .15s}
 .sp-swrow .sp-sw:hover{transform:scale(1.12)}
 .sp-swrow .sp-sw[aria-pressed=true]{box-shadow:0 0 0 3px #0098D8}
+/* action icons in front of button labels */
+.sp-ai{display:inline-flex;width:1.15em;height:1.15em;margin-right:.42em;vertical-align:-.2em;flex-shrink:0}
+.sp-ai svg{width:100%;height:100%;display:block;overflow:visible}
+.sp-ai-host{display:inline-flex;align-items:center;justify-content:center}
+button:hover .sp-ai svg,a:hover .sp-ai svg{animation:spAiPop .4s cubic-bezier(.2,.8,.2,1)}
+@keyframes spAiPop{50%{transform:scale(1.18) rotate(-6deg)}}
+@media (prefers-reduced-motion:reduce){button:hover .sp-ai svg,a:hover .sp-ai svg{animation:none}}
+.ak-pro-marketing,#proDetailsModal{display:none!important}
+.sp-ai-block{display:flex;align-items:center;justify-content:center}
