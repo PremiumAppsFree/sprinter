@@ -176,3 +176,11 @@ section.group{margin-bottom:46px;scroll-margin-top:140px}
  .ambient i,.maker::after,.btn-primary::after{animation:none!important;opacity:1}
  .maker-badge{transform:rotate(-6deg);opacity:1}
 }
+/* premium SVG tool icons */
+.tool .ic{background:linear-gradient(145deg,#fff,#eef2f6);box-shadow:inset 0 0 0 1px rgba(27,35,48,.06),0 4px 10px rgba(27,35,48,.06)}
+.tool .ic .i{width:36px;height:36px;overflow:visible;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.tool:hover .ic .i{transform:scale(1.08)}
+.group[data-g=photo] .tool .ic{background:linear-gradient(145deg,#f2fbff,#e2f3fb)}
+.group[data-g=card] .tool .ic{background:linear-gradient(145deg,#fff5fa,#fbe4ef)}
+.group[data-g=pdf] .tool .ic{background:linear-gradient(145deg,#fffbea,#fbf1cc)}
+.tool .ic{width:54px;height:54px;border-radius:14px}

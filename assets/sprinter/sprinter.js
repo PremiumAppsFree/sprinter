@@ -562,7 +562,8 @@
       var d = f.contentWindow.document; d.open(); d.write(html); d.close();
       var imgs = d.images, left = imgs.length;
       function go() {
-        try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {}
+        var doIt = function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} };
+        if (window.SPPrintAnim) window.SPPrintAnim(doIt); else doIt();
         setTimeout(function () { f.remove(); }, 60000);
       }
       if (!left) go(); else [].forEach.call(imgs, function (im) { if (im.complete) { if (!--left) go(); } else im.onload = im.onerror = function () { if (!--left) go(); }; });
@@ -612,4 +613,197 @@
   if (mq && mq.addEventListener) mq.addEventListener('change', function (e) { if (e.matches) fit(); });
   var real = window.print;
   window.print = function () { try { fit(); } catch (e) {} return real.apply(this, arguments); };
+})();
+
+/* Premium icons instead of emoji / symbol characters.
+ * Any emoji or arrow/symbol glyph that a tool puts into the page (buttons, labels, messages)
+ * is swapped for a crisp SVG icon, so the whole site uses one consistent icon style. */
+(function () {
+  'use strict';
+  var S = function (d, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + d + '</svg>'; };
+  var G = function (id, a, b) { return '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient></defs>'; };
+  var F = function (body) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + body + '</svg>'; };
+  var ROT_R = S('<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/>');
+  var ROT_L = S('<path d="M4 12a8 8 0 1 0 2.34-5.66"/><path d="M4 4v5h5"/>');
+  var DOC = F(G('spgD', '#2fd0f5', '#0077c8') + '<path d="M6 2.5h8l5 5V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4A1.5 1.5 0 0 1 6 2.5z" fill="url(#spgD)"/><path d="M14 2.5V7a.6.6 0 0 0 .6.6H19" fill="#fff" opacity=".55"/><path d="M8 12h8M8 15h8M8 18h5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>');
+  var PHOTO = F(G('spgP', '#2fd0f5', '#0077c8') + '<rect x="2.5" y="4" width="19" height="16" rx="3" fill="url(#spgP)"/><circle cx="8.3" cy="9.3" r="2" fill="#fff"/><path d="M4 18.5l5-5 3 3 4-4 4 4v2z" fill="#fff" opacity=".9"/>');
+  var FOLDER = F(G('spgF', '#ffe066', '#f59e0b') + '<path d="M2.5 6.5A1.5 1.5 0 0 1 4 5h5l2 2.2h9A1.5 1.5 0 0 1 21.5 8.7V18a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18z" fill="url(#spgF)"/><path d="M2.5 10h19" stroke="#fff" stroke-opacity=".6" stroke-width="1.2"/>');
+  var MAP = {
+    '↻': ROT_R, '↷': ROT_R, '↶': ROT_L,
+    '↓': S('<path d="M12 4.5v13M6.5 12l5.5 5.5 5.5-5.5M5 20.5h14"/>'),
+    '↑': S('<path d="M12 19.5v-13M6.5 12l5.5-5.5 5.5 5.5M5 3.5h14"/>'),
+    '←': S('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
+    '→': S('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+    '➡': S('<path d="M4 12h15M13 6l6 6-6 6"/>'),
+    '↗': S('<path d="M7 17 17 7M9 7h8v8"/>'),
+    '⇄': S('<path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/>'),
+    '‹': S('<path d="M15 5l-7 7 7 7"/>'), '›': S('<path d="M9 5l7 7-7 7"/>'),
+    '✓': S('<path d="M5 12.5l4.5 4.5L19 7.5"/>', ' stroke-width="2.8"'),
+    '✔': S('<path d="M5 12.5l4.5 4.5L19 7.5"/>', ' stroke-width="2.8"'),
+    '○': S('<circle cx="12" cy="12" r="7"/>'),
+    '☰': S('<path d="M4 7h16M4 12h16M4 17h16"/>'),
+    '✂': S('<circle cx="6" cy="6.5" r="2.8"/><circle cx="6" cy="17.5" r="2.8"/><path d="M8.3 8.3 20 18.5M8.3 15.7 20 5.5"/>'),
+    '✦': F(G('spgS', '#ffe066', '#ff5fa2') + '<path d="M12 1.8l2.3 6.4 6.6 2.3-6.6 2.3L12 19.4l-2.3-6.6-6.6-2.3 6.6-2.3z" fill="url(#spgS)"/><path d="M19.5 15.5l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z" fill="#ffd43b"/>'),
+    '✨': F(G('spgS2', '#ffe066', '#ff5fa2') + '<path d="M12 1.8l2.3 6.4 6.6 2.3-6.6 2.3L12 19.4l-2.3-6.6-6.6-2.3 6.6-2.3z" fill="url(#spgS2)"/>'),
+    '✅': F(G('spgOK', '#4ade80', '#15803d') + '<circle cx="12" cy="12" r="10" fill="url(#spgOK)"/><path d="M7.2 12.4l3.2 3.2 6.4-6.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'),
+    '❌': F(G('spgNO', '#ff7a6b', '#dc2626') + '<circle cx="12" cy="12" r="10" fill="url(#spgNO)"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>'),
+    '⚠': F(G('spgW', '#ffd43b', '#f59e0b') + '<path d="M10.3 3.5a2 2 0 0 1 3.4 0l8 13.8A2 2 0 0 1 20 20.3H4a2 2 0 0 1-1.7-3z" fill="url(#spgW)"/><path d="M12 9v5M12 17h.01" stroke="#1B2330" stroke-width="2.2" stroke-linecap="round"/>'),
+    '▣': F(G('spgCard', '#2fd0f5', '#0077c8') + '<rect x="2.5" y="5.5" width="19" height="13" rx="2.4" fill="url(#spgCard)"/><rect x="5" y="8.5" width="5" height="6.5" rx="1" fill="#fff"/><path d="M12.5 9.5h6M12.5 12h5M12.5 14.5h3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>'),
+    '▤': DOC,
+    '📄': DOC, '📃': DOC, '🖼': PHOTO, '📷': PHOTO, '📂': FOLDER, '📁': FOLDER,
+    '🚀': F(G('spgR', '#ff9a5a', '#d6247a') + '<path d="M13.5 3.5c3.6-1.2 6.4-.6 7 0 .6.6 1.2 3.4 0 7l-6.2 6.2-6.9-6.9z" fill="url(#spgR)"/><circle cx="15.4" cy="8.6" r="1.8" fill="#fff"/><path d="M7.4 9.8 4 10.3l-1.5 3 4.2.4M14.2 16.6l-.5 3.4-3 1.5-.4-4.2" fill="#f59e0b"/><path d="M6.3 15.6c-1.5 1-2 3-2.2 4.1 1.1-.2 3.1-.7 4.1-2.2" fill="#ffd43b"/>')
+  };
+  var keys = Object.keys(MAP).sort(function (a, b) { return b.length - a.length; });
+  var RE = new RegExp('(' + keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')\\uFE0F?', 'g');
+  var TEST = new RegExp(RE.source);
+  var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, TITLE: 1, NOSCRIPT: 1, CODE: 1, PRE: 1 };
+  function fixText(node) {
+    var p = node.parentNode; if (!p || !TEST.test(node.nodeValue)) return;
+    if (SKIP[p.nodeName] || p.closest && p.closest('svg,[contenteditable="true"],.sp-gi')) return;
+    if (p.nodeName === 'OPTION') { node.nodeValue = node.nodeValue.replace(RE, '').replace(/\s{2,}/g, ' ').trim(); return; }
+    var frag = document.createDocumentFragment(), s = node.nodeValue, last = 0, m;
+    RE.lastIndex = 0;
+    while ((m = RE.exec(s))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+      var span = document.createElement('span'); span.className = 'sp-gi'; span.setAttribute('aria-hidden', 'true');
+      span.innerHTML = MAP[m[1]]; frag.appendChild(span); last = RE.lastIndex;
+    }
+    if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+    p.replaceChild(frag, node);
+  }
+  function walk(root) {
+    if (!root) return;
+    if (root.nodeType === 3) return fixText(root);
+    if (root.nodeType !== 1 || SKIP[root.nodeName]) return;
+    var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), list = [], n;
+    while ((n = tw.nextNode())) if (TEST.test(n.nodeValue)) list.push(n);
+    list.forEach(fixText);
+  }
+  var pending = [], queued = false;
+  function flush() { queued = false; var l = pending; pending = []; l.forEach(walk); }
+  function start() {
+    walk(document.body);
+    new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        if (m.type === 'characterData') pending.push(m.target);
+        else m.addedNodes.forEach(function (n) { if (!(n.nodeType === 1 && n.classList && n.classList.contains('sp-gi'))) pending.push(n); });
+      });
+      if (!queued && pending.length) { queued = true; (window.requestAnimationFrame || setTimeout)(flush); }
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+/* Printing animation: a little printer prints the page before the print window opens,
+ * and a "saved" tick appears when a file is downloaded. */
+(function () {
+  'use strict';
+  var css = '' +
+  '#sp-pa{position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;background:rgba(238,241,244,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .25s}' +
+  '#sp-pa.on{opacity:1}' +
+  '#sp-pa .box{background:#fff;border-radius:22px;padding:26px 34px 22px;box-shadow:0 30px 70px rgba(27,35,48,.22);text-align:center;transform:translateY(10px) scale(.96);transition:transform .35s cubic-bezier(.2,.8,.2,1);min-width:230px}' +
+  '#sp-pa.on .box{transform:none}' +
+  '#sp-pa svg{width:150px;height:150px;display:block;margin:0 auto 8px;overflow:visible}' +
+  '#sp-pa b{display:block;font:700 17px/1.3 "SP Lexend",Lexend,system-ui,sans-serif;color:#1B2330}' +
+  '#sp-pa small{display:block;margin-top:4px;font:500 13px/1.4 "SP Inter",Inter,system-ui,sans-serif;color:#667385}' +
+  '#sp-pa .paper{animation:spPaOut 1.15s cubic-bezier(.4,0,.2,1) forwards}' +
+  '#sp-pa .ln{transform-box:fill-box;transform-origin:left;transform:scaleX(0);animation:spPaLn .28s ease-out forwards}' +
+  '#sp-pa .led{animation:spPaLed .5s steps(2) infinite}' +
+  '#sp-pa .roll{transform-box:fill-box;transform-origin:center;animation:spPaRoll .6s linear infinite}' +
+  '#sp-pa .bar{position:relative;height:4px;border-radius:9px;background:#EEF1F4;overflow:hidden;margin-top:14px}' +
+  '#sp-pa .bar i{position:absolute;inset:0;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,#0098D8,#D6247A,#F5C400);animation:spPaBar 1.1s cubic-bezier(.4,0,.2,1) forwards}' +
+  '@keyframes spPaOut{from{transform:translateY(-38px)}to{transform:translateY(0)}}' +
+  '@keyframes spPaLn{to{transform:scaleX(1)}}' +
+  '@keyframes spPaLed{50%{opacity:.25}}' +
+  '@keyframes spPaRoll{to{transform:rotate(360deg)}}' +
+  '@keyframes spPaBar{to{transform:scaleX(1)}}' +
+  '#sp-saved{position:fixed;left:50%;bottom:24px;z-index:2147483500;display:flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:14px;background:#1B2330;color:#fff;font:600 14px/1.3 "SP Inter",Inter,system-ui,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.28);transform:translate(-50%,20px);opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s;max-width:calc(100% - 32px)}' +
+  '#sp-saved.on{transform:translate(-50%,0);opacity:1}' +
+  '#sp-saved svg{width:30px;height:30px;flex-shrink:0}' +
+  '#sp-saved .ck{stroke-dasharray:24;stroke-dashoffset:24;animation:spCk .45s .15s ease-out forwards}' +
+  '#sp-saved span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+  '@keyframes spCk{to{stroke-dashoffset:0}}' +
+  '@media print{#sp-pa,#sp-saved{display:none!important}}' +
+  '@media (prefers-reduced-motion:reduce){#sp-pa *,#sp-saved *{animation-duration:.01s!important}}';
+  function addCss() { if (document.getElementById('sp-pa-css')) return; var st = document.createElement('style'); st.id = 'sp-pa-css'; st.textContent = css; (document.head || document.documentElement).appendChild(st); }
+  var PRINTER = '<svg viewBox="0 0 120 120" aria-hidden="true">' +
+    '<defs><linearGradient id="spPaB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b4a60"/><stop offset="1" stop-color="#141b26"/></linearGradient>' +
+    '<linearGradient id="spPaT" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0098D8"/><stop offset=".33" stop-color="#0098D8"/><stop offset=".33" stop-color="#D6247A"/><stop offset=".66" stop-color="#D6247A"/><stop offset=".66" stop-color="#F5C400"/><stop offset="1" stop-color="#F5C400"/></linearGradient>' +
+    '<clipPath id="spPaC"><rect x="22" y="70" width="76" height="50"/></clipPath></defs>' +
+    '<ellipse cx="60" cy="112" rx="40" ry="4" fill="#1B2330" opacity=".08"/>' +
+    '<rect x="34" y="12" width="52" height="34" rx="3" fill="#fff" stroke="#D5DDE6" stroke-width="2"/>' +
+    '<path d="M42 22h36M42 29h28" stroke="#E2E8F0" stroke-width="3" stroke-linecap="round"/>' +
+    '<rect x="14" y="38" width="92" height="40" rx="11" fill="url(#spPaB)"/>' +
+    '<rect x="14" y="38" width="92" height="5" rx="2.5" fill="url(#spPaT)"/>' +
+    '<circle class="led" cx="92" cy="52" r="3.2" fill="#22c55e"/>' +
+    '<rect x="26" y="49" width="40" height="5" rx="2.5" fill="#fff" opacity=".18"/>' +
+    '<g class="roll"><circle cx="76" cy="52" r="4" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2" stroke-dasharray="4 3"/></g>' +
+    '<rect x="24" y="68" width="72" height="5" rx="2.5" fill="#0b1018"/>' +
+    '<g clip-path="url(#spPaC)"><g class="paper">' +
+      '<rect x="30" y="70" width="60" height="44" rx="2" fill="#fff" stroke="#D5DDE6" stroke-width="1.5"/>' +
+      '<rect class="ln" style="animation-delay:.35s" x="37" y="78" width="18" height="14" rx="2" fill="#2fb7ea"/>' +
+      '<rect class="ln" style="animation-delay:.5s" x="59" y="79" width="24" height="3" rx="1.5" fill="#1B2330"/>' +
+      '<rect class="ln" style="animation-delay:.6s" x="59" y="85" width="18" height="3" rx="1.5" fill="#94a3b8"/>' +
+      '<rect class="ln" style="animation-delay:.72s" x="37" y="97" width="46" height="3" rx="1.5" fill="#D6247A"/>' +
+      '<rect class="ln" style="animation-delay:.84s" x="37" y="103" width="36" height="3" rx="1.5" fill="#F5C400"/>' +
+    '</g></g></svg>';
+  var el = null, started = 0, hideT = null, printed = false;
+  function show(text) {
+    if (!document.body) return;
+    addCss();
+    if (!el) {
+      el = document.createElement('div'); el.id = 'sp-pa'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+      el.innerHTML = '<div class="box">' + PRINTER + '<b>' + (text || 'Preparing your print…') + '</b><small>Choose Scale 100% / Actual size</small><div class="bar"><i></i></div></div>';
+      document.body.appendChild(el); started = Date.now(); printed = false;
+      requestAnimationFrame(function () { if (el) el.classList.add('on'); });
+    }
+    clearTimeout(hideT); hideT = setTimeout(hide, 9000);          // safety: the tool never printed
+  }
+  function hide() {
+    clearTimeout(hideT);
+    var e = el; if (!e) return; el = null;
+    e.classList.remove('on'); setTimeout(function () { e.remove(); }, 260);
+  }
+  function hideSoon() { clearTimeout(hideT); hideT = setTimeout(hide, Math.max(250, 1300 - (Date.now() - started))); }
+  window.addEventListener('afterprint', function () { if (el) hideSoon(); });
+  // used by tools that print through a hidden frame: animate first, then print
+  window.SPPrintAnim = function (cb, text) {
+    show(text);
+    setTimeout(function () { try { cb(); } catch (e) {} if (el) hideSoon(); }, Math.max(0, 1100 - (Date.now() - started)));
+  };
+  // window.print() keeps working exactly as before (no delay); the animation just shows with it
+  var base = window.print;
+  window.print = function () {
+    show(); printed = true;
+    var r = base.apply(this, arguments);
+    hideSoon();
+    return r;
+  };
+  // start the animation the moment a Print button is pressed, while the tool prepares the pages
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest && e.target.closest('button,a,[role=button]');
+    if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') return;
+    var label = ((b.id || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.textContent || '')).toLowerCase();
+    if (/\bprint\b/.test(label) && !/preview|guide|how to|setting|size|layout/.test(label) && !b.closest('nav,header,footer')) show();
+  }, true);
+  // "Saved" confirmation for downloads
+  var savedT;
+  function saved(name) {
+    addCss();
+    var el = document.getElementById('sp-saved');
+    if (!el) { el = document.createElement('div'); el.id = 'sp-saved'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.innerHTML = '<svg viewBox="0 0 30 30" aria-hidden="true"><defs><linearGradient id="spSvG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#15803d"/></linearGradient></defs><circle cx="15" cy="15" r="14" fill="url(#spSvG)"/><path class="ck" d="M9 15.5l4 4 8-8.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span></span>';
+    el.lastChild.textContent = 'Saved · ' + (name || 'file');
+    requestAnimationFrame(function () { el.classList.add('on'); });
+    clearTimeout(savedT); savedT = setTimeout(function () { el.classList.remove('on'); }, 2600);
+  }
+  var aclick = HTMLAnchorElement.prototype.click;
+  HTMLAnchorElement.prototype.click = function () {
+    try { if (this.hasAttribute('download') && document.body) saved(this.getAttribute('download') || this.download); } catch (e) {}
+    return aclick.apply(this, arguments);
+  };
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest && e.target.closest('a[download]');
+    if (a && e.isTrusted) saved(a.getAttribute('download'));
+  }, true);
 })();

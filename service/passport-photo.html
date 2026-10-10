@@ -4,8 +4,8 @@
 <head>
 <meta name="author" content="Raj">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=8">
-<script src="../assets/sprinter/sprinter.js?v=14"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=15">
+<script src="../assets/sprinter/sprinter.js?v=15"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,7 +118,7 @@
         @keyframes sparkle { 0% { transform: scale(0) rotate(0deg); opacity: 0; } 25% { opacity: 1; } 50% { transform: scale(1.2); } 100% { transform: scale(0) rotate(360deg); opacity: 0; } }
         #bgRemovalAnimationOverlay { inset: 0; overflow: hidden; background: transparent; z-index: 40; }
         #bgRemovalAnimationOverlay::before { content: ''; position: absolute; inset: -40% 0; background: linear-gradient(180deg,transparent 38%,rgba(129,140,248,.16) 48%,rgba(224,231,255,.8) 50%,rgba(168,85,247,.13) 52%,transparent 62%); animation: photo-magic-scan 1.8s ease-in-out infinite; }
-        #bgRemovalAnimationOverlay::after { content: '✦'; position: absolute; top: 20%; left: 24%; color: #fff; font-size: 22px; text-shadow: 0 0 9px #818cf8, 65px 70px 2px #ddd6fe, -24px 130px 2px #c7d2fe; animation: photo-magic-sparkle 1.3s ease-in-out infinite alternate; }
+        #bgRemovalAnimationOverlay::after { content: ''; position: absolute; top: 20%; left: 24%; width: 24px; height: 24px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.8l2.3 6.4 6.6 2.3-6.6 2.3L12 19.4l-2.3-6.6-6.6-2.3 6.6-2.3z' fill='%23fff'/%3E%3C/svg%3E") center/contain no-repeat; filter: drop-shadow(0 0 6px #818cf8) drop-shadow(0 0 2px #c7d2fe); animation: photo-magic-sparkle 1.3s ease-in-out infinite alternate; }
         .photo-magic-status { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 6px 10px; border-radius: 999px; color: #fff; background: rgba(49,46,129,.88); font-size: 11px; font-weight: 600; }
         @keyframes photo-magic-scan { from { transform: translateY(-35%); } to { transform: translateY(35%); } }
         @keyframes photo-magic-sparkle { from { opacity: .25; } to { opacity: 1; } }

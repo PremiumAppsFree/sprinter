@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Photo &amp; PDF Size Changer (KB / MB) — S Printer</title>
+<meta name="description" content="Reduce or increase the size of photos and PDFs to an exact KB or MB, keeping the text sharp and the quality high.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=15">
+<script src="../assets/sprinter/sprinter.js?v=15"></script>
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=1">
+<link rel="stylesheet" href="../assets/sizer/sizer.css?v=1">
+</head>
+<body class="sz-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+
+<main class="cp-wrap">
+  <div class="sz-hero">
+    <svg class="sz-hero-ic" viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+        <linearGradient id="szh1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22c1ee"/><stop offset="1" stop-color="#0077c8"/></linearGradient>
+        <linearGradient id="szh2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7aa8"/><stop offset="1" stop-color="#d6247a"/></linearGradient>
+      </defs>
+      <rect x="4" y="10" width="38" height="44" rx="8" fill="url(#szh1)"/>
+      <circle cx="16" cy="24" r="4.5" fill="#fff"/>
+      <path d="M8 48l11-12 7 7 7-8 9 10v3H8z" fill="#fff" opacity=".92"/>
+      <rect x="30" y="26" width="30" height="30" rx="9" fill="url(#szh2)"/>
+      <path d="M45 33v14M39 41l6 6 6-6" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <h1>Photo &amp; PDF size changer</h1>
+      <p>Make a photo or PDF exactly the size a form asks for — from MB down to KB, or bigger — while keeping the picture clear and the text sharp.</p>
+    </div>
+  </div>
+
+  <div class="cp-grid">
+    <div class="cp-col">
+      <section class="cp-card" aria-labelledby="sz-s1">
+        <h2 id="sz-s1"><span class="cp-step">1</span>Add photos or PDFs</h2>
+        <label class="cp-drop" id="sz-drop">
+          <input type="file" id="sz-file" accept="image/*,application/pdf" multiple>
+          <span class="cp-drop-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></span>
+          <b>Choose photos or PDF</b>
+          <small>JPG, PNG, WebP or PDF (password OK) · several at once</small>
+        </label>
+        <p class="sz-empty" id="sz-empty"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>Files stay on this device — nothing is uploaded.</p>
+      </section>
+    </div>
+    <div class="cp-col">
+      <section class="cp-card" aria-labelledby="sz-s2">
+        <h2 id="sz-s2"><span class="cp-step">2</span>Size you want</h2>
+        <div class="sz-target">
+          <input type="number" id="sz-target" value="50" min="1" step="any" inputmode="decimal" aria-label="Target size">
+          <select id="sz-unit" aria-label="Unit"><option value="KB" selected>KB</option><option value="MB">MB</option></select>
+        </div>
+        <div class="sz-chips" role="group" aria-label="Quick sizes">
+          <button type="button" class="sz-chip" data-v="10" data-u="KB" aria-pressed="false">10 KB</button>
+          <button type="button" class="sz-chip" data-v="20" data-u="KB" aria-pressed="false">20 KB</button>
+          <button type="button" class="sz-chip" data-v="50" data-u="KB" aria-pressed="true">50 KB</button>
+          <button type="button" class="sz-chip" data-v="100" data-u="KB" aria-pressed="false">100 KB</button>
+          <button type="button" class="sz-chip" data-v="200" data-u="KB" aria-pressed="false">200 KB</button>
+          <button type="button" class="sz-chip" data-v="500" data-u="KB" aria-pressed="false">500 KB</button>
+          <button type="button" class="sz-chip" data-v="1" data-u="MB" aria-pressed="false">1 MB</button>
+          <button type="button" class="sz-chip" data-v="2" data-u="MB" aria-pressed="false">2 MB</button>
+        </div>
+        <input type="hidden" id="sz-mode" value="max">
+        <div class="sz-seg" role="group" aria-label="How to match the size">
+          <button type="button" data-mode="max" aria-pressed="true">Up to this size<small>smaller or equal</small></button>
+          <button type="button" data-mode="exact" aria-pressed="false">Exactly this size<small>smaller or bigger</small></button>
+        </div>
+
+        <div class="cp-form" style="margin-top:14px">
+          <label>Save as
+            <select id="sz-format"><option value="same" selected>Same as original</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select></label>
+          <label>Width × height
+            <select id="sz-dim"><option value="keep" selected>Keep (auto)</option><option value="custom">Set pixels</option></select></label>
+        </div>
+        <div class="cp-form sz-dims" id="sz-dims" hidden>
+          <label>Width (px)<input type="number" id="sz-w" min="10" max="8000" value="350" inputmode="numeric"></label>
+          <label>Height (px)<input type="number" id="sz-h" min="10" max="8000" value="450" inputmode="numeric"></label>
+          <label class="cp-switch" style="grid-column:1/-1;flex-direction:row"><input type="checkbox" id="sz-lock" checked><span></span>Keep the shape (height from width)</label>
+        </div>
+        <div class="sz-checks">
+          <label class="cp-switch"><input type="checkbox" id="sz-doc" checked><span></span>Document / text — keep letters sharp</label>
+          <label class="cp-switch"><input type="checkbox" id="sz-gray"><span></span>Black &amp; white (smaller)</label>
+        </div>
+        <p class="sz-note">The size is matched by lowering the resolution first and keeping quality high. 1 KB = 1024 bytes. PDFs are rebuilt as images (text stays readable but can no longer be selected, and a digital signature is removed).</p>
+      </section>
+    </div>
+  </div>
+
+  <section class="sz-results" id="sz-results" hidden aria-labelledby="sz-s3">
+    <div class="sz-results-head">
+      <h2 class="cp-card-title" id="sz-s3" style="font:700 18px/1.2 'SP Lexend',sans-serif;display:flex;gap:10px;align-items:center"><span class="cp-step">3</span>Download</h2>
+      <button type="button" class="cp-btn cp-btn-main" id="sz-all" hidden disabled><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download all (ZIP)</button>
+    </div>
+    <div class="sz-list" id="sz-list"></div>
+  </section>
+</main>
+
+<div class="cp-modal" id="sz-cmp" hidden role="dialog" aria-modal="true" aria-labelledby="sz-cmp-title">
+  <div class="cp-modal-box sz-cmp-box">
+    <div class="cp-modal-head"><h3 id="sz-cmp-title">Before / after</h3><button type="button" class="cp-x" id="sz-cmp-x" aria-label="Close">×</button></div>
+    <div class="sz-stage">
+      <img id="sz-cmp-a" alt="Original">
+      <img id="sz-cmp-b" alt="New">
+      <span id="sz-cmp-line" aria-hidden="true"></span>
+      <span class="sz-tag" id="sz-cmp-l"></span><span class="sz-tag" id="sz-cmp-r"></span>
+    </div>
+    <div style="padding:12px 16px 16px"><input type="range" class="sz-range" id="sz-cmp-range" min="0" max="100" value="50" aria-label="Move the divider"></div>
+  </div>
+</div>
+
+<div class="cp-modal" id="sz-pass" hidden role="dialog" aria-modal="true" aria-labelledby="sz-pass-title">
+  <form class="cp-modal-box cp-small" id="sz-pass-form">
+    <div class="cp-modal-head"><h3 id="sz-pass-title">PDF password</h3></div>
+    <p class="cp-pass-hint"><span id="sz-pass-name"></span> is protected. e-Aadhaar: first 4 letters of the name in CAPITALS + birth year · e-PAN: date of birth DDMMYYYY.</p>
+    <input type="text" id="sz-pass-input" class="sz-pass-input" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Password">
+    <p class="cp-pass-err" id="sz-pass-err" hidden>Wrong password — try again.</p>
+    <div class="cp-modal-foot"><button type="button" class="cp-btn" id="sz-pass-cancel">Cancel</button><button type="submit" class="cp-btn cp-btn-main">Open</button></div>
+  </form>
+</div>
+<div class="cp-toast" id="sz-toast" role="status" aria-live="polite" hidden></div>
+
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/pdf.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/vendor/jszip.min.js"></script>
+<script src="../assets/sizer/sizer.js?v=1"></script>
+</body>
+</html>
