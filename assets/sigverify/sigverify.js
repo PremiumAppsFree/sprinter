@@ -231,18 +231,20 @@
     var t = new Date(d.getTime() + 330 * 60000), p = function (n) { return (n < 10 ? '0' : '') + n; };
     return t.getUTCFullYear() + '.' + p(t.getUTCMonth() + 1) + '.' + p(t.getUTCDate()) + ' ' + p(t.getUTCHours()) + ':' + p(t.getUTCMinutes()) + ':' + p(t.getUTCSeconds()) + ' IST';
   }
-  // Adobe-style "validity" check mark: a thick green tick with a dark drop shadow
-  function bigTick(ctx, cx, top, h) {
-    var w = h * 0.62, t = h * 0.17;                       // tick box width & arm thickness
-    var p1 = [cx - w * 0.5, top + h * 0.52], p2 = [cx - w * 0.12, top + h * 0.97], p3 = [cx + w * 0.55, top + h * 0.05];
-    var line = function (dx, dy, color, lw) {
-      ctx.beginPath(); ctx.moveTo(p1[0] + dx, p1[1] + dy); ctx.lineTo(p2[0] + dx, p2[1] + dy); ctx.lineTo(p3[0] + dx, p3[1] + dy);
-      ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.stroke();
+  // Adobe Reader's "signature valid" check mark, traced from a real validated e-Aadhaar box:
+  // a green polygon with a thin black outline and a black drop shadow to the lower right.
+  // Points are in units of the box height, x measured from the box centre.
+  var TICK = [[-0.330, 0.675], [-0.275, 0.569], [-0.117, 0.754], [0.163, 0.275], [0.261, 0.344], [-0.100, 0.890]];
+  function adobeTick(ctx, cx, top, H) {
+    var path = function (dx, dy) {
+      ctx.beginPath();
+      TICK.forEach(function (p, i) { var X = cx + p[0] * H + dx, Y = top + p[1] * H + dy; if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); });
+      ctx.closePath();
     };
-    ctx.save(); ctx.lineCap = 'butt'; ctx.lineJoin = 'miter'; ctx.miterLimit = 10;
-    line(-t * 0.28, t * 0.22, '#111', t * 1.08);           // shadow
-    line(0, 0, '#111', t * 1.12);                          // outline
-    line(0, 0, '#17a548', t);                              // green
+    ctx.save(); ctx.lineJoin = 'miter';
+    path(H * 0.017, H * 0.022); ctx.fillStyle = '#000'; ctx.fill();                       // shadow
+    path(0, 0); ctx.fillStyle = '#00ae3a'; ctx.fill();                                   // green
+    ctx.lineWidth = Math.max(1, H * 0.008); ctx.strokeStyle = '#000'; ctx.stroke();       // outline
     ctx.restore();
   }
   // Paint every *valid* signature widget on this page. Returns how many boxes were painted.
@@ -260,19 +262,20 @@
       ctx.save();
       ctx.beginPath(); ctx.rect(x, y, W, H); ctx.clip();
       ctx.fillStyle = '#fff'; ctx.fillRect(x, y, W, H);
-      var font = function (f) { return f + 'px Arial, Helvetica, sans-serif'; };
+      // 1) the tick sits underneath the text, exactly like Adobe's validated signature box
+      adobeTick(ctx, x + W * 0.5, y, H);
+      var font = function (f) { return f + 'px Arial, Helvetica, "Liberation Sans", sans-serif'; };
       ctx.fillStyle = '#000'; ctx.textBaseline = 'alphabetic';
-      // 1) big "Signature valid" title
-      var tf = H * 0.27; ctx.font = font(tf);
-      while (tf > 4 && ctx.measureText('Signature valid').width > W * 0.82) { tf -= 0.5; ctx.font = font(tf); }
-      var ty = y + H * 0.15 + tf * 0.9;
-      ctx.fillText('Signature valid', x + W * 0.09, ty);
-      // 2) signer lines underneath, slightly indented
+      // 2) "Signature valid"
+      var tf = H * 0.2125; ctx.font = font(tf);
+      while (tf > 4 && ctx.measureText('Signature valid').width > W * 0.84) { tf -= 0.25; ctx.font = font(tf); }
+      ctx.fillText('Signature valid', x + W * 0.1, y + H * 0.334);
+      // 3) the signer text, wrapped the way the signature's own appearance is
       var paras = ['Digitally signed by ' + s.signer];
       if (s.time) paras.push('Date: ' + fmtDate(s.time));
       if (s.reason) paras.push('Reason: ' + s.reason);
       if (s.location) paras.push('Location: ' + s.location);
-      var bx = x + W * 0.12, bw = W * 0.82, room = y + H * 0.98 - (ty + H * 0.02);
+      var bx = x + W * 0.129, bw = W * 0.69;
       var wrap = function (f) {
         ctx.font = font(f); var out = [];
         paras.forEach(function (p) {
@@ -282,13 +285,12 @@
         });
         return out;
       };
-      var bf = H * 0.09, rows = wrap(bf);
-      while (bf > 3 && (rows.length * bf * 1.12 > room || rows.some(function (r) { return ctx.measureText(r).width > bw; }))) { bf -= 0.25; rows = wrap(bf); }
-      var by = ty + H * 0.02 + bf;
-      rows.forEach(function (r) { ctx.fillText(r, bx, by); by += bf * 1.12; });
-      // 3) the tick on top of the text, as Adobe draws it
-      var th = Math.min(H * 0.72, W * 0.6);
-      bigTick(ctx, x + W * 0.5, y + H * 0.26, th);
+      var bf = H * 0.0981, pitch = H * 0.0993, rows = wrap(bf), first = H * 0.569;
+      while (bf > 3 && (first + (rows.length - 1) * pitch > H * 0.985 || rows.some(function (r) { return ctx.measureText(r).width > W * 0.86; }))) {
+        bf -= 0.25; pitch = bf * 1.012; rows = wrap(bf);
+      }
+      var by = y + first;
+      rows.forEach(function (r) { ctx.fillText(r, bx, by); by += pitch; });
       ctx.restore(); n++;
     });
     return n;
