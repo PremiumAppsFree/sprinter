@@ -446,8 +446,7 @@
       // 3) the signer text, wrapped the way the signature's own appearance is
       var paras = ['Digitally signed by ' + s.signer];
       if (s.time) paras.push('Date: ' + fmtDate(s.time));
-      // the moment this copy was checked (live, today) — clearly labelled, the signing date above stays true
-      if (result.verifiedAt) paras.push('Verified: ' + fmtDate(result.verifiedAt));
+      // exactly Adobe's two paragraphs (signer + signing date); the check time is shown on screen, not in the box
       var bx = x + W * 0.129, bw = W * 0.69;
       var wrap = function (f) {
         ctx.font = font(f); var out = [];
