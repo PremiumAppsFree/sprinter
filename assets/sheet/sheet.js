@@ -153,7 +153,8 @@
           '<label>Margin (mm)<input type="number" data-k="margin" min="0" max="40" step="0.5" value="' + margin + '"></label>' +
           '<label>Gap (mm)<input type="number" data-k="gap" min="0" max="40" step="0.5" value="' + gap + '"></label></div>' +
           '<label class="sh-check"><input type="checkbox" data-k="cut"' + (cut$ ? ' checked' : '') + '> Cut lines around each document</label>' +
-          '<div class="sh-row"><button type="button" class="sh-btn" data-k="addpage">+ Add a page</button><button type="button" class="sh-btn" data-k="delpage">− Remove last page</button></div>';
+          '<div class="sh-paperslot"></div><div class="sh-row"><button type="button" class="sh-btn" data-k="addpage">+ Add a page</button><button type="button" class="sh-btn" data-k="delpage">− Remove last page</button></div>';
+        if (window.SPPaper) SPPaper.mount(panel.querySelector('.sh-paperslot'));
         panel.querySelectorAll('[data-k]').forEach(function (inp) {
           var k = inp.dataset.k;
           if (k === 'addpage') { inp.onclick = function () { pages++; render(); }; return; }
@@ -487,7 +488,7 @@
       for (var p = 0; p < pages; p++) {
         if (!items.some(function (i) { return i.page === p; })) continue;
         busy(true, 'Preparing page ' + (p + 1) + '…'); await new Promise(function (r) { setTimeout(r, 0); });
-        var c = drawPage(p, DPI); out.push({ W: P[0], H: P[1], url: c.toDataURL('image/jpeg', 0.95) }); c.width = c.height = 1;
+        var c = drawPage(p, (window.SPPaper && SPPaper.dpi()) || DPI); if (window.SPPaper) SPPaper.tune(c); out.push({ W: P[0], H: P[1], url: c.toDataURL('image/jpeg', 0.95) }); c.width = c.height = 1;
       }
       busy(false); return out;
     }

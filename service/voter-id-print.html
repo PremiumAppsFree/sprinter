@@ -8,11 +8,11 @@
 <meta name="description" content="Print the e-EPIC voter ID card at real size.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=17">
-<script src="../assets/sprinter/sprinter.js?v=17"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=18">
+<script src="../assets/sprinter/sprinter.js?v=18"></script>
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
-<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=17">
-<link rel="stylesheet" href="../assets/sheet/sheet.css?v=17">
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=18">
+<link rel="stylesheet" href="../assets/sheet/sheet.css?v=18">
 </head>
 <body class="cp-body" data-doc="voter" data-size="small">
 <header class="sp-header" id="sp-header">
@@ -141,11 +141,10 @@
           </div>
           <label>Margin (mm)<input type="number" id="cp-margin" min="0" max="40" step="0.5" value="8" inputmode="decimal"></label>
           <label>Gap (mm)<input type="number" id="cp-gap" min="0" max="30" step="0.5" value="4" inputmode="decimal"></label>
-          <label>Print quality
-            <select id="cp-dpi"><option value="150">150 DPI (fast)</option><option value="300" selected>300 DPI (sharp)</option><option value="600">600 DPI (best)</option></select></label>
           <label>Cards per page
             <input type="number" id="cp-maxpp" min="0" max="200" value="0" inputmode="numeric" title="0 = as many as fit"></label>
         </div>
+        <div id="cp-paperbox"></div>
         <div class="cp-checks">
           <label class="cp-switch"><input type="checkbox" id="cp-cut" checked><span></span>Cut lines</label>
           <label class="cp-switch"><input type="checkbox" id="cp-round"><span></span>Rounded corners</label>
@@ -231,9 +230,9 @@
 <script src="../assets/vendor/pdf.min.js"></script>
 <script src="../assets/vendor/jspdf.umd.min.js"></script>
 <script src="../assets/vendor/forge.min.js"></script>
-<script src="../assets/sigverify/roots.js?v=17"></script>
-<script src="../assets/sigverify/sigverify.js?v=17"></script>
-<script src="../assets/sheet/sheet.js?v=17"></script>
-<script src="../assets/cardprint/cardprint.js?v=17"></script>
+<script src="../assets/sigverify/roots.js?v=18"></script>
+<script src="../assets/sigverify/sigverify.js?v=18"></script>
+<script src="../assets/sheet/sheet.js?v=18"></script>
+<script src="../assets/cardprint/cardprint.js?v=18"></script>
 </body>
 </html>

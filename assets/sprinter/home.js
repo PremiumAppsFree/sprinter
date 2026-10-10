@@ -41,9 +41,13 @@
   sizePill();
 
   var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
-    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('in'); });
   }, { rootMargin: '0px 0px -6% 0px' }) : null;
-  [].forEach.call(document.querySelectorAll('.reveal, .steps'), function (el) { io ? io.observe(el) : el.classList.add('in'); });
+  /* replay on every scroll pass: reset only once the block is fully off screen */
+  var out = io ? new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (!e.isIntersecting) e.target.classList.remove('in'); });
+  }) : null;
+  [].forEach.call(document.querySelectorAll('.reveal, .steps'), function (el) { if (io) { io.observe(el); out.observe(el); } else el.classList.add('in'); });
 
   var tb = document.getElementById('toolbar');
   addEventListener('scroll', function () { tb.classList.toggle('stuck', tb.getBoundingClientRect().top <= 64); }, { passive: true });

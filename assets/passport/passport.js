@@ -34,19 +34,19 @@
   function busy(on, t) { $('pp-busy').hidden = !on; if (t) $('pp-busy-t').textContent = t; }
   function canvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
   function fmt(mm, unit) { var v = mm / UNIT[unit]; return unit === 'px' ? String(Math.round(v)) : String(Math.round(v * 1000) / 1000); }
-  function dpi() { return parseInt($('pp-dpi').value, 10) || 300; }
+  function dpi() { return (window.SPPaper && SPPaper.dpi()) || 300; }
   function px(mm, d) { return Math.round(mm / MM * (d || dpi())); }
   function save() {
     try {
       localStorage.setItem(PREF, JSON.stringify({ unit: $('pp-unit').value, w: st.size.w, h: st.size.h, preset: $('pp-preset').value,
         paper: $('pp-paper').value, orient: $('pp-orient').value, margin: $('pp-margin').value, gap: $('pp-gap').value, fill: $('pp-fill').checked,
-        spare: $('pp-spare').checked, cut: $('pp-cut').checked, pos: $('pp-pos').value, dpi: $('pp-dpi').value, pw: $('pp-pw').value, ph: $('pp-ph').value, pu: $('pp-punit').value }));
+        spare: $('pp-spare').checked, cut: $('pp-cut').checked, pos: $('pp-pos').value, pw: $('pp-pw').value, ph: $('pp-ph').value, pu: $('pp-punit').value }));
     } catch (e) {}
   }
   function load() {
     try {
       var p = JSON.parse(localStorage.getItem(PREF) || 'null'); if (!p) return;
-      ['unit', 'preset', 'paper', 'orient', 'margin', 'gap', 'pos', 'dpi', 'pw', 'ph'].forEach(function (k) { if (p[k] != null && $('pp-' + k)) $('pp-' + k).value = p[k]; });
+      ['unit', 'preset', 'paper', 'orient', 'margin', 'gap', 'pos', 'pw', 'ph'].forEach(function (k) { if (p[k] != null && $('pp-' + k)) $('pp-' + k).value = p[k]; });
       if (p.pu) $('pp-punit').value = p.pu;
       ['fill', 'spare', 'cut'].forEach(function (k) { if (p[k] != null) $('pp-' + k).checked = !!p[k]; });
       if (p.w > 5 && p.h > 5) st.size = { w: p.w, h: p.h };
@@ -351,7 +351,7 @@
     st.pages = buildPages();
     if (st.page >= st.pages.length) st.page = Math.max(0, st.pages.length - 1);
     var has = st.pages.length > 0;
-    ['pp-print', 'pp-pdf', 'pp-jpg', 'pp-single'].forEach(function (id) { $(id).disabled = !has; });
+    ['pp-print', 'pp-pdf', 'pp-jpg', 'pp-single', 'pp-edit'].forEach(function (id) { if ($(id)) $(id).disabled = !has; });
     $('pp-empty').hidden = has; $('pp-canvas').style.visibility = has ? 'visible' : 'hidden';
     $('pp-pager').hidden = st.pages.length < 2; $('pp-pageno').textContent = (st.page + 1) + ' / ' + st.pages.length;
     var info = $('pp-info');
@@ -367,7 +367,7 @@
     var out = [], d = dpi();
     for (var i = 0; i < st.pages.length; i++) {
       busy(true, 'Preparing sheet ' + (i + 1) + ' of ' + st.pages.length + '…'); await new Promise(function (r) { setTimeout(r, 0); });
-      var c = drawPage(st.pages[i], d); out.push({ W: st.pages[i].W, H: st.pages[i].H, url: c.toDataURL('image/jpeg', 0.95) }); c.width = c.height = 1;
+      var c = drawPage(st.pages[i], d); if (window.SPPaper) SPPaper.tune(c); out.push({ W: st.pages[i].W, H: st.pages[i].H, url: c.toDataURL('image/jpeg', 0.95) }); c.width = c.height = 1;
     }
     busy(false); return out;
   }
@@ -395,12 +395,36 @@
   async function doJpg() { var out = await renderAll(); out.forEach(function (p, i) { setTimeout(function () { saveFile(base() + (out.length > 1 ? '-' + (i + 1) : '') + '.jpg', p.url); }, i * 400); }); }
   function doSingle() {
     var p = st.sel || st.people[0]; if (!p) return;
-    var c = photoCanvas(p, dpi());
+    var c = photoCanvas(p, dpi()); if (window.SPPaper) SPPaper.tune(c);
     c.toBlob(function (b) { saveFile(base() + '-single.jpg', URL.createObjectURL(b)); }, 'image/jpeg', 0.95);
+  }
+
+
+  // free layout: drag, pinch and resize every photo on the sheet
+  function openLayout() {
+    if (!window.SPSheet) { toast('Layout editor did not load.'); return; }
+    if (!st.pages.length) return;
+    var ov = document.createElement('div'); ov.className = 'sh-overlay';
+    var host = document.createElement('div'); ov.appendChild(host); document.body.appendChild(ov);
+    document.documentElement.style.overflow = 'hidden';
+    var P = st.pages[0], pv = $('pp-paper').value, map = { A4: 'A4', A3: 'A3', A5: 'A5', Letter: 'Letter', Legal: 'Legal', '4x6': '4x6', '5x7': '5x7' };
+    var ed = new SPSheet.Editor(host, { title: 'Edit layout', template: null, cut: $('pp-cut').checked, margin: num('pp-margin', 2, 0, 40), gap: num('pp-gap', 1, 0, 30),
+      paper: map[pv] || 'custom', custom: [Math.min(P.W, P.H), Math.max(P.W, P.H)], orient: P.W > P.H ? 'landscape' : 'portrait',
+      onClose: function () { ov.remove(); document.documentElement.style.overflow = ''; } });
+    var cache = {};
+    st.pages.forEach(function (pg, pi) {
+      pg.items.forEach(function (it) {
+        var c = cache[it.p.id] || (cache[it.p.id] = photoCanvas(it.p, 300));
+        if (it.rot) { var t = canvas(c.height, c.width), x = t.getContext('2d'); x.translate(t.width, 0); x.rotate(Math.PI / 2); x.drawImage(c, 0, 0); c = t; }
+        ed.addCanvas(c, { place: { page: pi, x: it.x, y: it.y, w: it.w, h: it.h }, real: [it.w, it.h] });
+      });
+    });
+    ed.fit();
   }
 
   // ---------- init ----------
   function init() {
+    if (window.SPPaper && $('pp-paperbox')) SPPaper.mount($('pp-paperbox'));
     var sel = $('pp-preset');
     PRESETS.forEach(function (p) { var o = document.createElement('option'); o.value = p[0]; o.textContent = p[1]; sel.appendChild(o); });
     var oc = document.createElement('option'); oc.value = 'custom'; oc.textContent = 'Custom size (type below)'; sel.appendChild(oc);
@@ -440,12 +464,13 @@
     ['b', 'c', 's'].forEach(function (k) { $('pp-' + k).addEventListener('input', function () { if (!st.sel) return; st.sel.adj[k] = +this.value; $('pp-' + k + '-v').textContent = this.value; renderPeopleSoon(); update(); }); });
     $('pp-adjreset').onclick = function () { if (st.sel) { st.sel.adj = { b: 0, c: 0, s: 0 }; renderEditor(); renderPeople(); update(); } };
     ['pp-border', 'pp-bw', 'pp-bc', 'pp-text', 'pp-name', 'pp-date', 'pp-tsize'].forEach(function (id) { $(id).addEventListener('input', function () { $('pp-textopts').hidden = !$('pp-text').checked; renderPeopleSoon(); update(); }); $(id).addEventListener('change', update); });
-    ['pp-paper', 'pp-orient', 'pp-margin', 'pp-gap', 'pp-fill', 'pp-spare', 'pp-cut', 'pp-pos', 'pp-dpi', 'pp-pw', 'pp-ph', 'pp-punit'].forEach(function (id) {
+    ['pp-paper', 'pp-orient', 'pp-margin', 'pp-gap', 'pp-fill', 'pp-spare', 'pp-cut', 'pp-pos', 'pp-pw', 'pp-ph', 'pp-punit'].forEach(function (id) {
       $(id).addEventListener('change', function () { $('pp-cp').hidden = $('pp-paper').value !== 'custom'; save(); update(); }); $(id).addEventListener('input', update);
     });
     $('pp-prev').onclick = function () { if (st.page > 0) { st.page--; update(); } };
     $('pp-next').onclick = function () { if (st.page < st.pages.length - 1) { st.page++; update(); } };
     $('pp-print').onclick = doPrint; $('pp-pdf').onclick = doPdf; $('pp-jpg').onclick = doJpg; $('pp-single').onclick = doSingle;
+    if ($('pp-edit')) $('pp-edit').onclick = openLayout;
     window.addEventListener('resize', update);
     renderEditor(); update();
   }

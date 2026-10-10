@@ -747,8 +747,9 @@
     for (var i = 0; i < pages.length; i++) {
       busy(true, 'Preparing page ' + (i + 1) + ' of ' + pages.length + '…');
       await new Promise(function (r) { setTimeout(r, 0); });
-      var dpi = parseInt(($('cp-dpi') || {}).value, 10) || DPI, c;
+      var dpi = (window.SPPaper && SPPaper.dpi()) || parseInt(($('cp-dpi') || {}).value, 10) || DPI, c;
       try { c = drawPage(pages[i], dpi); if (!c.width) throw 0; } catch (e) { c = drawPage(pages[i], 300); }
+      if (window.SPPaper) SPPaper.tune(c);
       out.push({ W: pages[i].W, H: pages[i].H, url: c.toDataURL('image/jpeg', 0.95) });
       c.width = c.height = 1;
     }
@@ -796,6 +797,7 @@
   // ---------- wiring ----------
   function init() {
     loadPrefs();
+    if (window.SPPaper && $('cp-paperbox')) SPPaper.mount($('cp-paperbox'));
     var ds = document.body.getAttribute('data-size'), dr = ds && document.querySelector('input[name=cp-size][value=' + ds + ']');
     if (dr) { dr.checked = true; st.size = ds; if (ds === 'full') $('cp-margin').value = Math.min(num('cp-margin', 8), 5); }
     [].forEach.call(document.querySelectorAll('input[name=cp-size]'), function (r) {

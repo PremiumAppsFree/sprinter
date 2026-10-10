@@ -15627,7 +15627,7 @@ function refreshEditor(resetPoints = false) {
         }
 
         function drawDocumentAlbumCutFoldGuides(targetCtx, scaleX = 1, scaleY = 1) {
-            if (!isDocumentAlbumLaunch) return;
+            if (!isDocumentAlbumLaunch || window.SP_ALBUM_SLIT !== true) return;   // S Printer: centre slit line is not printed
             const cardWidth = DOC_TYPES.pvc.w * DOCUMENT_ALBUM_CARD_SCALE;
             const cardHeight = DOC_TYPES.pvc.h * DOCUMENT_ALBUM_CARD_SCALE;
             const startX = (2480 - ((cardWidth * 2) + DOCUMENT_ALBUM_DOCUMENT_GAP)) / 2;
@@ -16188,7 +16188,7 @@ function refreshEditor(resetPoints = false) {
                 }
                 progress(Math.round((index + 1) / items.length * 100));
             }
-            if (isDocumentAlbumLaunch) {
+            if (isDocumentAlbumLaunch && window.SP_ALBUM_SLIT === true) {
                 const h = DOC_TYPES.pvc.h * DOCUMENT_ALBUM_CARD_SCALE;
                 const gap = DOCUMENT_ALBUM_DOCUMENT_GAP;
                 const start = DOCUMENT_ALBUM_START_Y + h + gap / 2;

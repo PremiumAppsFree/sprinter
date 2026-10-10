@@ -954,3 +954,250 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
+
+/* Paper type & print quality — one setting shared by every tool.
+ * Each paper gets a colour tune so prints look rich on that paper (plain paper soaks up ink,
+ * glossy photo paper does not). Quality: Normal 300 / High 450 / Best 600 dpi. */
+(function () {
+  'use strict';
+  var KEY = 'sp-paper-v1';
+  var PAPERS = {
+    plain: { name: 'Plain paper (normal)', b: 1.03, c: 1.07, s: 1.12 },
+    gloss: { name: 'Photo paper — glossy', b: 1.0, c: 1.03, s: 1.05 },
+    matte: { name: 'Photo paper — matte', b: 1.02, c: 1.05, s: 1.08 },
+    card: { name: 'Card / art paper (thick)', b: 1.02, c: 1.06, s: 1.09 },
+    pvc: { name: 'PVC card', b: 1.0, c: 1.04, s: 1.06 },
+    exact: { name: 'Exact colours (no change)', b: 1, c: 1, s: 1 }
+  };
+  var QUAL = { normal: { name: 'Normal (300 dpi)', dpi: 300 }, high: { name: 'High (450 dpi)', dpi: 450 }, best: { name: 'Best (600 dpi)', dpi: 600 } };
+  var st = { paper: 'plain', quality: 'normal' }, subs = [];
+  try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved) { if (PAPERS[saved.paper]) st.paper = saved.paper; if (QUAL[saved.quality]) st.quality = saved.quality; } } catch (e) {}
+  function prof() { return PAPERS[st.paper] || PAPERS.plain; }
+  function cssFilter() { var p = prof(); return p.b === 1 && p.c === 1 && p.s === 1 ? 'none' : 'brightness(' + p.b + ') contrast(' + p.c + ') saturate(' + p.s + ')'; }
+  function applyPrintCss() {
+    var el = document.getElementById('sp-paper-print');
+    if (!el) { el = document.createElement('style'); el.id = 'sp-paper-print'; (document.head || document.documentElement).appendChild(el); }
+    var f = cssFilter();
+    // tools that print straight from the page get the tune here; S Printer's own sheets are already tuned
+    el.textContent = f === 'none' ? '' : '@media print{img,canvas{filter:' + f + '}#cp-print-root img{filter:none!important}}';
+  }
+  // tune pixels of a finished sheet (works in every browser, also where canvas filters are missing)
+  function tune(canvas) {
+    var p = prof(); if (p.b === 1 && p.c === 1 && p.s === 1) return canvas;
+    try {
+      var x = canvas.getContext('2d'), W = canvas.width, H = canvas.height, step = 512;
+      for (var y0 = 0; y0 < H; y0 += step) {
+        var h = Math.min(step, H - y0), img = x.getImageData(0, y0, W, h), d = img.data;
+        for (var i = 0; i < d.length; i += 4) {
+          var r = d[i], g = d[i + 1], b = d[i + 2];
+          if (r > 250 && g > 250 && b > 250) continue;                 // keep paper white clean
+          r *= p.b; g *= p.b; b *= p.b;
+          r = (r - 128) * p.c + 128; g = (g - 128) * p.c + 128; b = (b - 128) * p.c + 128;
+          var l = 0.299 * r + 0.587 * g + 0.114 * b;
+          d[i] = l + (r - l) * p.s; d[i + 1] = l + (g - l) * p.s; d[i + 2] = l + (b - l) * p.s;
+        }
+        x.putImageData(img, 0, y0);
+      }
+    } catch (e) {}
+    return canvas;
+  }
+  function set(k, v) {
+    if (k === 'paper' && PAPERS[v]) st.paper = v; if (k === 'quality' && QUAL[v]) st.quality = v;
+    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
+    applyPrintCss();
+    subs.forEach(function (f) { try { f(st); } catch (e) {} });
+    [].forEach.call(document.querySelectorAll('[data-sp-paper],[data-sp-quality]'), function (s) { s.value = s.dataset.spPaper != null ? st.paper : st.quality; });
+    var pill = document.getElementById('sp-paperpill'); if (pill) pill.querySelector('b').textContent = shortLabel();
+  }
+  function opts(map, cur) { return Object.keys(map).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + map[k].name + '</option>'; }).join(''); }
+  // inline controls for a tool's settings panel
+  function mount(host, cls) {
+    var w = document.createElement('div'); w.className = cls || 'sp-paperbox';
+    w.innerHTML = '<label>Paper type<select data-sp-paper>' + opts(PAPERS, st.paper) + '</select></label><label>Print quality<select data-sp-quality>' + opts(QUAL, st.quality) + '</select></label>';
+    w.querySelector('[data-sp-paper]').addEventListener('change', function () { set('paper', this.value); });
+    w.querySelector('[data-sp-quality]').addEventListener('change', function () { set('quality', this.value); });
+    host.appendChild(w); return w;
+  }
+  function shortLabel() { return (st.paper === 'plain' ? 'Plain' : st.paper === 'gloss' ? 'Glossy' : st.paper === 'matte' ? 'Matte' : st.paper === 'card' ? 'Card' : st.paper === 'pvc' ? 'PVC' : 'Exact') + ' · ' + st.quality.charAt(0).toUpperCase() + st.quality.slice(1); }
+  // floating "Paper" button on tool pages that have no inline paper settings
+  function pill() {
+    if (!/\/(service|tool)\//.test(location.pathname) || document.querySelector('[data-sp-paper]') || document.getElementById('sp-paperpill')) return;
+    var b = document.createElement('button'); b.type = 'button'; b.id = 'sp-paperpill'; b.className = 'sp-paperpill';
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z" fill="#fff" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="8.5" y="11" width="7" height="2.2" rx="1" fill="#0098D8"/><rect x="8.5" y="15" width="5" height="2.2" rx="1" fill="#D6247A"/></svg><span>Paper</span><b></b>';
+    b.querySelector('b').textContent = shortLabel();
+    b.onclick = function () {
+      var m = document.getElementById('sp-papermenu'); if (m) { m.remove(); return; }
+      m = document.createElement('div'); m.id = 'sp-papermenu'; m.className = 'sp-papermenu';
+      m.innerHTML = '<b>Print settings</b><p>Choose the paper you print on — colours are tuned for it.</p>';
+      mount(m); var c = document.createElement('button'); c.type = 'button'; c.className = 'sp-paperok'; c.textContent = 'Done'; c.onclick = function () { m.remove(); }; m.appendChild(c);
+      document.body.appendChild(m);
+    };
+    document.body.appendChild(b);
+  }
+  window.SPPaper = {
+    get: function () { return { paper: st.paper, quality: st.quality }; }, set: set,
+    dpi: function () { return (QUAL[st.quality] || QUAL.normal).dpi; }, tune: tune, filter: cssFilter, mount: mount,
+    onChange: function (f) { subs.push(f); }, papers: PAPERS
+  };
+  applyPrintCss();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(pill, 800); }); else setTimeout(pill, 800);
+})();
+
+/* App-like feel: no blue tap flash, no accidental text selection / copy / link pop-ups,
+ * no page address or title printed on the paper, and smooth scroll animations. */
+(function () {
+  'use strict';
+  var EDIT = 'input,textarea,select,[contenteditable="true"],[contenteditable=""]';
+  document.addEventListener('contextmenu', function (e) { if (!e.target.closest || !e.target.closest(EDIT)) e.preventDefault(); });
+  document.addEventListener('copy', function (e) { var a = document.activeElement; if (!(a && a.matches && a.matches(EDIT))) e.preventDefault(); });
+  document.addEventListener('dragstart', function (e) { if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'A')) e.preventDefault(); });
+  // the page title / address are printed by the browser in the page margins: keep them empty
+  var title = null;
+  window.addEventListener('beforeprint', function () { title = document.title; document.title = '​'; });
+  window.addEventListener('afterprint', function () { if (title != null) document.title = title; title = null; });
+  var pm = document.createElement('style'); pm.id = 'sp-print-margins';
+  pm.textContent = '@media print{@page{margin:0}}';
+  (document.head || document.documentElement).insertBefore(pm, (document.head || document.documentElement).firstChild);
+
+  // scroll animation: cards slide in every time they come into view (up or down)
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var SEL = '.cp-card,.sz-item,.pp-person,.sh-root,.md-head,.cp-head,.sz-hero,.pp-hero,section.card,.rounded-2xl,.rounded-3xl,.shadow-lg,.shadow-xl,.faq-item,article';
+  var SKIP = '[role=dialog],.cp-modal,.sh-overlay,.sh-cropm,header,nav,footer,.fixed,#sp-pa,.reveal,.group,.tool,.hero';
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      var el = e.target;
+      if (e.isIntersecting) el.classList.add('sp-in');
+      else {
+        var r = e.boundingClientRect;                                   // only when completely off screen
+        if ((r.top >= innerHeight || r.bottom <= 0) && r.height < innerHeight * 1.1) el.classList.remove('sp-in');
+      }
+    });
+  }, { rootMargin: '0px', threshold: 0 });
+  var seen = new WeakSet();
+  function scan(root) {
+    [].forEach.call((root || document).querySelectorAll(SEL), function (el) {
+      if (seen.has(el) || el.closest(SKIP) || el.offsetParent === null && getComputedStyle(el).position !== 'fixed' && !el.getClientRects().length) return;
+      seen.add(el); el.classList.add('sp-rv');
+      var r = el.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) el.classList.add('sp-in');
+      io.observe(el);
+    });
+  }
+  function start() { scan(); var t; new MutationObserver(function () { clearTimeout(t); t = setTimeout(scan, 250); }).observe(document.body, { childList: true, subtree: true }); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+/* "Arrange on page" for every tool: the documents/photos you added to a tool can be placed
+ * freely on A4 / 4×6 … — drag, pinch to zoom, resize, auto-crop, re-crop — and printed. */
+(function () {
+  'use strict';
+  if (!/\/(service|tool)\//.test(location.pathname)) return;
+  var OWN = /\/(multi-doc|size-changer|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)\.html/;
+  if (OWN.test(location.pathname)) return;
+  var files = [], btn = null;
+  var BASE = (function () { var s = document.querySelector('script[src*="assets/sprinter/sprinter.js"]'); return s ? s.src.replace(/assets\/sprinter\/sprinter\.js.*$/, '') : '../'; })();
+  function keep(list) {
+    [].forEach.call(list || [], function (f) {
+      if (!f || !(/^image\//.test(f.type) || /pdf$/i.test(f.type) || /\.(pdf|jpe?g|png|webp)$/i.test(f.name))) return;
+      if (!files.some(function (x) { return x.name === f.name && x.size === f.size; })) files.push(f);
+    });
+    if (files.length > 30) files = files.slice(-30);
+    if (files.length) show();
+  }
+  document.addEventListener('change', function (e) { if (e.target && e.target.type === 'file') keep(e.target.files); }, true);
+  document.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files) keep(e.dataTransfer.files); }, true);
+  function show() {
+    if (btn) { btn.hidden = false; return; }
+    btn = document.createElement('button'); btn.type = 'button'; btn.className = 'sp-arrange';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" fill="#D6247A" opacity=".16"/><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></g></svg><span>Arrange on page</span>';
+    btn.title = 'Drag, pinch-zoom and resize your documents on the paper';
+    btn.onclick = open;
+    document.body.appendChild(btn);
+  }
+  function load(src, css) {
+    return new Promise(function (res, rej) {
+      if (css) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = BASE + src; l.onload = res; l.onerror = res; document.head.appendChild(l); return; }
+      var s = document.createElement('script'); s.src = BASE + src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+    });
+  }
+  var ready = null;
+  function libs() {
+    if (ready) return ready;
+    var jobs = [load('assets/sheet/sheet.css?v=2', true), load('assets/vendor/cropper.min.css', true)];
+    ready = Promise.all(jobs).then(function () {
+      var js = [];
+      if (!window.Cropper) js.push(load('assets/vendor/cropper.min.js'));
+      if (!window.pdfjsLib) js.push(load('assets/vendor/pdf.min.js'));
+      if (!(window.jspdf && window.jspdf.jsPDF)) js.push(load('assets/vendor/jspdf.umd.min.js'));
+      return Promise.all(js);
+    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=2'); });
+    return ready;
+  }
+  function open() {
+    btn.disabled = true;
+    libs().then(function () {
+      btn.disabled = false;
+      var ov = document.createElement('div'); ov.className = 'sh-overlay';
+      var host = document.createElement('div'); ov.appendChild(host); document.body.appendChild(ov);
+      document.documentElement.style.overflow = 'hidden';
+      var ed = new window.SPSheet.Editor(host, { title: 'Arrange on page', template: [2, 2], base: BASE, onClose: function () { ov.remove(); document.documentElement.style.overflow = ''; } });
+      ed.addFiles(files.slice());
+    }).catch(function () { btn.disabled = false; alert('Could not open the layout editor. Check the connection and try again.'); });
+  }
+})();
+
+/* keep the floating Paper / Arrange buttons off anything a tool needs to click */
+(function () {
+  'use strict';
+  var cur = null;
+  var HIT = 'button,a[href],input,select,textarea,label,[role=button],[onclick],[contenteditable=true]';
+  function els() { return [document.querySelector('.sp-arrange'), document.getElementById('sp-paperpill')].filter(function (e) { return e && e.getClientRects().length > 0; }); }
+  function size(list) { var w = 0, h = 0; list.forEach(function (e, i) { var r = e.getBoundingClientRect(); w = Math.max(w, r.width); h += r.height + (i ? 8 : 0); }); return { w: w, h: h }; }
+  function blocked(x, y, mine) {
+    var st = document.elementsFromPoint(x, y) || [];
+    for (var i = 0; i < st.length; i++) {
+      var n = st[i];
+      if (mine.some(function (m) { return m === n || m.contains(n); })) continue;
+      if (n.closest && n.closest(HIT + ',nav,[role=toolbar],.mobile-panel')) return true;
+      try { if (getComputedStyle(n).cursor === 'pointer') return true; } catch (e) {}
+      return false;
+    }
+    return false;
+  }
+  function free(side, bottom, sz, mine) {
+    var top = innerHeight - bottom - sz.h; if (top < 60) return false;
+    var x0 = side === 'l' ? 14 : innerWidth - 14 - sz.w;
+    for (var fy = 0; fy <= 1; fy += 0.5) for (var fx = 0; fx <= 1; fx += 0.5) {
+      if (blocked(x0 + 2 + fx * (sz.w - 4), top + 2 + fy * (sz.h - 4), mine)) return false;
+    }
+    return true;
+  }
+  function apply(pos, list) {
+    var arr = document.querySelector('.sp-arrange'), pill = document.getElementById('sp-paperpill'), menu = document.getElementById('sp-papermenu');
+    var b = pos.b;
+    [pill, arr].forEach(function (e) {
+      if (!e || !e.getClientRects().length) return;
+      e.style.bottom = b + 'px';
+      e.style.left = pos.s === 'l' ? '14px' : 'auto'; e.style.right = pos.s === 'r' ? '14px' : 'auto';
+      b += e.getBoundingClientRect().height + 8;
+    });
+    if (menu) { menu.style.bottom = (b + 2) + 'px'; menu.style.left = pos.s === 'l' ? '14px' : 'auto'; menu.style.right = pos.s === 'r' ? '14px' : 'auto'; }
+  }
+  function lift() {
+    var mine = els(); if (!mine.length) return;
+    if (document.querySelector('.sh-overlay')) return;
+    var all = mine.concat([document.getElementById('sp-papermenu')].filter(Boolean));
+    var sz = size(mine);
+    if (cur && free(cur.s, cur.b, sz, all)) { apply(cur, mine); return; }
+    var best = null;
+    for (var b = 14; b < innerHeight * 0.75 && !best; b += 24) {
+      if (free('l', b, sz, all)) best = { s: 'l', b: b };
+      else if (free('r', b, sz, all)) best = { s: 'r', b: b };
+    }
+    cur = best || { s: 'l', b: 14 };
+    apply(cur, mine);
+  }
+  var t; function soon() { clearTimeout(t); t = setTimeout(lift, 120); }
+  window.addEventListener('resize', function () { cur = null; soon(); }); window.addEventListener('scroll', soon, { passive: true }); setInterval(lift, 2000);
+  new MutationObserver(function (m) { if (m.some(function (x) { return [].some.call(x.addedNodes, function (n) { return n.id === 'sp-paperpill' || n.id === 'sp-papermenu' || (n.classList && n.classList.contains('sp-arrange')); }); })) soon(); })
+    .observe(document.documentElement, { childList: true, subtree: true });
+})();

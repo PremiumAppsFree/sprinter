@@ -8,11 +8,12 @@
 <meta name="description" content="Make passport size photos (1.2 × 1.5 in or any size in inch, cm, mm), remove the background, choose any colour and print a perfectly filled A4 or 4×6 sheet.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=17">
-<script src="../assets/sprinter/sprinter.js?v=17"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=18">
+<script src="../assets/sprinter/sprinter.js?v=18"></script>
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
-<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=1">
-<link rel="stylesheet" href="../assets/passport/passport.css?v=1">
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=3">
+<link rel="stylesheet" href="../assets/passport/passport.css?v=3">
+<link rel="stylesheet" href="../assets/sheet/sheet.css?v=3">
 </head>
 <body class="pp-body">
 <header class="sp-header" id="sp-header">
@@ -111,8 +112,8 @@
           <label>Margin (mm)<input type="number" id="pp-margin" min="0" max="40" step="0.5" value="2" inputmode="decimal"></label>
           <label>Gap (mm)<input type="number" id="pp-gap" min="0" max="30" step="0.5" value="1" inputmode="decimal"></label>
           <label>Place<select id="pp-pos"><option value="top" selected>Top</option><option value="center">Centre</option></select></label>
-          <label>Quality<select id="pp-dpi"><option value="300" selected>300 DPI</option><option value="600">600 DPI</option></select></label>
         </div>
+        <div id="pp-paperbox"></div>
         <div class="cp-checks">
           <label class="cp-switch"><input type="checkbox" id="pp-fill" checked><span></span>Fill the whole sheet</label>
           <label class="cp-switch"><input type="checkbox" id="pp-spare" checked><span></span>Use spare space (turn photos)</label>
@@ -129,6 +130,7 @@
           <button type="button" class="cp-btn" id="pp-pdf" disabled>PDF</button>
           <button type="button" class="cp-btn" id="pp-jpg" disabled>JPG</button>
         </div>
+        <button type="button" class="cp-btn cp-editbtn" id="pp-edit" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>Edit layout — drag, pinch &amp; resize on the page</button>
         <button type="button" class="cp-btn" id="pp-single" disabled style="width:100%;margin-top:8px">Download one photo (for online forms)</button>
         <p class="cp-tip">When printing choose <b>Scale: 100% / Actual size</b> and turn <b>Headers and footers</b> off.</p>
       </section>
@@ -170,6 +172,7 @@
 </footer>
 <script src="../assets/vendor/cropper.min.js"></script>
 <script src="../assets/vendor/jspdf.umd.min.js"></script>
-<script src="../assets/passport/passport.js?v=1"></script>
+<script src="../assets/sheet/sheet.js?v=3"></script>
+<script src="../assets/passport/passport.js?v=3"></script>
 </body>
 </html>
