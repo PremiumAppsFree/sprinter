@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Application Letter Maker — Hindi & English — S Printer</title>
+<meta name="description" content="Free application letter maker: leave, bank, school, job, resignation, RTI and complaint letters in Hindi and English, with signature, PDF and print.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=20">
+<script src="../assets/sprinter/sprinter.js?v=20"></script>
+<link rel="stylesheet" href="../assets/vendor/cropper.min.css">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
+</head>
+<body class="st-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+<main class="st-wrap">
+  <div class="st-head"><svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="sti" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a5b4fc"/><stop offset="1" stop-color="#3730a3"/></linearGradient></defs><circle cx="26" cy="26" r="25" fill="#fff" stroke="#e5e7eb"/><rect x="13" y="14" width="26" height="24" rx="3" fill="url(#sti)"/><path d="M13 17l13 10 13-10" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/></svg><div><h1>Application Letter Maker</h1><p>Ready letters in English and Hindi — leave, bank, school, job, complaints and RTI. Fill your details, add your signature, print.</p></div></div>
+  <div id="studio"></div>
+</main>
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/cropper.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/vendor/studio/fabric.min.js"></script>
+<script src="../assets/vendor/studio/qrcode.js"></script>
+<script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
+<script src="../assets/studio/studio.js?v=1"></script>
+
+<script src="../assets/studio/tpl-kit.js?v=1"></script>
+<script src="../assets/studio/tpl-letter.js?v=1"></script>
+<script>
+  (function () {
+    var K = SPStudio.K, cfg = {"tool": "letter", "title": "Application", "file": "Application", "sizes": ["a4p"], "cats": ["Sarkari Vibhag", "Bank & Post", "School/College", "Company", "Request/Leave"], "photoFields": ["SIGN"], "dataTitle": "Letter details", "fields": [{"k": "FULL_NAME", "label": "Your name", "group": "From (you)", "def": "Aarav Sharma"}, {"k": "FATHER", "label": "Father's name", "def": "Shri Ramesh Sharma"}, {"k": "ADDRESS", "label": "Your address", "type": "textarea", "rows": 2, "def": "12, MG Road, Jaipur 302001"}, {"k": "PHONE", "label": "Mobile", "def": "+91 98765 43210"}, {"k": "PLACE", "label": "Place", "def": "Jaipur"}, {"k": "DATE", "label": "Date", "def": "10/10/2026"}, {"k": "SIGN", "label": "Signature", "type": "photo"}, {"k": "TO_TITLE", "label": "To (post)", "group": "To", "def": "The Branch Manager"}, {"k": "TO_OFFICE", "label": "Office / organisation", "def": "State Bank of India"}, {"k": "TO_ADDRESS", "label": "Place / address", "def": "Jaipur"}, {"k": "SUBJECT", "label": "Subject (general letters)", "group": "Letter", "def": "Request for street light repair"}, {"k": "REASON", "label": "Reason / matter", "type": "textarea", "rows": 3, "def": "the street lights in our lane have not been working for two weeks."}, {"k": "FROM_DATE", "label": "From date", "def": "12/10/2026"}, {"k": "TO_DATE", "label": "To date", "def": "14/10/2026"}, {"k": "DAYS", "label": "Number of days / leaves", "def": "3"}, {"k": "ACCOUNT_NO", "label": "Account / consumer / card number", "group": "Bank & office", "def": "XXXXXXX1234"}, {"k": "BANK_NAME", "label": "Bank name", "def": "State Bank of India"}, {"k": "BRANCH", "label": "Branch", "def": "MI Road, Jaipur"}, {"k": "FEE_MODE", "label": "RTI fee paid by", "def": "Indian Postal Order No. ______"}, {"k": "POST", "label": "Post / designation", "group": "Job", "def": "Accounts Executive"}, {"k": "EMP_ID", "label": "Employee ID", "def": "ST-1042"}, {"k": "COMPANY", "label": "Company", "def": "Shree Traders Pvt. Ltd."}, {"k": "QUALIFICATION", "label": "Qualification", "def": "B.Com"}, {"k": "EXPERIENCE_YRS", "label": "Experience", "def": "2 years"}, {"k": "STUDENT", "label": "Student / family member name", "group": "School", "def": "Riya Sharma"}, {"k": "CLASS", "label": "Class / course", "def": "VII"}, {"k": "ROLL_NO", "label": "Roll number", "def": "24"}, {"k": "SCHOOL", "label": "School / college", "def": "Sunrise Public School"}], "aiHint": "e.g. Hindi application to the Gram Panchayat for a hand pump repair in our mohalla"};
+    cfg.sizes = cfg.sizes.map(function (k) { return K.SIZES[k]; });
+    window.__studio = new SPStudio.Studio(document.getElementById('studio'), cfg);
+    __studio.init();
+  })();
+</script>
+</body>
+</html>

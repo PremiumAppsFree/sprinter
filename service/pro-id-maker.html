@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pro ID Card Maker — free bulk ID cards — S Printer</title>
+<meta name="description" content="Free bulk ID card maker for schools, offices and events: front and back designs, Excel import, photos, QR and barcode, A4 sheets and PVC print.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=20">
+<script src="../assets/sprinter/sprinter.js?v=20"></script>
+<link rel="stylesheet" href="../assets/vendor/cropper.min.css">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
+</head>
+<body class="st-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+<main class="st-wrap">
+  <div class="st-head"><svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="sti" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs><circle cx="26" cy="26" r="25" fill="#fff" stroke="#e5e7eb"/><rect x="13" y="15" width="26" height="22" rx="3" fill="url(#sti)"/><circle cx="21" cy="24" r="3.5" fill="#fff"/><path d="M17 31c1-2.5 2.5-3.5 4-3.5s3 1 4 3.5M28 22h7M28 26h7M28 30h5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg><div><h1>Pro ID Card Maker</h1><p>Design front and back once, add people by hand or from Excel, then print every card on A4 or export PVC front/back images.</p></div></div>
+  <div id="studio"></div>
+</main>
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/cropper.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/vendor/studio/fabric.min.js"></script>
+<script src="../assets/vendor/studio/qrcode.js"></script>
+<script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
+<script src="../assets/studio/studio.js?v=1"></script>
+<script src="../assets/studio/studio-id.js?v=1"></script>
+
+<script src="../assets/studio/tpl-kit.js?v=1"></script>
+<script src="../assets/studio/tpl-id.js?v=1"></script>
+<script>
+  (function () {
+    var K = SPStudio.K, cfg = {"tool": "idcard", "title": "ID card", "file": "ID-card", "sizes": ["idp", "idl"], "cats": ["School", "Corporate", "Event"], "id": true, "fixedPages": true, "photoFields": ["PHOTO", "LOGO", "SIGN"], "dataTitle": "Card details", "dataNote": "Organisation details print on every card. The card-holder details here are only for the preview — add real people in Database.", "fields": [{"k": "ORG_NAME", "label": "School / company name", "group": "Organisation (same on every card)", "def": "Sunrise Public School"}, {"k": "ORG_TAG", "label": "Tagline / affiliation", "def": "Affiliated to CBSE · Since 1998"}, {"k": "ORG_ADDRESS", "label": "Address", "type": "textarea", "rows": 2, "def": "Near Bus Stand, Sikar Road, Jaipur 302013"}, {"k": "ORG_PHONE", "label": "Office phone", "def": "0141-2345678"}, {"k": "ORG_WEB", "label": "Website / e-mail", "def": "www.sunriseschool.in"}, {"k": "LOGO", "label": "Logo", "type": "photo"}, {"k": "SIGN", "label": "Authority signature", "type": "photo"}, {"k": "NAME", "label": "Name", "group": "Card holder (preview / dummy data)", "rec": true, "def": "Ananya Gupta"}, {"k": "ID_NO", "label": "ID / roll number", "rec": true, "def": "SPS2026-0142"}, {"k": "ROLE", "label": "Class / designation", "rec": true, "def": "Class VIII"}, {"k": "DEPT", "label": "Section / department", "rec": true, "def": "Section B"}, {"k": "FATHER", "label": "Father's name", "rec": true, "def": "Mr. Rajesh Gupta"}, {"k": "DOB", "label": "Date of birth", "rec": true, "def": "05/06/2013"}, {"k": "BLOOD", "label": "Blood group", "rec": true, "def": "B+"}, {"k": "PHONE", "label": "Phone", "rec": true, "def": "+91 98290 55555"}, {"k": "ADDRESS", "label": "Address", "rec": true, "def": "22, Vidhyadhar Nagar, Jaipur"}, {"k": "EMERGENCY", "label": "Emergency contact", "rec": true, "def": "+91 98290 55556"}, {"k": "VALID", "label": "Valid till", "rec": true, "def": "31 March 2027"}, {"k": "PHOTO", "label": "Photo", "type": "photo", "rec": true}], "demoRows": [{"NAME": "Ananya Gupta", "ID_NO": "SPS2026-0142", "ROLE": "Class VIII", "DEPT": "B", "FATHER": "Mr. Rajesh Gupta", "DOB": "05/06/2013", "BLOOD": "B+", "PHONE": "9829055555", "ADDRESS": "22, Vidhyadhar Nagar, Jaipur", "EMERGENCY": "9829055556", "VALID": "31/03/2027", "PHOTO": "SPS2026-0142.jpg"}, {"NAME": "Kabir Singh", "ID_NO": "SPS2026-0143", "ROLE": "Class VIII", "DEPT": "B", "FATHER": "Mr. Harpreet Singh", "DOB": "17/11/2012", "BLOOD": "O+", "PHONE": "9829066666", "ADDRESS": "5, Malviya Nagar, Jaipur", "EMERGENCY": "9829066667", "VALID": "31/03/2027", "PHOTO": "SPS2026-0143.jpg"}], "aiHint": "e.g. Modern school ID card, portrait, navy and yellow, photo in a circle, QR code on the back"};
+    cfg.sizes = cfg.sizes.map(function (k) { return K.SIZES[k]; });
+    window.__studio = new SPStudio.Studio(document.getElementById('studio'), cfg);
+    __studio.init();
+  })();
+</script>
+</body>
+</html>

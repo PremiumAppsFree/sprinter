@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Marriage Card & Biodata Maker — free shadi card — S Printer</title>
+<meta name="description" content="Free wedding invitation (shadi card) and marriage biodata maker: Hindu, Muslim, Sikh and modern designs, Hindi fonts, photo, JPG/PDF and print.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=20">
+<script src="../assets/sprinter/sprinter.js?v=20"></script>
+<link rel="stylesheet" href="../assets/vendor/cropper.min.css">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
+</head>
+<body class="st-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+<main class="st-wrap">
+  <div class="st-head"><svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="sti" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fda4af"/><stop offset="1" stop-color="#9f1239"/></linearGradient></defs><circle cx="26" cy="26" r="25" fill="#fff" stroke="#e5e7eb"/><circle cx="21" cy="27" r="8" fill="none" stroke="url(#sti)" stroke-width="3.2"/><circle cx="31" cy="27" r="8" fill="none" stroke="url(#sti)" stroke-width="3.2"/><path d="M26 12l2 3h-4z" fill="#f59e0b"/></svg><div><h1>Marriage Card & Biodata</h1><p>Wedding invitations for every tradition and marriage biodata in English or Hindi. Fill the details once, pick a design, download or print.</p></div></div>
+  <div id="studio"></div>
+</main>
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/cropper.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/vendor/studio/fabric.min.js"></script>
+<script src="../assets/vendor/studio/qrcode.js"></script>
+<script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
+<script src="../assets/studio/studio.js?v=1"></script>
+
+<script src="../assets/studio/tpl-kit.js?v=1"></script>
+<script src="../assets/studio/tpl-marriage.js?v=1"></script>
+<script>
+  (function () {
+    var K = SPStudio.K, cfg = {"tool": "marriage", "title": "Marriage card", "file": "Marriage", "sizes": ["a4p", "sq", "story", "a4l"], "cats": ["Hindu", "Muslim", "Sikh", "Modern/Creative", "Biodata"], "photoFields": ["PHOTO"], "dataTitle": "Wedding & biodata details", "fields": [{"k": "GROOM", "label": "Groom name", "group": "Wedding card", "def": "Rahul"}, {"k": "GROOM_PARENTS", "label": "Groom's parents", "def": "S/o Shri Ramesh Sharma & Smt. Sunita Sharma"}, {"k": "BRIDE", "label": "Bride name", "def": "Priya"}, {"k": "BRIDE_PARENTS", "label": "Bride's parents", "def": "D/o Shri Mahesh Verma & Smt. Kavita Verma"}, {"k": "MESSAGE", "label": "Invitation line", "type": "textarea", "rows": 2, "def": "Together with their families, request the honour of your presence at the wedding of"}, {"k": "WEDDING_DATE", "label": "Wedding date", "def": "Friday, 21 November 2026"}, {"k": "WEDDING_TIME", "label": "Time", "def": "7:00 PM"}, {"k": "VENUE", "label": "Venue", "type": "textarea", "rows": 2, "def": "Hotel Shree Palace, Station Road, Jaipur"}, {"k": "EVENTS", "label": "Functions (one per line)", "type": "textarea", "rows": 4, "def": "Haldi — 20 Nov, 10:00 AM\nMehndi — 20 Nov, 5:00 PM\nBaraat — 21 Nov, 7:00 PM"}, {"k": "INVITER", "label": "Invited by", "def": "Sharma Parivar"}, {"k": "RSVP", "label": "RSVP / contact", "def": "+91 98765 43210"}, {"k": "NAME", "label": "Name", "group": "Biodata", "def": "Priya Verma"}, {"k": "PHOTO", "label": "Photo", "type": "photo"}, {"k": "DOB", "label": "Date of birth", "def": "12 March 1999"}, {"k": "TOB", "label": "Time of birth", "def": "06:45 AM"}, {"k": "POB", "label": "Place of birth", "def": "Jaipur"}, {"k": "HEIGHT", "label": "Height", "def": "5' 4\""}, {"k": "COMPLEXION", "label": "Complexion", "def": "Fair"}, {"k": "RELIGION", "label": "Religion", "def": "Hindu"}, {"k": "CASTE", "label": "Caste", "def": "Brahmin"}, {"k": "GOTRA", "label": "Gotra", "def": "Bharadwaj"}, {"k": "RASHI", "label": "Rashi", "def": "Kanya"}, {"k": "NAKSHATRA", "label": "Nakshatra", "def": "Hasta"}, {"k": "MANGLIK", "label": "Manglik", "def": "No"}, {"k": "EDUCATION", "label": "Education", "def": "M.Sc. (Chemistry)"}, {"k": "OCCUPATION", "label": "Occupation", "def": "Teacher, Kendriya Vidyalaya"}, {"k": "INCOME", "label": "Annual income", "def": "₹6 lakh"}, {"k": "FATHER", "label": "Father", "def": "Shri Mahesh Verma"}, {"k": "FATHER_OCC", "label": "Father's occupation", "def": "Retired bank officer"}, {"k": "MOTHER", "label": "Mother", "def": "Smt. Kavita Verma"}, {"k": "MOTHER_OCC", "label": "Mother's occupation", "def": "Homemaker"}, {"k": "SIBLINGS", "label": "Brothers / sisters", "def": "1 elder brother (married)"}, {"k": "ADDRESS", "label": "Address", "type": "textarea", "rows": 2, "def": "45, Shanti Nagar, Jaipur, Rajasthan"}, {"k": "CONTACT", "label": "Contact", "def": "+91 98290 12345"}], "aiHint": "e.g. Royal red and gold Hindu wedding card in Hindi with Ganesh ji blessing line, events list and venue"};
+    cfg.sizes = cfg.sizes.map(function (k) { return K.SIZES[k]; });
+    window.__studio = new SPStudio.Studio(document.getElementById('studio'), cfg);
+    __studio.init();
+  })();
+</script>
+</body>
+</html>

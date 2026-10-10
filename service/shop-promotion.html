@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shop Promotion Maker — banners, rate list, letter pad — S Printer</title>
+<meta name="description" content="Free shop promotion maker: cyber cafe service posters, offer banners, festival greetings, rate lists, letter pads and election banners with UPI QR.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=20">
+<script src="../assets/sprinter/sprinter.js?v=20"></script>
+<link rel="stylesheet" href="../assets/vendor/cropper.min.css">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
+</head>
+<body class="st-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+<main class="st-wrap">
+  <div class="st-head"><svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="sti" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f9a8d4"/><stop offset="1" stop-color="#be185d"/></linearGradient></defs><circle cx="26" cy="26" r="25" fill="#fff" stroke="#e5e7eb"/><path d="M12 22l14-9 14 9v4H12z" fill="url(#sti)"/><rect x="15" y="27" width="22" height="12" rx="1.5" fill="url(#sti)" opacity=".8"/><rect x="22" y="31" width="8" height="8" fill="#fff"/></svg><div><h1>Shop Promotion Maker</h1><p>Posters for your cyber café or shop: services, offers, festival wishes, rate list, letter pad and election banners — with a UPI pay QR.</p></div></div>
+  <div id="studio"></div>
+</main>
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/cropper.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/vendor/studio/fabric.min.js"></script>
+<script src="../assets/vendor/studio/qrcode.js"></script>
+<script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
+<script src="../assets/studio/studio.js?v=1"></script>
+
+<script src="../assets/studio/tpl-kit.js?v=1"></script>
+<script src="../assets/studio/tpl-shop.js?v=1"></script>
+<script>
+  (function () {
+    var K = SPStudio.K, cfg = {"tool": "shop", "title": "Shop promotion", "file": "Shop", "sizes": ["a4p", "sq", "a4l", "hd"], "cats": ["Cyber Cafe Shop", "Shop Promo", "Service Rate List", "Letter Pad", "Election Banner"], "photoFields": ["LOGO", "PHOTO"], "dataTitle": "Shop details", "fields": [{"k": "SHOP_NAME", "label": "Shop / business name", "group": "Your shop", "def": "Shree Ganesh Cyber Cafe"}, {"k": "TAGLINE", "label": "Tagline", "def": "Online forms · Print · Xerox · Lamination"}, {"k": "OWNER", "label": "Owner / proprietor", "def": "Ramesh Kumar"}, {"k": "SHOP_PHONE", "label": "Phone", "def": "+91 98765 43210"}, {"k": "SHOP_ADDRESS", "label": "Address", "def": "Main Market, Near SBI Bank, Jaipur"}, {"k": "EMAIL", "label": "E-mail", "def": "shreeganeshcyber@gmail.com"}, {"k": "WEBSITE", "label": "Website", "def": "www.shreeganeshcyber.in"}, {"k": "TIMING", "label": "Timing", "def": "9 AM – 9 PM"}, {"k": "UPI", "label": "UPI ID (for the pay QR)", "def": "shopname@upi"}, {"k": "LOGO", "label": "Logo", "type": "photo"}, {"k": "SERVICES", "label": "Services (one per line)", "type": "textarea", "rows": 6, "group": "Services & rates", "def": "Aadhaar / PAN services\nOnline job forms\nAdmit card & result\nPassport photo\nColour print & Xerox\nLamination & PVC card\nBill payment & recharge\nBank & money transfer\nTrain / bus tickets\nScholarship forms"}, {"k": "RATES", "label": "Rate list (Service - ₹price, one per line)", "type": "textarea", "rows": 8, "def": "B/W print - ₹2\nColour print - ₹10\nXerox (A4) - ₹2\nPassport photo (8) - ₹50\nLamination - ₹20\nPVC Aadhaar card - ₹50\nOnline form - ₹50\nScanning - ₹10\nResume / biodata - ₹30\nPAN apply - ₹150"}, {"k": "OFFER", "label": "Offer (big text)", "group": "Offer & festival", "def": "FLAT 20% OFF"}, {"k": "OFFER_NOTE", "label": "Offer details / message", "def": "On all colour prints and lamination"}, {"k": "VALID_TILL", "label": "Offer valid till", "def": "31 Oct 2026"}, {"k": "GREETING", "label": "Festival greeting", "def": "Happy Diwali"}, {"k": "CANDIDATE", "label": "Candidate name", "group": "Election banner", "def": "Ramesh Kumar"}, {"k": "PHOTO", "label": "Candidate photo", "type": "photo"}, {"k": "POST_NAME", "label": "Post (e.g. Sarpanch, Ward Member)", "def": "सरपंच"}, {"k": "WARD", "label": "Ward / panchayat", "def": "Gram Panchayat Rampura"}, {"k": "SYMBOL", "label": "Election symbol (text)", "def": "Ghadi (clock)"}, {"k": "BALLOT_NO", "label": "Ballot number", "def": "3"}, {"k": "ELECTION_DATE", "label": "Voting date", "def": "15 Jan 2027"}, {"k": "SLOGAN", "label": "Slogan", "def": "Saaf neeyat, sahi vikas"}], "aiHint": "e.g. Diwali offer poster for my mobile shop: 10% off on accessories, yellow and red, phone number big"};
+    cfg.sizes = cfg.sizes.map(function (k) { return K.SIZES[k]; });
+    window.__studio = new SPStudio.Studio(document.getElementById('studio'), cfg);
+    __studio.init();
+  })();
+</script>
+</body>
+</html>

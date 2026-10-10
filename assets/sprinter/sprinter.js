@@ -1045,7 +1045,7 @@
   function shortLabel() { return (st.paper === 'plain' ? 'Plain' : st.paper === 'gloss' ? 'Glossy' : st.paper === 'matte' ? 'Matte' : st.paper === 'card' ? 'Card' : st.paper === 'pvc' ? 'PVC' : 'Exact') + ' · ' + st.quality.charAt(0).toUpperCase() + st.quality.slice(1); }
   // floating "Paper" button on tool pages that have no inline paper settings
   function pill() {
-    if (!/\/(service|tool)\//.test(location.pathname) || document.querySelector('[data-sp-paper]') || document.getElementById('sp-paperpill')) return;
+    if (!/\/(service|tool)\//.test(location.pathname) || document.querySelector('[data-sp-paper]') || document.getElementById('sp-paperpill') || document.body.classList.contains('st-body') || document.body.hasAttribute('data-sp-nofloat')) return;
     var b = document.createElement('button'); b.type = 'button'; b.id = 'sp-paperpill'; b.className = 'sp-paperpill';
     b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z" fill="#fff" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="8.5" y="11" width="7" height="2.2" rx="1" fill="#0098D8"/><rect x="8.5" y="15" width="5" height="2.2" rx="1" fill="#D6247A"/></svg><span>Paper</span><b></b>';
     b.querySelector('b').textContent = shortLabel();
@@ -1115,7 +1115,7 @@
 (function () {
   'use strict';
   if (!/\/(service|tool)\//.test(location.pathname)) return;
-  var OWN = /\/(multi-doc|size-changer|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)\.html/;
+  var OWN = /\/(cv-resume-maker|marriage-card-creator|pro-id-maker|pro-poster-maker|job-application-maker|shop-promotion|payment-qr|portal-services|govt-jobs|multi-doc|size-changer|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)(\.html)?$/;
   if (OWN.test(location.pathname)) return;
   var files = [], btn = null;
   var BASE = (function () { var s = document.querySelector('script[src*="assets/sprinter/sprinter.js"]'); return s ? s.src.replace(/assets\/sprinter\/sprinter\.js.*$/, '') : '../'; })();
