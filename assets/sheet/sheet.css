@@ -1,0 +1,85 @@
+/* S Printer — MultiSide Doc sheet editor */
+.sh-root{position:relative;display:flex;flex-direction:column;background:#E9EDF1;border-radius:16px;overflow:hidden;border:1px solid var(--line,#DCE2E9);min-height:72vh;font:15px/1.4 'SP Inter',Inter,system-ui,sans-serif;color:#1B2330}
+.sh-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#fff;border-bottom:1px solid #DCE2E9}
+.sh-title{display:flex;flex-direction:column;min-width:0;flex:1}
+.sh-title b{font:700 16px/1.2 'SP Lexend',sans-serif}
+.sh-sub{font-size:12.5px;color:#667385}
+.sh-zoom{display:flex;gap:4px;background:#EEF1F4;border-radius:10px;padding:3px}
+.sh-zoom button{border:0;background:transparent;border-radius:8px;min-width:36px;height:34px;display:grid;place-items:center;cursor:pointer;font:700 13px 'SP Inter',sans-serif;color:#1B2330}
+.sh-zoom button:hover{background:#fff}
+.sh-zoom svg{width:18px;height:18px}
+.sh-out{display:flex;gap:6px;align-items:center}
+.sh-btn{border:1.5px solid #DCE2E9;background:#fff;border-radius:10px;min-height:38px;padding:7px 13px;font:700 14px/1 'SP Inter',sans-serif;cursor:pointer;color:#1B2330}
+.sh-btn:hover{border-color:#3A4554}
+.sh-main{background:#1B2330;color:#fff;border-color:#1B2330;box-shadow:inset 0 -3px 0 #0098D8}
+.sh-close{border:0;background:#EEF1F4;width:38px;height:38px;border-radius:50%;font-size:22px;cursor:pointer}
+.sh-stage{flex:1;overflow:auto;padding:14px;min-height:56vh;max-height:76vh;-webkit-overflow-scrolling:touch}
+.sh-pages{display:flex;flex-direction:column;align-items:center;gap:18px;width:max-content;min-width:100%}
+.sh-page{position:relative;background:#fff;box-shadow:0 10px 28px rgba(27,35,48,.16);flex-shrink:0;touch-action:pan-x pan-y;overflow:hidden}
+.sh-pno{position:absolute;right:6px;bottom:4px;font:600 11px 'SP Inter',sans-serif;color:#9aa4b0;pointer-events:none}
+.sh-cells i{position:absolute;border:1px dashed #cfd8e3;border-radius:2px;pointer-events:none}
+.sh-item{position:absolute;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;transition:box-shadow .15s}
+.sh-item img{width:100%;height:100%;display:block;pointer-events:none}
+.sh-item.cutl{outline:1px solid #b6c0cc}
+.sh-item:hover{box-shadow:0 0 0 2px rgba(0,152,216,.35)}
+.sh-item.sel{box-shadow:0 0 0 2px #0098D8,0 8px 22px rgba(0,0,0,.18);z-index:5;cursor:move}
+.sh-h{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;border:2.5px solid #0098D8;box-shadow:0 2px 6px rgba(0,0,0,.25);touch-action:none;z-index:6}
+.sh-nw{left:-11px;top:-11px;cursor:nwse-resize}.sh-se{right:-11px;bottom:-11px;cursor:nwse-resize}
+.sh-ne{right:-11px;top:-11px;cursor:nesw-resize}.sh-sw{left:-11px;bottom:-11px;cursor:nesw-resize}
+.sh-dim{position:absolute;left:50%;top:-30px;transform:translateX(-50%);background:#1B2330;color:#fff;font:700 11.5px 'SP Inter',sans-serif;padding:4px 8px;border-radius:7px;white-space:nowrap;pointer-events:none}
+.sh-tip{margin:0;padding:6px 12px;font-size:12px;color:#667385;text-align:center;background:#F4F6F8}
+.sh-ctx{display:flex;gap:2px;overflow-x:auto;background:#fff;border-top:1px solid #DCE2E9;padding:6px 6px;scrollbar-width:none;animation:shUp .25s cubic-bezier(.2,.8,.2,1)}
+.sh-ctx::-webkit-scrollbar{display:none}
+.sh-ctx button{flex:1 0 auto;min-width:68px;border:0;background:transparent;border-radius:10px;padding:6px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;font:600 11.5px 'SP Inter',sans-serif;color:#3A4554;cursor:pointer}
+.sh-ctx button:hover{background:#EEF1F4}
+.sh-ctx span svg{width:21px;height:21px}
+.sh-ctx [data-a=del]{color:#b42318}
+.sh-bar{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-top:1px solid #DCE2E9}
+.sh-bar button{border:0;background:transparent;padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:4px;font:700 13.5px 'SP Lexend',sans-serif;letter-spacing:.04em;color:#1B2330;cursor:pointer;position:relative}
+.sh-bar button span svg{width:24px;height:24px;color:#5b6676;transition:transform .25s}
+.sh-bar button.on{color:#0098D8}.sh-bar button.on span svg{color:#0098D8;transform:translateY(-2px) scale(1.08)}
+.sh-bar button.on::after{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:#0098D8}
+.sh-panel{background:#fff;border-top:1px solid #DCE2E9;padding:12px;animation:shUp .25s cubic-bezier(.2,.8,.2,1);max-height:46vh;overflow:auto}
+@keyframes shUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sh-addrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sh-big{border:2px dashed #b9c4cf;background:#F8FAFC;border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;font:700 14px 'SP Inter',sans-serif;cursor:pointer;color:#1B2330}
+.sh-big:hover{border-color:#0098D8;background:#F2FAFE}
+.sh-big span svg{width:30px;height:30px;color:#0098D8}
+.sh-check{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:#3A4554;margin-top:10px}
+.sh-check input{width:18px;height:18px;accent-color:#0098D8}
+.sh-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sh-grid2 label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:#3A4554}
+.sh-grid2 select,.sh-grid2 input,.sh-pass{width:100%;box-sizing:border-box;font:500 15px 'SP Inter',sans-serif;border:1.5px solid #DCE2E9;border-radius:10px;padding:8px 10px;min-height:42px;background:#fff}
+.sh-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.sh-tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px}
+.sh-tpls button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:6px;font:700 14px 'SP Lexend',sans-serif;color:#667385;cursor:pointer;padding:4px}
+.sh-tg{position:relative;width:54px;height:54px;background:#fff;border:2px solid #1B2330;display:block;transition:transform .2s}
+.sh-tg i{position:absolute;border:1px solid #1B2330;box-sizing:border-box}
+.sh-free{border-style:dashed}
+.sh-tpls button[aria-pressed=true]{color:#0098D8}.sh-tpls button[aria-pressed=true] .sh-tg{border-color:#0098D8;box-shadow:0 0 0 3px rgba(0,152,216,.2);transform:scale(1.05)}
+.sh-tpls button[aria-pressed=true] .sh-tg i{border-color:#0098D8}
+.sh-note{font-size:12.5px;color:#667385;margin:10px 0 0}
+.sh-sizemenu{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);z-index:30;width:min(360px,calc(100% - 24px));background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:12px;display:flex;flex-direction:column;gap:6px;animation:shUp .2s}
+.sh-sizemenu>button{border:1.5px solid #DCE2E9;background:#fff;border-radius:10px;padding:9px;text-align:left;font:600 14px 'SP Inter',sans-serif;cursor:pointer}
+.sh-sizemenu>button:hover{border-color:#0098D8}
+.sh-cropm{position:fixed;inset:0;z-index:300;background:rgba(15,20,28,.72);display:flex;align-items:center;justify-content:center;padding:12px}
+.sh-cropbox{background:#fff;border-radius:16px;width:min(920px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden}
+.sh-small{width:min(420px,100%)}
+.sh-croptop{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #DCE2E9}
+.sh-croptop button{border:0;background:#EEF1F4;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer}
+.sh-cropstage{height:min(62vh,560px);background:#141b26}
+.sh-cropstage img{max-width:100%;display:block}
+.sh-croptools{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px}
+.sh-croptools button{border:1.5px solid #DCE2E9;background:#fff;border-radius:9px;min-height:38px;padding:0 10px;font:700 13px 'SP Inter',sans-serif;cursor:pointer}
+.sh-cropfoot{display:flex;justify-content:flex-end;gap:8px;padding:10px 12px 14px;border-top:1px solid #DCE2E9}
+.sh-pass{margin:10px 16px;width:calc(100% - 32px)}
+.sh-toast{position:absolute;left:50%;bottom:90px;transform:translate(-50%,10px);opacity:0;background:#1B2330;color:#fff;padding:9px 14px;border-radius:12px;font-weight:600;font-size:13.5px;transition:all .25s;pointer-events:none;z-index:40;max-width:calc(100% - 32px);text-align:center}
+.sh-toast.on{opacity:1;transform:translate(-50%,0)}
+.sh-busy{position:absolute;inset:0;z-index:50;background:rgba(255,255,255,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-weight:700}
+.sh-busy span{width:34px;height:34px;border-radius:50%;border:3.5px solid #DCE2E9;border-top-color:#0098D8;animation:shSpin .8s linear infinite}
+@keyframes shSpin{to{transform:rotate(360deg)}}
+.sh-overlay{position:fixed;inset:0;z-index:250;background:rgba(15,20,28,.5);display:flex;padding:10px}
+.sh-overlay>.sh-root{flex:1;min-height:0;max-height:100%}
+@media (max-width:640px){.sh-out .sh-btn{padding:7px 10px}.sh-top{padding:8px}.sh-stage{padding:10px;max-height:none}.sh-root{min-height:calc(100vh - 140px)}}
+@media print{.sh-overlay{display:none!important}}
+@media (max-width:640px){.sh-title{flex-basis:100%}.sh-sub{display:block}.sh-zoom{order:2}.sh-out{order:3;margin-left:auto}}

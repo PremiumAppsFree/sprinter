@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MultiSide Doc — documents on one sheet — S Printer</title>
+<meta name="description" content="Put several documents, ID cards and photos on one A4 or 4×6 sheet: grid templates, drag, pinch to resize, auto crop and manual crop.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=16">
+<script src="../assets/sprinter/sprinter.js?v=16"></script>
+<link rel="stylesheet" href="../assets/vendor/cropper.min.css">
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=1">
+<link rel="stylesheet" href="../assets/sheet/sheet.css?v=1">
+<style>body.md-body{margin:0;background:var(--desk);color:var(--ink);font:15px/1.5 'SP Inter',Inter,system-ui,sans-serif}.md-head{display:flex;align-items:center;gap:14px;margin:4px 0 14px}.md-head svg{width:52px;height:52px;flex-shrink:0;animation:mdF 4s ease-in-out infinite}@keyframes mdF{50%{transform:translateY(-4px)}}.md-head h1{font:800 clamp(24px,4vw,34px)/1.1 'SP Lexend',sans-serif;margin:0 0 4px}.md-head p{margin:0;color:var(--ink2);font-size:14.5px}</style>
+</head>
+<body class="md-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+<main class="cp-wrap">
+  <div class="md-head">
+    <svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="mdg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7eb0"/><stop offset="1" stop-color="#d6247a"/></linearGradient></defs><circle cx="26" cy="26" r="25" fill="#fff" stroke="#e5e7eb"/><rect x="13" y="13" width="26" height="26" rx="4" fill="url(#mdg)"/><path d="M26 13v26M26 26h13" stroke="#fff" stroke-width="2.4"/></svg>
+    <div><h1>MultiSide Doc</h1><p>Several documents, ID cards and photos on one sheet. ADD them, pick a SHEET and a TEMPLATE, then drag and pinch to place them exactly.</p></div>
+  </div>
+  <div id="md-editor"></div>
+</main>
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/cropper.min.js"></script>
+<script src="../assets/vendor/pdf.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/sheet/sheet.js?v=1"></script>
+<script>
+  window.__md = new SPSheet.Editor(document.getElementById('md-editor'), { title: 'Your sheet', template: [2, 2] });
+  __md.open('add');
+</script>
+</body>
+</html>

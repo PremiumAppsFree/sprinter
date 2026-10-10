@@ -698,7 +698,7 @@
     st.pages = buildPages();
     if (st.page >= st.pages.length) st.page = Math.max(0, st.pages.length - 1);
     var has = st.pages.length > 0;
-    ['cp-print', 'cp-pdf', 'cp-jpg'].forEach(function (id) { $(id).disabled = !has; });
+    ['cp-print', 'cp-pdf', 'cp-jpg', 'cp-edit'].forEach(function (id) { if ($(id)) $(id).disabled = !has; });
     $('cp-empty').hidden = has; $('cp-canvas').style.visibility = has ? 'visible' : 'hidden';
     $('cp-pager').hidden = st.pages.length < 2;
     $('cp-pageno').textContent = (st.page + 1) + ' / ' + st.pages.length;
@@ -714,6 +714,30 @@
     } else {
       info.textContent = st.warn || ''; info.className = 'cp-info' + (st.warn ? ' warn' : '');
     }
+  }
+
+
+  // ---------- free layout editor (drag, pinch, resize on the paper) ----------
+  function openLayoutEditor() {
+    if (!window.SPSheet) { toast('Layout editor did not load.'); return; }
+    var pages = buildPages(); if (!pages.length) { toast('Nothing to arrange yet.'); return; }
+    var ov = document.createElement('div'); ov.className = 'sh-overlay';
+    var host = document.createElement('div'); ov.appendChild(host); document.body.appendChild(ov);
+    document.documentElement.style.overflow = 'hidden';
+    var P = pages[0], pv = $('cp-paper').value, map = { A4: 'A4', A3: 'A3', A5: 'A5', Letter: 'Letter', Legal: 'Legal', '4x6': '4x6', '5x7': '5x7' };
+    var ed = new SPSheet.Editor(host, {
+      title: 'Edit layout', template: null, cut: false, margin: num('cp-margin', 8, 0, 40), gap: num('cp-gap', 4, 0, 30),
+      paper: map[pv] || 'custom', custom: [Math.min(P.W, P.H), Math.max(P.W, P.H)], orient: P.W > P.H ? 'landscape' : 'portrait',
+      onClose: function () { ov.remove(); document.documentElement.style.overflow = ''; }
+    });
+    pages.forEach(function (pg, pi) {
+      pg.items.forEach(function (it) {
+        var w = it.full ? it.w : it.unit.w, h = it.full ? it.h : it.unit.h;
+        var one = it.full ? { W: w, H: h, items: [{ full: it.full, x: 0, y: 0, w: w, h: h }] } : { W: w, H: h, items: [{ unit: it.unit, x: 0, y: 0, back: it.back }] };
+        ed.addCanvas(drawPage(one, DPI), { place: { page: pi, x: it.x, y: it.y, w: w, h: h }, real: [w, h] });
+      });
+    });
+    ed.fit();
   }
 
   // ---------- output ----------
@@ -799,6 +823,7 @@
     $('cp-prev').onclick = function () { if (st.page > 0) { st.page--; update(); } };
     $('cp-next').onclick = function () { if (st.page < st.pages.length - 1) { st.page++; update(); } };
     $('cp-print').onclick = doPrint; $('cp-pdf').onclick = doPdf; $('cp-jpg').onclick = doJpg;
+    if ($('cp-edit')) $('cp-edit').onclick = openLayoutEditor;
     $('cp-crop-cancel').onclick = closeCrop; $('cp-crop-cancel2').onclick = closeCrop; $('cp-crop-done').onclick = doneCrop;
     $('cp-lock').onchange = function () { if (cropper) cropper.setAspectRatio($('cp-lock').checked ? cropDef.w / cropDef.h : NaN); };
     [].forEach.call(document.querySelectorAll('.cp-tools [data-act]'), function (b) {
