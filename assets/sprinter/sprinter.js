@@ -413,7 +413,10 @@
   // biggest page picture: keeps the document's own quality (up to ~600 dpi on A4 on computers, ~400 dpi on phones)
   var SMALLDEV = (window.innerWidth || 1000) < 820 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
   window.SPMaxSide = SMALLDEV ? 4800 : 7200;
+  // print resolution chosen in Paper & quality (300 / 450 / 600 dpi) — used by every tool, including the photo-print ones
+  window.__spDPI = function () { try { return (window.SPPaper && window.SPPaper.dpi()) || 300; } catch (e) { return 300; } };
   var MAX_SIDE = window.SPMaxSide;
+  var BOOST = /\/(pdf-to-jpg|document-auto-crop)(\.html)?$/.test(location.pathname);
   // ---- automatic digital-signature check for every tool that opens a PDF ----
   var SP_BASE = (function () {
     var sc = document.currentScript && document.currentScript.src;
@@ -429,7 +432,7 @@
     };
     sigLibs = (window.forge ? Promise.resolve() : one('assets/vendor/forge.min.js'))
       .then(function () { return window.SP_TRUSTED_ROOTS ? 0 : one('assets/sigverify/roots.js?v=15'); })
-      .then(function () { return window.SPSig ? 0 : one('assets/sigverify/sigverify.js?v=21'); });
+      .then(function () { return window.SPSig ? 0 : one('assets/sigverify/sigverify.js?v=22'); });
     return sigLibs;
   }
   function sigManaged() { return document.body && document.body.classList.contains('cp-body'); } // the card tool does its own check
@@ -487,6 +490,8 @@
     if (!pg || pg.__spCap) return pg;
     var gv = pg.getViewport.bind(pg);
     pg.getViewport = function (o) {
+      // tools that turn PDF pages into pictures render them at the chosen print quality (not their own low 144 dpi)
+      try { if (BOOST && o && o.scale >= 1.5 && window.__spDPI) { var want = window.__spDPI() / 72; if (o.scale < want) o = Object.assign({}, o, { scale: want }); } } catch (e) {}
       var v = gv(o);
       try {
         var m = Math.max(v.width, v.height);

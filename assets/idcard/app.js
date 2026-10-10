@@ -7629,8 +7629,10 @@
         }
 
         function getPdfRasterScale() {
-            if (currentType === 'pvc' && (isProUser() || canOpenLockedPvcWorkspace())) return 5.2;
-            return isProUser() ? 4.2 : 2.2;
+            // S Printer: never below the print quality chosen in Paper & quality (300 / 450 / 600 dpi)
+            const chosen = (window.__spDPI ? window.__spDPI() : 300) / 72;
+            if (currentType === 'pvc' && (isProUser() || canOpenLockedPvcWorkspace())) return Math.max(5.2, chosen);
+            return Math.max(isProUser() ? 4.2 : 2.2, chosen);
         }
 
         function getPdfFinalRasterScale() {
@@ -8994,7 +8996,7 @@
                 }
                 const rasterScale = getPdfRasterScale();
                 let viewport = page.getViewport({ scale: rasterScale });
-                const maxRasterPixels = currentType === 'pvc' ? 12000000 : 10000000;
+                const maxRasterPixels = 40000000;   // S Printer: the device-size cap in sprinter.js keeps phones safe
                 const rasterPixels = viewport.width * viewport.height;
                 if (rasterPixels > maxRasterPixels) {
                     const adjustedScale = rasterScale * Math.sqrt(maxRasterPixels / rasterPixels);
@@ -17644,7 +17646,7 @@ function refreshEditor(resetPoints = false) {
                 const pagesToRender = Math.min(totalPages, maxPages);
                 const pages = [];
                 const rasterScale = Math.max(4.2, getPdfRasterScale());
-                const maxRasterPixels = 14500000;
+                const maxRasterPixels = 40000000;
                 try {
                     for (let pageNo = 1; pageNo <= pagesToRender; pageNo++) {
                         const page = await withTimeout(pdfDoc.getPage(pageNo), 4500, 'PDF page read timed out');

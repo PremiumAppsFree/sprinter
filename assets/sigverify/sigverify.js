@@ -458,6 +458,8 @@
       var font = function (f) { return f + 'px ' + SIGFONT; };
       var paras = ['Digitally signed by ' + s.signer];
       if (s.time) paras.push('Date: ' + fmtDate(s.time));
+      // live check time (with seconds) as its own line under the Adobe block — the signing date above stays true
+      var verifiedLine = 'Verified: ' + fmtDate(new Date());
       function wrap(bf, bw) {
         ctx.font = font(bf); var out = [];
         paras.forEach(function (p) { var line = ''; p.split(' ').forEach(function (wd) { var t = line ? line + ' ' + wd : wd; if (line && ctx.measureText(t).width > bw) { out.push(line); line = wd; } else line = t; }); out.push(line); });
@@ -477,7 +479,7 @@
       }
       if (!L) return;
       ctx.save();
-      ctx.beginPath(); ctx.rect(x, y, W, H); ctx.clip();
+      ctx.beginPath(); ctx.rect(x, y, W, H + L.pitch * 1.6); ctx.clip();   // room for the Verified line just under the box
       ctx.fillStyle = '#fff'; ctx.fillRect(x, y, W, H);
       // tick first, the text on top of it — like Adobe
       var Ht = 0.434 * L.tw / 0.591, tipX = L.tx + 0.726 * L.tw, top = L.base - 0.2 * L.tf - 0.275 * Ht;
@@ -486,6 +488,7 @@
       ctx.font = font(L.tf); ctx.fillText('Signature valid', L.tx, L.base);
       ctx.font = font(L.bf);
       var by = L.first; L.rows.forEach(function (q) { ctx.fillText(q, L.tx + L.tf * 0.15, by); by += L.pitch; });
+      ctx.fillText(verifiedLine, L.tx + L.tf * 0.15, by);
       ctx.restore(); n++;
     });
     return n;
