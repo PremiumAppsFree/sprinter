@@ -292,7 +292,7 @@
     var t = document.createElement('canvas'), k = 160 / Math.max(canvas.width, canvas.height);
     t.width = Math.max(1, Math.round(canvas.width * k)); t.height = Math.max(1, Math.round(canvas.height * k));
     t.getContext('2d').drawImage(canvas, 0, 0, t.width, t.height);
-    st.sources.push({ id: ++srcSeq, name: name, url: url, thumb: t.toDataURL('image/jpeg', 0.8), w: canvas.width, h: canvas.height, cards: detectCards(canvas), mmW: extra && extra.mmW, mmH: extra && extra.mmH, fileKey: extra && extra.fileKey, signed: extra && extra.signed });
+    st.sources.push({ id: ++srcSeq, name: name, url: url, thumb: t.toDataURL('image/jpeg', 0.8), w: canvas.width, h: canvas.height, cards: detectCards(canvas), mmW: extra && extra.mmW, mmH: extra && extra.mmH, fileKey: extra && extra.fileKey, signed: extra && extra.signed, pdfref: extra && extra.pdfref });
   }
 
   async function addImageFile(file) {
@@ -360,7 +360,8 @@
       var painted = 0;
       if (sig && sig.status === 'valid') { try { painted = await SPSig.paint(x, page, vp, sig); } catch (e) {} }
       await addCanvasSource(c, file.name.replace(/\.pdf$/i, '') + (n > 1 ? ' · p' + i : ''),
-        { mmW: v1.width / 72 * MM, mmH: v1.height / 72 * MM, fileKey: fileKey, signed: painted > 0 });
+        { mmW: v1.width / 72 * MM, mmH: v1.height / 72 * MM, fileKey: fileKey, signed: painted > 0,
+          pdfref: { bytes: data, doc: pdf, page: i, sig: sig, key: fileKey, locked: !!(usedPw || (sig && sig.encrypted)) } });
     }
     if (pdf.numPages > 20) toast('Only the first 20 pages were added.');
   }
@@ -518,14 +519,17 @@
         var s = st.sources.find(function (x) { return x.id === f.id; }); return s && { src: s, rot: f.rot };
       }).filter(Boolean);
       if (!items.length) return [];
-      var p0 = paperDims();
+      var p0 = paperDims(), sameAsDoc = $('cp-paper').value === 'orig';
       items.forEach(function (it) {
         var turned = it.rot % 180 !== 0, iw = turned ? it.src.h : it.src.w, ih = turned ? it.src.w : it.src.h;
         var land = orient === 'landscape' || (orient === 'auto' && iw > ih);
         var W = land ? Math.max(p0[0], p0[1]) : Math.min(p0[0], p0[1]), H = land ? Math.min(p0[0], p0[1]) : Math.max(p0[0], p0[1]);
         if (isPVC) { W = 85.6; H = 54; }
+        var omw = turned ? it.src.mmH : it.src.mmW, omh = turned ? it.src.mmW : it.src.mmH;
+        if (sameAsDoc && omw && omh) { W = omw; H = omh; }      // paper = the document's own size, nothing shrunk
         var fit = ($('cp-fit') && $('cp-fit').value) || 'actual', sc = num('cp-scale', 100, 5, 400) / 100;
-        var aw = W - 2 * m, ah = H - 2 * m, k = Math.min(aw / iw, ah / ih), w = iw * k, h = ih * k, y = pos === 'top' ? m : (H - h) / 2;
+        var mm0 = sameAsDoc && omw ? 0 : m;
+        var aw = W - 2 * mm0, ah = H - 2 * mm0, k = Math.min(aw / iw, ah / ih), w = iw * k, h = ih * k, y = pos === 'top' ? mm0 : (H - h) / 2;
         var mw = turned ? it.src.mmH : it.src.mmW, mh = turned ? it.src.mmW : it.src.mmH;
         if (fit === 'actual' && !isPVC && mw && mw <= W + 0.5 && mh <= H + 0.5) { w = mw; h = mh; y = (H - h) / 2; }   // real size (100%)
         else if (fit === 'fill') { var kc = Math.max(W / iw, H / ih); w = iw * kc; h = ih * kc; y = (H - h) / 2; }       // edge to edge, no white border
@@ -778,7 +782,61 @@
     window.addEventListener('afterprint', clean, { once: true });
     setTimeout(function () { window.print(); }, 60);
   }
+
+  // ---------- original-quality PDF (the document's own page is embedded, not re-drawn as a picture) ----------
+  function origMode() { return !window.SPPaper || SPPaper.get().paper === 'exact'; }
+  async function vectorPdf() {
+    var PL = window.PDFLib; if (!PL || st.size !== 'full' || !origMode()) return null;
+    var pages = buildPages(); if (!pages.length) return null;
+    var PT = 72 / MM, out = await PL.PDFDocument.create(), docs = {}, emb = {}, any = false;
+    for (var pi = 0; pi < pages.length; pi++) {
+      busy(true, 'Saving page ' + (pi + 1) + ' of ' + pages.length + ' in original quality…');
+      await new Promise(function (r) { setTimeout(r, 0); });
+      var P = pages[pi], pg = out.addPage([P.W * PT, P.H * PT]);
+      for (var ii = 0; ii < P.items.length; ii++) {
+        var it = P.items[ii], f = it.full, src = f.src, rot = f.rot, ref = src.pdfref;
+        var wpt = it.w * PT, hpt = it.h * PT, cx = it.x * PT + wpt / 2, cy = P.H * PT - (it.y * PT + hpt / 2);
+        var turned = rot % 180 !== 0, dw = turned ? hpt : wpt, dh = turned ? wpt : hpt, th = -rot * Math.PI / 180;
+        var o = { x: cx - (dw / 2 * Math.cos(th) - dh / 2 * Math.sin(th)), y: cy - (dw / 2 * Math.sin(th) + dh / 2 * Math.cos(th)), width: dw, height: dh, rotate: PL.degrees(-rot) };
+        var key = ref && ref.key + ':' + ref.page, e = key && emb[key];
+        if (ref && !e && !ref.locked) {
+          try {
+            var d = docs[ref.key] || (docs[ref.key] = await PL.PDFDocument.load(ref.bytes.slice()));
+            var sp = d.getPage(ref.page - 1);
+            if (sp.getRotation().angle) throw new Error('rotated page');
+            var cb = sp.getCropBox();
+            e = emb[key] = await out.embedPage(sp, { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height }, [1, 0, 0, 1, -cb.x, -cb.y]);
+          } catch (err) { e = null; }
+        }
+        if (e) {
+          pg.drawPage(e, o);
+          // the verified tick + live "Verified" time, painted on top of the signature box at today's time
+          if (src.signed && ref.sig && window.SPSig) {
+            try {
+              var page = await ref.doc.getPage(ref.page), vp = page.getViewport({ scale: 4 });
+              var c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+              var n = await SPSig.paint(c.getContext('2d'), page, vp, ref.sig);
+              if (n) { var img = await out.embedPng(c.toDataURL('image/png')); pg.drawImage(img, o); }
+              c.width = c.height = 1;
+            } catch (err) {}
+          }
+          any = true;
+        } else {
+          // photo / locked PDF: the full-resolution picture of that page
+          var u = src.url, im = /^data:image\/png/.test(u) ? await out.embedPng(u) : await out.embedJpg(u);
+          pg.drawImage(im, o);
+        }
+      }
+    }
+    if (!any) return null;
+    out.setProducer('S Printer'); out.setCreator('S Printer'); out.setTitle(DOC.name + ' (original quality)');
+    return out.save();
+  }
   async function doPdf() {
+    try {
+      var bytes = await vectorPdf();
+      if (bytes) { busy(false); var u = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); save(fileBase() + '.pdf', u); setTimeout(function () { URL.revokeObjectURL(u); }, 20000); toast('PDF saved in original quality.'); return; }
+    } catch (e) { try { console.warn('vector pdf failed', e); } catch (_) {} } finally { busy(false); }
     var out; try { out = await renderAll(); } finally { busy(false); }
     if (!out.length) return;
     var J = window.jspdf && window.jspdf.jsPDF;
@@ -795,13 +853,19 @@
   }
 
   // ---------- wiring ----------
+  // full-document mode defaults to "same size as the document" so nothing is shrunk or re-framed
+  function fullPaper(on) {
+    var sel = $('cp-paper'); if (!sel || !sel.querySelector('option[value=orig]')) return;
+    if (on && sel.value === 'A4') sel.value = 'orig'; else if (!on && sel.value === 'orig') sel.value = 'A4';
+    if ($('cp-custompaper')) $('cp-custompaper').hidden = sel.value !== 'custom';
+  }
   function init() {
     loadPrefs();
     if (window.SPPaper && $('cp-paperbox')) SPPaper.mount($('cp-paperbox'));
     var ds = document.body.getAttribute('data-size'), dr = ds && document.querySelector('input[name=cp-size][value=' + ds + ']');
-    if (dr) { dr.checked = true; st.size = ds; if (ds === 'full') $('cp-margin').value = Math.min(num('cp-margin', 8), 5); }
+    if (dr) { dr.checked = true; st.size = ds; if (ds === 'full') { $('cp-margin').value = Math.min(num('cp-margin', 8), 5); fullPaper(true); } }
     [].forEach.call(document.querySelectorAll('input[name=cp-size]'), function (r) {
-      r.addEventListener('change', function () { if (r.checked) { st.size = r.value; if (st.size === 'full') $('cp-margin').value = Math.min(num('cp-margin', 8), 5); renderSlots(); renderSig(); update(); } });
+      r.addEventListener('change', function () { if (r.checked) { st.size = r.value; if (st.size === 'full') $('cp-margin').value = Math.min(num('cp-margin', 8), 5); fullPaper(st.size === 'full'); renderSlots(); renderSig(); update(); } });
     });
     $('cp-file').addEventListener('change', function (e) { addFiles(e.target.files); e.target.value = ''; });
     var drop = $('cp-drop');
