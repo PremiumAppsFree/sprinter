@@ -231,11 +231,18 @@
     var t = new Date(d.getTime() + 330 * 60000), p = function (n) { return (n < 10 ? '0' : '') + n; };
     return t.getUTCFullYear() + '.' + p(t.getUTCMonth() + 1) + '.' + p(t.getUTCDate()) + ' ' + p(t.getUTCHours()) + ':' + p(t.getUTCMinutes()) + ':' + p(t.getUTCSeconds()) + ' IST';
   }
-  function tick(ctx, x, y, s) {
-    ctx.save();
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#1e9e3a'; ctx.lineWidth = s * 0.16;
-    ctx.beginPath(); ctx.moveTo(x + s * 0.12, y + s * 0.55); ctx.lineTo(x + s * 0.4, y + s * 0.82); ctx.lineTo(x + s * 0.9, y + s * 0.18); ctx.stroke();
+  // Adobe-style "validity" check mark: a thick green tick with a dark drop shadow
+  function bigTick(ctx, cx, top, h) {
+    var w = h * 0.62, t = h * 0.17;                       // tick box width & arm thickness
+    var p1 = [cx - w * 0.5, top + h * 0.52], p2 = [cx - w * 0.12, top + h * 0.97], p3 = [cx + w * 0.55, top + h * 0.05];
+    var line = function (dx, dy, color, lw) {
+      ctx.beginPath(); ctx.moveTo(p1[0] + dx, p1[1] + dy); ctx.lineTo(p2[0] + dx, p2[1] + dy); ctx.lineTo(p3[0] + dx, p3[1] + dy);
+      ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.stroke();
+    };
+    ctx.save(); ctx.lineCap = 'butt'; ctx.lineJoin = 'miter'; ctx.miterLimit = 10;
+    line(-t * 0.28, t * 0.22, '#111', t * 1.08);           // shadow
+    line(0, 0, '#111', t * 1.12);                          // outline
+    line(0, 0, '#17a548', t);                              // green
     ctx.restore();
   }
   // Paint every *valid* signature widget on this page. Returns how many boxes were painted.
@@ -251,38 +258,37 @@
       var r = viewport.convertToViewportRectangle(w.rect);
       var x = Math.min(r[0], r[2]), y = Math.min(r[1], r[3]), W = Math.abs(r[2] - r[0]), H = Math.abs(r[3] - r[1]);
       ctx.save();
+      ctx.beginPath(); ctx.rect(x, y, W, H); ctx.clip();
       ctx.fillStyle = '#fff'; ctx.fillRect(x, y, W, H);
-      var ic = Math.min(H * 0.9, W * 0.32);
-      // big faint tick behind the text (Adobe style) + solid tick on the left
-      ctx.globalAlpha = 0.18; tick(ctx, x + (W - ic * 1.6) / 2, y + (H - ic * 1.6) / 2, ic * 1.6); ctx.globalAlpha = 1;
-      tick(ctx, x + H * 0.05, y + (H - ic) / 2, ic);
-      var tx = x + ic + H * 0.12, tw = W - (tx - x) - H * 0.06;
-      var paras = [['Signature valid', 'bold'], ['Digitally signed by ' + s.signer, 'normal']];
-      if (s.time) paras.push(['Date: ' + fmtDate(s.time), 'normal']);
-      if (s.reason) paras.push(['Reason: ' + s.reason, 'normal']);
-      if (s.location) paras.push(['Location: ' + s.location, 'normal']);
-      var font = function (wt, f) { return wt + ' ' + f + 'px Arial, Helvetica, sans-serif'; };
+      var font = function (f) { return f + 'px Arial, Helvetica, sans-serif'; };
+      ctx.fillStyle = '#000'; ctx.textBaseline = 'alphabetic';
+      // 1) big "Signature valid" title
+      var tf = H * 0.27; ctx.font = font(tf);
+      while (tf > 4 && ctx.measureText('Signature valid').width > W * 0.82) { tf -= 0.5; ctx.font = font(tf); }
+      var ty = y + H * 0.15 + tf * 0.9;
+      ctx.fillText('Signature valid', x + W * 0.09, ty);
+      // 2) signer lines underneath, slightly indented
+      var paras = ['Digitally signed by ' + s.signer];
+      if (s.time) paras.push('Date: ' + fmtDate(s.time));
+      if (s.reason) paras.push('Reason: ' + s.reason);
+      if (s.location) paras.push('Location: ' + s.location);
+      var bx = x + W * 0.12, bw = W * 0.82, room = y + H * 0.98 - (ty + H * 0.02);
       var wrap = function (f) {
-        var out = [];
+        ctx.font = font(f); var out = [];
         paras.forEach(function (p) {
-          ctx.font = font(p[1], f); var words = p[0].split(' '), line = '';
-          words.forEach(function (w) {
-            var t = line ? line + ' ' + w : w;
-            if (line && ctx.measureText(t).width > tw) { out.push([line, p[1]]); line = w; } else line = t;
-          });
-          out.push([line, p[1]]);
+          var line = '';
+          p.split(' ').forEach(function (w) { var t = line ? line + ' ' + w : w; if (line && ctx.measureText(t).width > bw) { out.push(line); line = w; } else line = t; });
+          out.push(line);
         });
         return out;
       };
-      var f = H / 3.2, rows;
-      for (; f > 3; f -= 0.5) {
-        rows = wrap(f);
-        var wide = rows.some(function (r) { ctx.font = font(r[1], f); return ctx.measureText(r[0]).width > tw; });
-        if (!wide && rows.length * f * 1.22 <= H * 0.94) break;
-      }
-      var fy = y + (H - rows.length * f * 1.22) / 2 + f;
-      ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#111';
-      rows.forEach(function (r) { ctx.font = font(r[1], f); ctx.fillText(r[0], tx, fy); fy += f * 1.22; });
+      var bf = H * 0.09, rows = wrap(bf);
+      while (bf > 3 && (rows.length * bf * 1.12 > room || rows.some(function (r) { return ctx.measureText(r).width > bw; }))) { bf -= 0.25; rows = wrap(bf); }
+      var by = ty + H * 0.02 + bf;
+      rows.forEach(function (r) { ctx.fillText(r, bx, by); by += bf * 1.12; });
+      // 3) the tick on top of the text, as Adobe draws it
+      var th = Math.min(H * 0.72, W * 0.6);
+      bigTick(ctx, x + W * 0.5, y + H * 0.26, th);
       ctx.restore(); n++;
     });
     return n;
