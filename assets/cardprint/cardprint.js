@@ -296,16 +296,17 @@
       st.sigs.push({ key: fileKey, name: file.name, res: sig });
     }
     var task = lib.getDocument({ data: data.slice() });
-    var cancelled = false;
+    var cancelled = false, usedPw = '';
     task.onPassword = function (update, reason) {
       busy(false);
       askPassword(reason === 2).then(function (pw) {
         if (pw === null) { cancelled = true; try { task.destroy(); } catch (e) {} return; }
-        busy(true, 'Opening PDF…'); update(pw);
+        busy(true, 'Opening PDF…'); usedPw = pw; update(pw);
       });
     };
     var pdf;
     try { pdf = await task.promise; } catch (e) { st.sigs = st.sigs.filter(function (g) { return g.key !== fileKey; }); if (!cancelled) toast('Could not open this PDF.'); return; }
+    if (sig && sig.encrypted && window.SPSig) SPSig.unlock(sig, usedPw);
     if (sig && sig.status === 'unsigned') {
       // explain *why* there is no signature: a signature box without data, or an official document that lost it
       try {

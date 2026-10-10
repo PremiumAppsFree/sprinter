@@ -402,8 +402,8 @@
       return new Promise(function (res, rej) { var s = document.createElement('script'); s.src = SP_BASE + src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
     };
     sigLibs = (window.forge ? Promise.resolve() : one('assets/vendor/forge.min.js'))
-      .then(function () { return window.SP_TRUSTED_ROOTS ? 0 : one('assets/sigverify/roots.js?v=12'); })
-      .then(function () { return window.SPSig ? 0 : one('assets/sigverify/sigverify.js?v=12'); });
+      .then(function () { return window.SP_TRUSTED_ROOTS ? 0 : one('assets/sigverify/roots.js?v=13'); })
+      .then(function () { return window.SPSig ? 0 : one('assets/sigverify/sigverify.js?v=13'); });
     return sigLibs;
   }
   function sigManaged() { return document.body && document.body.classList.contains('cp-body'); } // the card tool does its own check
@@ -486,11 +486,22 @@
         } catch (e) { check = null; }
       }
       var task = gd.apply(this, arguments);
+      // remember the password the tool hands to pdf.js, so the signature date of a protected file can be read
+      var given = arguments[0] && typeof arguments[0] === 'object' && arguments[0].password ? arguments[0].password : '';
+      if (check) {
+        try {
+          var userCb = null;
+          Object.defineProperty(task, 'onPassword', { configurable: true, enumerable: true,
+            get: function () { return userCb && function (update, reason) { return userCb(function (pw) { given = pw; return update(pw); }, reason); }; },
+            set: function (fn) { userCb = fn; } });
+        } catch (e) {}
+      }
       try {
         var p = task.promise.then(function (doc) {
           if (!check) return wrapDoc(doc);
           var limit = new Promise(function (r) { setTimeout(function () { r(null); }, 9000); });
           return Promise.race([check, limit]).then(function (res) {
+            if (res && res.encrypted && window.SPSig && window.SPSig.unlock) window.SPSig.unlock(res, given);
             if (res) { doc.__spSig = res; sigToast(res); }
             return wrapDoc(doc);
           });

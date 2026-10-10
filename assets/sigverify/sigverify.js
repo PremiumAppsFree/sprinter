@@ -60,6 +60,151 @@
     return new Date(d);
   }
 
+
+  // ---------- PDF strings (literal / hex) ----------
+  function readPdfString(text, pos) {
+    while (pos < text.length && /\s/.test(text[pos])) pos++;
+    if (text[pos] === '(') {
+      var out = '', depth = 1, i = pos + 1;
+      while (i < text.length && depth > 0) {
+        var c = text[i];
+        if (c === '\\') {
+          var n = text[i + 1];
+          var map = { n: '\n', r: '\r', t: '\t', b: '\b', f: '\f', '(': '(', ')': ')', '\\': '\\' };
+          if (map[n] !== undefined) { out += map[n]; i += 2; continue; }
+          if (n === '\r') { i += text[i + 2] === '\n' ? 3 : 2; continue; }
+          if (n === '\n') { i += 2; continue; }
+          var oct = /^[0-7]{1,3}/.exec(text.slice(i + 1, i + 4));
+          if (oct) { out += String.fromCharCode(parseInt(oct[0], 8) & 255); i += 1 + oct[0].length; continue; }
+          i++; continue;
+        }
+        if (c === '(') depth++;
+        if (c === ')') { depth--; if (!depth) break; }
+        out += c; i++;
+      }
+      return out;
+    }
+    if (text[pos] === '<' && text[pos + 1] !== '<') {
+      var end = text.indexOf('>', pos), hx = text.slice(pos + 1, end).replace(/[^0-9a-fA-F]/g, '');
+      if (hx.length % 2) hx += '0';
+      return forge.util.hexToBytes(hx);
+    }
+    return null;
+  }
+  function dictString(dict, key) {
+    var r = new RegExp('\\/' + key + '(?![A-Za-z0-9#])').exec(dict);
+    return r ? readPdfString(dict, r.index + r[0].length) : null;
+  }
+  function decodeText(b) {
+    if (b == null) return '';
+    if (b.charCodeAt(0) === 0xfe && b.charCodeAt(1) === 0xff) { var o = ''; for (var i = 2; i + 1 < b.length; i += 2) o += String.fromCharCode((b.charCodeAt(i) << 8) | b.charCodeAt(i + 1)); return o; }
+    if (b.charCodeAt(0) === 0xef && b.charCodeAt(1) === 0xbb && b.charCodeAt(2) === 0xbf) { try { return decodeURIComponent(escape(b.slice(3))); } catch (e) {} }
+    return b;
+  }
+  function objectText(text, num, gen) {
+    var re = new RegExp('(^|[^0-9])' + num + '\\s+' + gen + '\\s+obj'), m, last = -1, rx = new RegExp(re.source, 'g');
+    while ((m = rx.exec(text))) last = m.index + m[1].length;
+    if (last < 0) return null;
+    var end = text.indexOf('endobj', last);
+    return text.slice(last, end < 0 ? text.length : end);
+  }
+
+  // ---------- standard security handler (to read the date of a password-protected signed PDF) ----------
+  var PAD = forge ? forge.util.hexToBytes('28BF4E5E4E758A4164004E56FFFA01082E2E00B6D0683E802F0CA9FE6453697A') : '';
+  function md5(b) { var m = forge.md.md5.create(); m.update(b); return m.digest().getBytes(); }
+  function shaN(n, b) { var m = forge.md['sha' + n].create(); m.update(b); return m.digest().getBytes(); }
+  function rc4(key, data) {
+    var S = [], i, j = 0, t, out = '';
+    for (i = 0; i < 256; i++) S[i] = i;
+    for (i = 0; i < 256; i++) { j = (j + S[i] + key.charCodeAt(i % key.length)) & 255; t = S[i]; S[i] = S[j]; S[j] = t; }
+    i = j = 0;
+    for (var k = 0; k < data.length; k++) {
+      i = (i + 1) & 255; j = (j + S[i]) & 255; t = S[i]; S[i] = S[j]; S[j] = t;
+      out += String.fromCharCode(data.charCodeAt(k) ^ S[(S[i] + S[j]) & 255]);
+    }
+    return out;
+  }
+  function aesRaw(encrypt, key, iv, data) {
+    var c = encrypt ? forge.cipher.createCipher('AES-CBC', key) : forge.cipher.createDecipher('AES-CBC', key);
+    c.start({ iv: iv }); c.update(forge.util.createBuffer(data)); c.finish(function () { return true; });
+    return c.output.getBytes();
+  }
+  function aesStr(key, data) {
+    if (data.length < 32) return null;
+    var c = forge.cipher.createDecipher('AES-CBC', key);
+    c.start({ iv: data.slice(0, 16) }); c.update(forge.util.createBuffer(data.slice(16)));
+    return c.finish() ? c.output.getBytes() : null;
+  }
+  function le(n, bytes) { var o = ''; for (var i = 0; i < bytes; i++) o += String.fromCharCode((n >>> (8 * i)) & 255); return o; }
+  function xorKey(k, x) { var o = ''; for (var i = 0; i < k.length; i++) o += String.fromCharCode(k.charCodeAt(i) ^ x); return o; }
+  function hash2B(pw, salt, udata, R) {
+    var K = shaN(256, pw + salt + udata);
+    if (R < 6) return K;
+    var i = 0, E = '';
+    while (i < 64 || E.charCodeAt(E.length - 1) > i - 32) {
+      var K1 = '', unit = pw + K + udata; for (var r = 0; r < 64; r++) K1 += unit;
+      E = aesRaw(true, K.slice(0, 16), K.slice(16, 32), K1);
+      var sum = 0; for (var q = 0; q < 16; q++) sum += E.charCodeAt(q);
+      K = shaN([256, 384, 512][sum % 3], E); i++;
+    }
+    return K.slice(0, 32);
+  }
+  function readEncryption(text) {
+    var m = /\/Encrypt\s+(\d+)\s+(\d+)\s+R/.exec(text), dict = null;
+    if (m) dict = objectText(text, m[1], m[2]);
+    else { var k = text.indexOf('/Encrypt'); if (k >= 0 && /^\/Encrypt\s*<</.test(text.slice(k, k + 20))) dict = text.slice(k, k + 4000); }
+    if (!dict || !/\/Filter\s*\/Standard/.test(dict)) return null;
+    var full = dict; dict = dict.replace(/\/CF\s*<<(?:[^<>]|<<(?:[^<>]|<<[^<>]*>>)*>>)*>>/, '');   // top-level keys only
+    var num = function (k, d) { var r = new RegExp('\\/' + k + '\\s+(-?\\d+)').exec(dict); return r ? +r[1] : d; };
+    var idm = /\/ID\s*\[\s*/.exec(text.slice(text.lastIndexOf('/ID')));
+    var id0 = idm ? readPdfString(text, text.lastIndexOf('/ID') + idm.index + idm[0].length) : '';
+    var cfm = /\/StdCF\s*<<[^>]*\/CFM\s*\/(\w+)/.exec(full);
+    return {
+      V: num('V', 0), R: num('R', 2), len: num('Length', 40), P: num('P', 0),
+      O: dictString(dict, 'O') || '', U: dictString(dict, 'U') || '', OE: dictString(dict, 'OE') || '', UE: dictString(dict, 'UE') || '',
+      encMeta: !/\/EncryptMetadata\s+false/.test(dict), cfm: cfm ? cfm[1] : (num('V', 0) >= 4 ? 'AESV2' : 'V2'), id0: id0 || ''
+    };
+  }
+  function fileKey(E, password) {
+    var pw = password || '';
+    if (E.R >= 5) {
+      var u = pw; try { u = unescape(encodeURIComponent(pw)); } catch (e) {} u = u.slice(0, 127);
+      var U = E.U.slice(0, 48), O = E.O.slice(0, 48), zero = '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0';
+      if (hash2B(u, U.slice(32, 40), '', E.R) === U.slice(0, 32)) return aesRaw(false, hash2B(u, U.slice(40, 48), '', E.R), zero, E.UE.slice(0, 32));
+      if (hash2B(u, O.slice(32, 40), U, E.R) === O.slice(0, 32)) return aesRaw(false, hash2B(u, O.slice(40, 48), U, E.R), zero, E.OE.slice(0, 32));
+      return null;
+    }
+    var n = E.R === 2 ? 5 : Math.max(5, Math.min(16, (E.len || 40) / 8));
+    var keyFrom = function (padded) {
+      var h = md5(padded + E.O.slice(0, 32) + le(E.P, 4) + E.id0 + (E.R >= 4 && !E.encMeta ? '\xff\xff\xff\xff' : ''));
+      if (E.R >= 3) for (var i = 0; i < 50; i++) h = md5(h.slice(0, n));
+      return h.slice(0, n);
+    };
+    var userOk = function (key) {
+      if (E.R === 2) return rc4(key, PAD) === E.U.slice(0, 32);
+      var x = rc4(key, md5(PAD + E.id0));
+      for (var i = 1; i <= 19; i++) x = rc4(xorKey(key, i), x);
+      return x.slice(0, 16) === E.U.slice(0, 16);
+    };
+    var raw = pw; try { raw = unescape(encodeURIComponent(pw)); } catch (e) {}
+    var padded = (raw + PAD).slice(0, 32), key = keyFrom(padded);
+    if (userOk(key)) return key;
+    // maybe it is the owner password
+    var h = md5(padded); if (E.R >= 3) for (var i = 0; i < 50; i++) h = md5(h);
+    var ok = h.slice(0, n), up = E.O.slice(0, 32);
+    if (E.R === 2) up = rc4(ok, up); else for (var j = 19; j >= 0; j--) up = rc4(xorKey(ok, j), up);
+    key = keyFrom(up);
+    return userOk(key) ? key : null;
+  }
+  function decryptString(E, key, num, gen, data) {
+    if (data == null) return null;
+    if (E.R >= 5) return aesStr(key, data);
+    if (E.cfm === 'None' || E.cfm === 'Identity') return data;
+    var aes = E.V >= 4 && E.cfm === 'AESV2';
+    var ok = md5(key + le(num, 3) + le(gen, 2) + (aes ? 'sAlT' : '')).slice(0, Math.min(key.length + 5, 16));
+    return aes ? aesStr(ok, data) : rc4(ok, data);
+  }
+
   // ---------- find the signatures in the raw file ----------
   function findSignatures(u8) {
     var text = latin(u8, 0, u8.length), re = /\/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]/g, m, out = [], seen = {};
@@ -71,11 +216,16 @@
       if (!broken && (u8[lt] !== 0x3c || u8[gt] !== 0x3e)) broken = true;   // the hole must be exactly <hex>
       if (broken) { out.push({ byteRange: br, broken: true, at: m.index }); continue; }
       var hex = latin(u8, lt + 1, gt).replace(/[^0-9a-fA-F]/g, '');
-      // signature dictionary around it: look for /SubFilter, /M, /Name, /Reason, /Location
-      var from = Math.max(0, m.index - 4000), dict = text.slice(from, Math.min(text.length, br[2] + 2000));
-      var pick = function (k) { var r = new RegExp('\\/' + k + '\\s*\\(((?:\\\\.|[^\\\\)])*)\\)').exec(dict); return r ? r[1] : ''; };
+      // the signature dictionary that holds this /ByteRange
+      var head = text.slice(Math.max(0, m.index - 20000), m.index), om, objm = null, orx = /(\d+)\s+(\d+)\s+obj\b/g;
+      while ((om = orx.exec(head))) objm = om;
+      var dStart = objm ? m.index - head.length + objm.index : Math.max(0, m.index - 4000);
+      var dEnd = text.indexOf('endobj', br[2]); if (dEnd < 0) dEnd = Math.min(text.length, br[2] + 4000);
+      var dict = text.slice(dStart, lt) + text.slice(br[2], dEnd);      // leave the huge /Contents out
       var sf = /\/SubFilter\s*\/([A-Za-z0-9.]+)/.exec(dict);
-      out.push({ byteRange: br, hex: hex, subFilter: sf ? sf[1] : '', m: pick('M'), name: pick('Name'), reason: pick('Reason'), location: pick('Location'), at: m.index });
+      out.push({ byteRange: br, hex: hex, subFilter: sf ? sf[1] : '', at: m.index,
+        num: objm ? +objm[1] : 0, gen: objm ? +objm[2] : 0,
+        raw: { M: dictString(dict, 'M'), Name: dictString(dict, 'Name'), Reason: dictString(dict, 'Reason'), Location: dictString(dict, 'Location') } });
     }
     return out;
   }
@@ -154,8 +304,9 @@
     return { ok: false, chain: chain, root: null, reason: 'chain' };
   }
 
-  async function checkOne(u8, sig) {
-    var r = { byteRange: sig.byteRange, at: sig.at, status: 'error', problems: [], signer: '', org: '', time: null, chain: [], reason: sig.reason, location: sig.location };
+  async function checkOne(u8, sig, enc) {
+    var plain = function (k) { return enc || !sig.raw ? '' : decodeText(sig.raw[k]); };
+    var r = { byteRange: sig.byteRange, at: sig.at, num: sig.num, gen: sig.gen, status: 'error', problems: [], signer: '', org: '', time: null, chain: [], reason: plain('Reason'), location: plain('Location') };
     if (sig.broken) { r.wholeFile = false; r.status = 'modified'; r.problems.push('The file was re-saved after signing, so the signature no longer matches its bytes.'); return r; }
     var br = sig.byteRange;
     var parts = [u8.subarray(br[0], br[0] + br[1]), u8.subarray(br[2], br[2] + br[3])];
@@ -187,9 +338,11 @@
     } else {
       sigOk = verifyRsa(cert, alg, docHash, s.signature);
     }
-    if (attrs[OID.signingTime]) { try { r.time = forge.asn1.utcTimeToDate ? (attrs[OID.signingTime][0].type === forge.asn1.Type.UTCTIME ? forge.asn1.utcTimeToDate(attrs[OID.signingTime][0].value) : forge.asn1.generalizedTimeToDate(attrs[OID.signingTime][0].value)) : null; } catch (e) {} }
-    if (!r.time) r.time = pdfDate(sig.m);
-    r.timeSource = attrs[OID.signingTime] ? 'signature' : (sig.m ? 'pdf' : 'none');
+    // the signing date shown in the box is the dictionary's /M (as Adobe shows it); CMS signingTime is the fallback
+    var mDate = pdfDate(plain('M')), cmsDate = null;
+    if (attrs[OID.signingTime]) { try { cmsDate = attrs[OID.signingTime][0].type === forge.asn1.Type.UTCTIME ? forge.asn1.utcTimeToDate(attrs[OID.signingTime][0].value) : forge.asn1.generalizedTimeToDate(attrs[OID.signingTime][0].value); } catch (e) {} }
+    r.time = mDate || cmsDate; r.cmsTime = cmsDate;
+    r.timeSource = mDate ? 'pdf' : (cmsDate ? 'signature' : 'none');
     var when = r.time || new Date();
     var chain = buildChain(cert, cms.certs, when);
     r.chain = chain.chain.map(function (c) { return { name: nameOf(c), org: attr(c, 'O'), from: c.validity.notBefore, to: c.validity.notAfter }; });
@@ -213,8 +366,9 @@
     var u8 = input instanceof Uint8Array ? input : new Uint8Array(input);
     var sigs = findSignatures(u8);
     if (!sigs.length) return { status: 'unsigned', signatures: [] };
+    var enc = null; try { enc = readEncryption(latin(u8, 0, u8.length)); } catch (e) {}
     var res = [];
-    for (var i = 0; i < sigs.length; i++) res.push(await checkOne(u8, sigs[i]));
+    for (var i = 0; i < sigs.length; i++) res.push(await checkOne(u8, sigs[i], enc));
     // a later revision may legitimately add another signature: the earlier one is then not "whole file"
     var last = res.slice().sort(function (a, b) { return (b.byteRange[2] + b.byteRange[3]) - (a.byteRange[2] + a.byteRange[3]); })[0];
     res.forEach(function (r) {
@@ -222,7 +376,26 @@
     });
     var order = ['modified', 'changed-after', 'error', 'untrusted', 'valid'];
     var overall = res.map(function (r) { return r.status; }).sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); })[0];
-    return { status: overall, signatures: res };
+    var out = { status: overall, signatures: res, encrypted: !!enc };
+    Object.defineProperty(out, '_enc', { value: { E: enc, raw: sigs.filter(function (x) { return !x.broken; }) } });
+    if (enc) unlock(out, '');                 // owner-password-only files open without a password
+    return out;
+  }
+  // Read the date / reason / location of a password-protected file once its password is known.
+  function unlock(result, password) {
+    try {
+      var info = result && result._enc; if (!info || !info.E || result.unlocked) return false;
+      var key = fileKey(info.E, password || ''); if (!key) return false;
+      result.signatures.forEach(function (r) {
+        var sg = info.raw.find(function (x) { return x.at === r.at; }); if (!sg || !sg.raw) return;
+        var dec = function (k) { return decodeText(decryptString(info.E, key, sg.num, sg.gen, sg.raw[k])); };
+        var d = pdfDate(dec('M'));
+        if (d) { r.time = d; r.timeSource = 'pdf'; }
+        r.reason = dec('Reason'); r.location = dec('Location');
+      });
+      result.unlocked = true;
+      return true;
+    } catch (e) { return false; }
   }
 
   // ---------- drawing the validated signature box ----------
@@ -273,8 +446,6 @@
       // 3) the signer text, wrapped the way the signature's own appearance is
       var paras = ['Digitally signed by ' + s.signer];
       if (s.time) paras.push('Date: ' + fmtDate(s.time));
-      if (s.reason) paras.push('Reason: ' + s.reason);
-      if (s.location) paras.push('Location: ' + s.location);
       var bx = x + W * 0.129, bw = W * 0.69;
       var wrap = function (f) {
         ctx.font = font(f); var out = [];
@@ -315,6 +486,8 @@
       h += '<details><summary>Details</summary><dl>';
       h += '<dt>Signed by</dt><dd>' + esc(sig.signer) + (sig.org && sig.org !== sig.signer ? ' · ' + esc(sig.org) : '') + '</dd>';
       if (sig.time) h += '<dt>Signed on</dt><dd>' + esc(fmtDate(sig.time)) + '</dd>';
+      if (sig.reason) h += '<dt>Reason</dt><dd>' + esc(sig.reason) + '</dd>';
+      if (sig.location) h += '<dt>Location</dt><dd>' + esc(sig.location) + '</dd>';
       if (sig.chain && sig.chain.length) h += '<dt>Certificate chain</dt><dd>' + sig.chain.map(function (c) { return esc(c.name); }).join(' → ') + '</dd>';
       h += '<dt>Trusted root</dt><dd>' + (sig.root ? esc(sig.root) + ' (India PKI)' : 'Not found') + '</dd>';
       if (sig.problems && sig.problems.length) h += '<dt>Problems</dt><dd>' + sig.problems.map(esc).join('<br>') + '</dd>';
@@ -326,5 +499,5 @@
     return h + '</div></div>';
   }
 
-  window.SPSig = { verify: verify, paint: paint, describe: describe, fmtDate: fmtDate };
+  window.SPSig = { verify: verify, unlock: unlock, paint: paint, describe: describe, fmtDate: fmtDate };
 })();
