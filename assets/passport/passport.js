@@ -89,7 +89,7 @@
     });
   }
   function toCanvas(img, w, h) {
-    var k = Math.min(1, 3200 / Math.max(w, h)), c = canvas(w * k, h * k), x = c.getContext('2d');
+    var k = Math.min(1, (window.SPMaxSide || 4800) / Math.max(w, h)), c = canvas(w * k, h * k), x = c.getContext('2d');
     x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, c.width, c.height); return c;
   }
   function defaultCrop(p) {
@@ -367,7 +367,7 @@
     var out = [], d = dpi();
     for (var i = 0; i < st.pages.length; i++) {
       busy(true, 'Preparing sheet ' + (i + 1) + ' of ' + st.pages.length + '…'); await new Promise(function (r) { setTimeout(r, 0); });
-      var c = drawPage(st.pages[i], d); if (window.SPPaper) SPPaper.tune(c); out.push({ W: st.pages[i].W, H: st.pages[i].H, url: c.toDataURL('image/jpeg', 0.95) }); c.width = c.height = 1;
+      var c = drawPage(st.pages[i], d); if (window.SPPaper) SPPaper.tune(c); out.push({ W: st.pages[i].W, H: st.pages[i].H, url: c.toDataURL('image/jpeg', 0.98) }); c.width = c.height = 1;
     }
     busy(false); return out;
   }

@@ -104,7 +104,7 @@
   function fileToURL(f) {
     return new Promise(function (res, rej) {
       var u = URL.createObjectURL(f), i = new Image();
-      i.onload = function () { var k = Math.min(1, 2400 / Math.max(i.naturalWidth, i.naturalHeight)), c = canvasEl(i.naturalWidth * k, i.naturalHeight * k); c.getContext('2d').drawImage(i, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL(/png/i.test(f.type) ? 'image/png' : 'image/jpeg', 0.92)); };
+      i.onload = function () { var k = Math.min(1, (window.SPMaxSide || 4800) / Math.max(i.naturalWidth, i.naturalHeight)), c = canvasEl(i.naturalWidth * k, i.naturalHeight * k); c.getContext('2d').drawImage(i, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL(/png/i.test(f.type) ? 'image/png' : 'image/jpeg', 0.97)); };
       i.onerror = function () { URL.revokeObjectURL(u); rej(new Error('Not an image')); }; i.src = u;
     });
   }
@@ -520,7 +520,7 @@
       list.forEach(function (p) {
         var w = p.mm ? p.mm[0] : mmW, h = p.mm ? p.mm[1] : mmH, o = w > h ? 'l' : 'p';
         if (!pdf) pdf = new J({ orientation: o, unit: 'mm', format: [w, h], compress: true }); else pdf.addPage([w, h], o);
-        pdf.addImage(p.url || p.c.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, w, h, undefined, 'FAST');
+        pdf.addImage(p.url || p.c.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, w, h, undefined, 'FAST');
       });
       return pdf;
     }
@@ -539,9 +539,9 @@
     }
     S.printImages = printImages;
     function doExport(a) {
-      if (a === 'jpg' || a === 'png') return exportPages(a, 'file').then(function (list) { list.forEach(function (p, i) { setTimeout(function () { saveURL(fname(a, i), p.c.toDataURL(a === 'png' ? 'image/png' : 'image/jpeg', 0.95)); }, i * 400); }); toast('Saved ' + list.length + (list.length > 1 ? ' images.' : ' image.')); });
+      if (a === 'jpg' || a === 'png') return exportPages(a, 'file').then(function (list) { list.forEach(function (p, i) { setTimeout(function () { saveURL(fname(a, i), p.c.toDataURL(a === 'png' ? 'image/png' : 'image/jpeg', 0.98)); }, i * 400); }); toast('Saved ' + list.length + (list.length > 1 ? ' images.' : ' image.')); });
       if (a === 'pdf') return exportPages('jpg', 'print').then(function (list) { var pdf = toPDF(list, doc.mm[0], doc.mm[1]); pdf.save(fname('pdf')); toast('PDF saved.'); });
-      if (a === 'print') return exportPages('jpg', 'print').then(function (list) { printImages(list.map(function (p) { return p.c.toDataURL('image/jpeg', 0.95); }), doc.mm[0], doc.mm[1]); });
+      if (a === 'print') return exportPages('jpg', 'print').then(function (list) { printImages(list.map(function (p) { return p.c.toDataURL('image/jpeg', 0.98); }), doc.mm[0], doc.mm[1]); });
       if (a === 'share') return exportPages('jpg', 'screen').then(function (list) {
         list[0].c.toBlob(function (b) {
           var f = new File([b], fname('jpg'), { type: 'image/jpeg' });
@@ -733,7 +733,7 @@
             cropper.setDragMode('crop'); cropper.setAspectRatio(r === 'free' ? NaN : r === 'frame' ? (o.ratio || NaN) : +r);
           };
           foot.querySelector('[data-c=x]').onclick = function () { m.close(); m.onclose(); };
-          foot.querySelector('[data-c=ok]').onclick = function () { var c = cropper.getCroppedCanvas({ maxWidth: 2400, maxHeight: 2400, imageSmoothingQuality: 'high' }); cropper.destroy(); cropper = null; cropped = c; step2(); };
+          foot.querySelector('[data-c=ok]').onclick = function () { var c = cropper.getCroppedCanvas({ maxWidth: 4800, maxHeight: 4800, imageSmoothingQuality: 'high' }); cropper.destroy(); cropper = null; cropped = c; step2(); };
         }
         function prev(c) { body.innerHTML = '<div class="st-prev"></div>'; var p = body.querySelector('.st-prev'); var im = new Image(); im.src = c.toDataURL('image/png'); p.appendChild(im); }
         function step2() {

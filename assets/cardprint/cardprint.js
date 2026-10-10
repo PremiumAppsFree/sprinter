@@ -352,7 +352,7 @@
       busy(true, 'Reading page ' + i + ' of ' + n + '…');
       var page = await pdf.getPage(i);
       var v1 = page.getViewport({ scale: 1 });
-      var scale = Math.min(3508 / Math.max(v1.width, v1.height), 6);
+      var want = Math.max(300, (window.SPPaper && SPPaper.dpi()) || 300) / 72, scale = Math.min(want, (window.SPMaxSide || 4800) / Math.max(v1.width, v1.height), 8.4);
       var vp = page.getViewport({ scale: scale });
       var c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
       var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
@@ -750,7 +750,7 @@
       var dpi = (window.SPPaper && SPPaper.dpi()) || parseInt(($('cp-dpi') || {}).value, 10) || DPI, c;
       try { c = drawPage(pages[i], dpi); if (!c.width) throw 0; } catch (e) { c = drawPage(pages[i], 300); }
       if (window.SPPaper) SPPaper.tune(c);
-      out.push({ W: pages[i].W, H: pages[i].H, url: c.toDataURL('image/jpeg', 0.95) });
+      out.push({ W: pages[i].W, H: pages[i].H, url: c.toDataURL('image/jpeg', 0.98) });
       c.width = c.height = 1;
     }
     return out;

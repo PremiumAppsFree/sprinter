@@ -208,7 +208,7 @@
       S.busy(true, 'Arranging on A4…');
       var pages = sheets(cards, opt);
       if (opt.fmt === 'a4zip') return needZip().then(function () { var z = new window.JSZip(); pages.forEach(function (p, i) { z.file('A4-page-' + (i + 1) + '.png', p.toDataURL('image/png').split(',')[1], { base64: true }); }); return z.generateAsync({ type: 'blob' }); }).then(function (b) { S.busy(false); S.saveURL('SPrinter-ID-A4-pages-' + stamp() + '.zip', URL.createObjectURL(b)); S.toast(pages.length + ' A4 pages saved.'); });
-      var urls = pages.map(function (p) { return p.toDataURL('image/jpeg', 0.95); });
+      var urls = pages.map(function (p) { return p.toDataURL('image/jpeg', 0.98); });
       S.busy(false);
       if (opt.fmt === 'a4print') { S.printImages(urls, 210, 297); return; }
       S.toPDF(urls.map(function (u) { return { url: u }; }), 210, 297).save('SPrinter-ID-cards-A4-' + stamp() + '.pdf'); S.toast('PDF saved: ' + cards.length + ' cards on ' + pages.length + ' page' + (pages.length > 1 ? 's' : '') + '.');

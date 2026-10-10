@@ -300,16 +300,19 @@
         });
       };
       var pdf; try { pdf = await task.promise; } catch (e) { if (!cancelled) toast('Could not open ' + f.name); return 0; }
-      var n = Math.min(pdf.numPages, 30), got = 0, MAXPX = SMALL ? 1900 : 2600;
+      var n = Math.min(pdf.numPages, 30), got = 0, MAXPX = window.SPMaxSide || (SMALL ? 4800 : 7200), DPIW = Math.max(300, (window.SPPaper && SPPaper.dpi()) || 300);
       for (var i = 1; i <= n && !stopFlag; i++) {
         busy(true, 'Reading page ' + i + (n > 1 ? ' of ' + n : '') + '…');
         try {
           var p = await late(pdf.getPage(i), 20000), v1 = p.getViewport({ scale: 1 }), c = null;
           for (var tryN = 0; tryN < 2 && !c && !stopFlag; tryN++) {
-            var sc = Math.min(200 / 72, (tryN ? MAXPX * 0.6 : MAXPX) / Math.max(v1.width, v1.height)), vp = p.getViewport({ scale: sc });
-            var cc = canvas(vp.width, vp.height), x = cc.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cc.width, cc.height);
-            var rt = p.render({ canvasContext: x, viewport: vp });
-            try { await late(rt.promise, tryN ? 30000 : 25000); c = cc; } catch (e) { try { rt.cancel(); } catch (e2) {} cc.width = cc.height = 1; }
+            var sc = Math.min(DPIW / 72, (tryN ? MAXPX * 0.6 : MAXPX) / Math.max(v1.width, v1.height)), vp = p.getViewport({ scale: sc });
+            var cc = null, rt = null;
+            try {
+              cc = canvas(vp.width, vp.height); var x = cc.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cc.width, cc.height);   // throws if the phone cannot hold this size
+              rt = p.render({ canvasContext: x, viewport: vp });
+              await late(rt.promise, tryN ? 30000 : 25000); c = cc;
+            } catch (e) { try { rt && rt.cancel(); } catch (e2) {} if (cc) cc.width = cc.height = 1; }
           }
           if (c) { got++; onPage({ c: c, mm: [v1.width / 72 * MM, v1.height / 72 * MM] }); }
           else toast('Page ' + i + ' took too long and was skipped.');
@@ -357,7 +360,7 @@
       try { b = await createImageBitmap(f, { imageOrientation: 'from-image' }); } catch (e) {
         b = await new Promise(function (res, rej) { var u = URL.createObjectURL(f), i = new Image(); i.onload = function () { res(i); }; i.onerror = rej; i.src = u; });
       }
-      var w = b.width || b.naturalWidth, h = b.height || b.naturalHeight, k = Math.min(1, 3200 / Math.max(w, h)), c = canvas(w * k, h * k);
+      var w = b.width || b.naturalWidth, h = b.height || b.naturalHeight, k = Math.min(1, (window.SPMaxSide || 4800) / Math.max(w, h)), c = canvas(w * k, h * k);
       c.getContext('2d').drawImage(b, 0, 0, c.width, c.height); return c;
     }
     E.addFiles = addFiles;
@@ -579,7 +582,7 @@
       for (var p = 0; p < pages; p++) {
         if (!items.some(function (i) { return i.page === p; })) continue;
         busy(true, 'Preparing page ' + (p + 1) + '…'); await new Promise(function (r) { setTimeout(r, 0); });
-        var c = drawPage(p, (window.SPPaper && SPPaper.dpi()) || DPI); if (window.SPPaper) SPPaper.tune(c); out.push({ W: P[0], H: P[1], url: c.toDataURL('image/jpeg', 0.95) }); c.width = c.height = 1;
+        var c = drawPage(p, (window.SPPaper && SPPaper.dpi()) || DPI); if (window.SPPaper) SPPaper.tune(c); out.push({ W: P[0], H: P[1], url: c.toDataURL('image/jpeg', 0.98) }); c.width = c.height = 1;
       }
       busy(false); return out;
     }

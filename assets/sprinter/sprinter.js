@@ -410,7 +410,10 @@
   }, true);
 
   // PDF render cap
-  var MAX_SIDE = 3508;
+  // biggest page picture: keeps the document's own quality (up to ~600 dpi on A4 on computers, ~400 dpi on phones)
+  var SMALLDEV = (window.innerWidth || 1000) < 820 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+  window.SPMaxSide = SMALLDEV ? 4800 : 7200;
+  var MAX_SIDE = window.SPMaxSide;
   // ---- automatic digital-signature check for every tool that opens a PDF ----
   var SP_BASE = (function () {
     var sc = document.currentScript && document.currentScript.src;
@@ -984,19 +987,19 @@
  * glossy photo paper does not). Quality: Normal 300 / High 450 / Best 600 dpi. */
 (function () {
   'use strict';
-  var KEY = 'sp-paper-v1';
+  var KEY = 'sp-paper-v2';
   var PAPERS = {
-    plain: { name: 'Plain paper (normal)', b: 1.03, c: 1.07, s: 1.12 },
+    exact: { name: 'Original colours (no change)', b: 1, c: 1, s: 1 },
+    plain: { name: 'Plain paper — brighter', b: 1.03, c: 1.07, s: 1.12 },
     gloss: { name: 'Photo paper — glossy', b: 1.0, c: 1.03, s: 1.05 },
     matte: { name: 'Photo paper — matte', b: 1.02, c: 1.05, s: 1.08 },
     card: { name: 'Card / art paper (thick)', b: 1.02, c: 1.06, s: 1.09 },
-    pvc: { name: 'PVC card', b: 1.0, c: 1.04, s: 1.06 },
-    exact: { name: 'Exact colours (no change)', b: 1, c: 1, s: 1 }
+    pvc: { name: 'PVC card', b: 1.0, c: 1.04, s: 1.06 }
   };
   var QUAL = { normal: { name: 'Normal (300 dpi)', dpi: 300 }, high: { name: 'High (450 dpi)', dpi: 450 }, best: { name: 'Best (600 dpi)', dpi: 600 } };
-  var st = { paper: 'plain', quality: 'normal' }, subs = [];
+  var st = { paper: 'exact', quality: 'normal' }, subs = [];
   try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved) { if (PAPERS[saved.paper]) st.paper = saved.paper; if (QUAL[saved.quality]) st.quality = saved.quality; } } catch (e) {}
-  function prof() { return PAPERS[st.paper] || PAPERS.plain; }
+  function prof() { return PAPERS[st.paper] || PAPERS.exact; }
   function cssFilter() { var p = prof(); return p.b === 1 && p.c === 1 && p.s === 1 ? 'none' : 'brightness(' + p.b + ') contrast(' + p.c + ') saturate(' + p.s + ')'; }
   function applyPrintCss() {
     var el = document.getElementById('sp-paper-print');
@@ -1042,7 +1045,7 @@
     w.querySelector('[data-sp-quality]').addEventListener('change', function () { set('quality', this.value); });
     host.appendChild(w); return w;
   }
-  function shortLabel() { return (st.paper === 'plain' ? 'Plain' : st.paper === 'gloss' ? 'Glossy' : st.paper === 'matte' ? 'Matte' : st.paper === 'card' ? 'Card' : st.paper === 'pvc' ? 'PVC' : 'Exact') + ' · ' + st.quality.charAt(0).toUpperCase() + st.quality.slice(1); }
+  function shortLabel() { return (st.paper === 'exact' ? 'Original' : st.paper === 'plain' ? 'Plain' : st.paper === 'gloss' ? 'Glossy' : st.paper === 'matte' ? 'Matte' : st.paper === 'card' ? 'Card' : st.paper === 'pvc' ? 'PVC' : 'Exact') + ' · ' + st.quality.charAt(0).toUpperCase() + st.quality.slice(1); }
   // floating "Paper" button on tool pages that have no inline paper settings
   function pill() {
     if (!/\/(service|tool)\//.test(location.pathname) || document.querySelector('[data-sp-paper]') || document.getElementById('sp-paperpill') || document.body.classList.contains('st-body') || document.body.hasAttribute('data-sp-nofloat')) return;
@@ -1147,14 +1150,14 @@
   var ready = null;
   function libs() {
     if (ready) return ready;
-    var jobs = [load('assets/sheet/sheet.css?v=3', true), load('assets/vendor/cropper.min.css', true)];
+    var jobs = [load('assets/sheet/sheet.css?v=4', true), load('assets/vendor/cropper.min.css', true)];
     ready = Promise.all(jobs).then(function () {
       var js = [];
       if (!window.Cropper) js.push(load('assets/vendor/cropper.min.js'));
       if (!window.pdfjsLib) js.push(load('assets/vendor/pdf.min.js'));
       if (!(window.jspdf && window.jspdf.jsPDF)) js.push(load('assets/vendor/jspdf.umd.min.js'));
       return Promise.all(js);
-    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=3'); });
+    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=4'); });
     return ready;
   }
   function open() {
