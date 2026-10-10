@@ -440,7 +440,7 @@
   // Layout measured from Adobe Reader prints of a validated e-Aadhaar:
   //  · detail text = 0.4617 × title size, line pitch = 1.012 × detail size
   //  · lines wrap at 13.5 × detail size ("…by DS Unique / Identification Authority of India / 06 / Date… / IST")
-  //  · first detail baseline 1.106 × title size below the title baseline, indented 0.15 × title size
+  //  · first detail baseline 1.06 × title size below the title baseline, indented 0.15 × title size
   //  · tick width 0.434 × title width, its right tip at 72.6 % of the title, top 0.2 × title size above the baseline
   async function paint(ctx, page, viewport, result) {
     if (!result || result.status !== 'valid' || !result.signatures) return 0;
@@ -463,15 +463,16 @@
         paras.forEach(function (p) { var line = ''; p.split(' ').forEach(function (wd) { var t = line ? line + ' ' + wd : wd; if (line && ctx.measureText(t).width > bw) { out.push(line); line = wd; } else line = t; }); out.push(line); });
         return out;
       }
-      // largest title size (Adobe: 0.2125 × box height) whose whole block fits inside the box
-      var tf = H * 0.2125, L;
+      // Adobe prints the title at 0.25 × box height, starting at the left edge and touching the top
+      // (measured against the document's own address text in real Adobe prints)
+      var tf = H * 0.25, L;
       for (var k = 0; k < 80; k++) {
         ctx.font = font(tf);
         var tw = ctx.measureText('Signature valid').width, bf = tf * 0.4617, pitch = bf * 1.012, bw = bf * 13.5;
-        var tx = x + Math.max(W * 0.04, (W - Math.max(tw, tf * 0.15 + bw)) * 0.42), base = y + tf * 1.572;   // Adobe: title baseline at 0.334 × box height when the title is 0.2125 × height
-        var rows = wrap(bf, bw), first = base + tf * 1.106, last = first + (rows.length - 1) * pitch;
+        var tx = x + W * 0.02, base = y + tf * 0.8;
+        var rows = wrap(bf, bw), first = base + tf * 1.06, last = first + (rows.length - 1) * pitch;
         var widest = Math.max(tw, tf * 0.15 + Math.max.apply(null, rows.map(function (q) { return ctx.measureText(q).width; })));
-        if (widest <= W * 0.94 && last + bf * 0.25 <= y + H * 0.99) { L = { tf: tf, tw: tw, bf: bf, pitch: pitch, tx: tx, base: base, rows: rows, first: first }; break; }
+        if (widest <= W * 0.97 && last + bf * 0.25 <= y + H * 0.995) { L = { tf: tf, tw: tw, bf: bf, pitch: pitch, tx: tx, base: base, rows: rows, first: first }; break; }
         tf *= 0.97;
       }
       if (!L) return;
