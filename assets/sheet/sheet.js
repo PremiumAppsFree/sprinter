@@ -69,6 +69,10 @@
   }
   // ID cards on a PDF page (e-Aadhaar, e-PAN …): blobs with the card shape
   function findCards(c) {
+    var lines = lineCards(c), blobs = blobCards(c);
+    return mergeBoxes(lines.concat(blobs)).slice(0, 8);
+  }
+  function blobCards(c) {
     var out = [];
     try {
       var k = Math.min(1, 420 / Math.max(c.width, c.height)), w = Math.round(c.width * k), h = Math.round(c.height * k);
@@ -100,6 +104,62 @@
     } catch (e) {}
     return out.slice(0, 6);
   }
+
+  function iou(a, b) {
+    var x0 = Math.max(a.x, b.x), y0 = Math.max(a.y, b.y), x1 = Math.min(a.x + a.width, b.x + b.width), y1 = Math.min(a.y + a.height, b.y + b.height);
+    if (x1 <= x0 || y1 <= y0) return 0; var i = (x1 - x0) * (y1 - y0); return i / (a.width * a.height + b.width * b.height - i);
+  }
+  function mergeBoxes(list) {
+    var out = [];
+    list.forEach(function (b) { if (!out.some(function (o) { return iou(o, b) > 0.55; })) out.push(b); });
+    // drop a box that holds two or more others (a frame around both cards)
+    out = out.filter(function (b) { return out.filter(function (o) { return o !== b && o.x >= b.x - 3 && o.y >= b.y - 3 && o.x + o.width <= b.x + b.width + 3 && o.y + o.height <= b.y + b.height + 3; }).length < 2; });
+    out.sort(function (a, b) { return Math.abs(a.y - b.y) > a.height * 0.5 ? a.y - b.y : a.x - b.x; });
+    return out;
+  }
+  // card outlines: thin printed borders (e-Aadhaar, e-PAN, PVC sheets), even with rounded corners
+  function lineCards(c) {
+    var out = [];
+    try {
+      var k = Math.min(1, 900 / Math.max(c.width, c.height)), w = Math.round(c.width * k), h = Math.round(c.height * k);
+      var t = canvas(w, h), x = t.getContext('2d'); x.drawImage(c, 0, 0, w, h);
+      var d = x.getImageData(0, 0, w, h).data, m = new Uint8Array(w * h), i, y;
+      for (i = 0; i < w * h; i++) { var r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2]; m[i] = (0.3 * r + 0.59 * g + 0.11 * b < 222 || Math.max(r, g, b) - Math.min(r, g, b) > 50) ? 1 : 0; }
+      var minH = Math.round(Math.min(w, h) * 0.16), hs = [];
+      for (y = 0; y < h; y++) {
+        var run = 0, gapN = 0, x0 = 0;
+        for (var xx = 0; xx <= w; xx++) {
+          var on = xx < w && m[y * w + xx];
+          if (on) { if (!run) x0 = xx; run = xx - x0 + 1; gapN = 0; }
+          else if (run) { if (++gapN > 3 || xx === w) { if (run >= minH) hs.push({ y: y, x0: x0, x1: x0 + run - 1 }); run = 0; gapN = 0; } }
+        }
+      }
+      // merge neighbouring rows into one line
+      var L = [];
+      hs.forEach(function (s) {
+        var o = L.find(function (l) { return s.y - l.y1 <= 2 && Math.abs(s.x0 - l.x0) < 6 && Math.abs(s.x1 - l.x1) < 6; });
+        if (o) o.y1 = s.y; else L.push({ y0: s.y, y1: s.y, x0: s.x0, x1: s.x1 });
+      });
+      L = L.filter(function (l) { return l.y1 - l.y0 <= 6; });   // a border is thin; a filled bar is not
+      if (L.length > 400) L = L.slice(0, 400);
+      function colCover(cx, ya, yb) { var n = 0; for (var yy = ya; yy <= yb; yy++) if (m[yy * w + cx]) n++; return n / Math.max(1, yb - ya + 1); }
+      // nearest column to the line's end that runs most of the height (not the neighbour card's border)
+      function edge(from, to, ya, yb) { var st = from < to ? 1 : -1; for (var cx = from; st > 0 ? cx <= to : cx >= to; cx += st) { if (cx < 0 || cx >= w) continue; if (colCover(cx, ya, yb) > 0.72) { while (cx + st >= 0 && cx + st < w && colCover(cx + st, ya, yb) > 0.72) cx += st; return cx; } } return -1; }
+      for (var a = 0; a < L.length; a++) for (var bI = a + 1; bI < L.length; bI++) {
+        var A = L[a], B = L[bI], hh = B.y0 - A.y1; if (hh < h * 0.04) continue;
+        if (Math.abs(A.x0 - B.x0) > 8 || Math.abs(A.x1 - B.x1) > 8) continue;
+        var rr = Math.round(Math.min(w, h) * 0.035), ya = A.y1 + rr, yb = B.y0 - rr; if (yb - ya < 6) continue;
+        var lx = edge(Math.min(A.x0, B.x0) + 3, Math.min(A.x0, B.x0) - rr - 2, ya, yb), rx = edge(Math.max(A.x1, B.x1) - 3, Math.max(A.x1, B.x1) + rr + 2, ya, yb);
+        if (lx < 0 || rx < 0) continue;
+        var bw = rx - lx + 1, bh = B.y1 - A.y0 + 1, ratio = bw / bh;
+        if (!((ratio > 1.35 && ratio < 1.95) || (ratio > 0.51 && ratio < 0.75))) continue;
+        out.push({ x: lx / k, y: A.y0 / k, width: bw / k, height: bh / k });
+      }
+      // inner/outer double borders → keep the outer one
+      out = out.filter(function (b) { return !out.some(function (o) { return o !== b && o.width * o.height > b.width * b.height && iou(o, b) > 0.7; }); });
+    } catch (e) {}
+    return out;
+  }
   function cut(src, r) { var c = canvas(r.width, r.height); c.getContext('2d').drawImage(src, r.x, r.y, r.width, r.height, 0, 0, c.width, c.height); return c; }
 
   // =====================================================================
@@ -126,8 +186,14 @@
     var file = el('input'); file.type = 'file'; file.accept = 'image/*,application/pdf'; file.multiple = true; file.hidden = true;
     var tip = el('p', 'sh-tip', 'Drag to move · pinch or drag a corner to resize · scroll wheel to resize on PC');
     host.appendChild(top); host.appendChild(stage); host.appendChild(tip); host.appendChild(ctx); host.appendChild(panel); host.appendChild(bar); host.appendChild(file);
-    var busyEl = el('div', 'sh-busy', '<span></span><b>Working…</b>'); busyEl.hidden = true; host.appendChild(busyEl);
-    function busy(on, t) { busyEl.hidden = !on; if (t) busyEl.querySelector('b').textContent = t; }
+    var busyEl = el('div', 'sh-busy', '<span></span><b>Working…</b><button type="button" class="sh-btn sh-stop">Cancel</button>'); busyEl.hidden = true; host.appendChild(busyEl);
+    var stopFlag = false;
+    busyEl.querySelector('.sh-stop').onclick = function () { stopFlag = true; busy(false); };
+    function busy(on, t) { busyEl.hidden = !on; if (t) busyEl.querySelector('b').textContent = t; if (on) busyEl.querySelector('.sh-stop').hidden = false; }
+    // empty page: one big button to add photos or a PDF
+    var empty = el('div', 'sh-empty', '<button type="button" class="sh-big sh-addnow"><span>' + IC.add + '</span>Add photos or PDF</button><p>Gallery, camera or PDF (password PDFs too). Small documents are cropped automatically.</p>');
+    stage.appendChild(empty);
+    empty.querySelector('button').onclick = function () { file.removeAttribute('capture'); file.click(); };
 
     function paperMM() {
       var p = paper === 'custom' ? custom : PAPERS[paper] || PAPERS.A4, W = Math.min(p[0], p[1]), H = Math.max(p[0], p[1]);
@@ -218,49 +284,74 @@
     }
     E.addCanvas = function (c, o) { var it = addItem(c, o); render(); return it; };
 
-    async function loadPdf(f) {
-      var lib = window.pdfjsLib; if (!lib) { toast('PDF reader did not load.'); return []; }
-      try { lib.GlobalWorkerOptions.workerSrc = (opts.base || '../') + 'assets/vendor/pdf.worker.min.js'; } catch (e) {}
-      var task = lib.getDocument({ data: new Uint8Array(await f.arrayBuffer()) }), cancelled = false;
+    function late(p, ms) { return Promise.race([p, new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, ms); })]); }
+    var SMALL = (window.innerWidth || 1000) < 820 || /Android|iPhone|iPad/i.test(navigator.userAgent);
+    async function loadPdf(f, onPage) {
+      var lib = window.pdfjsLib; if (!lib) { toast('PDF reader did not load.'); return 0; }
+      try { if (!lib.GlobalWorkerOptions.workerSrc || lib.version === '2.16.105') lib.GlobalWorkerOptions.workerSrc = (opts.base || '../') + 'assets/vendor/pdf.worker.min.js'; } catch (e) {}
+      var known = (window.SPPw && SPPw.list()) || [], tryAt = 0, cancelled = false;
+      var task = lib.getDocument({ data: new Uint8Array(await f.arrayBuffer()) });
       task.onPassword = function (upd, reason) {
+        if (tryAt < known.length) { upd(known[tryAt++]); return; }   // passwords you already typed on this page
         busy(false);
-        askPass(f.name, reason === 2).then(function (pw) { if (pw == null) { cancelled = true; task.destroy(); } else { busy(true, 'Opening…'); upd(pw); } });
+        askPass(f.name, reason === 2 && tryAt === 0 ? true : reason === 2 && tryAt > known.length).then(function (pw) {
+          if (pw == null) { cancelled = true; try { task.destroy(); } catch (e) {} }
+          else { tryAt = known.length + 1; if (window.SPPw) SPPw.add(pw); busy(true, 'Opening…'); upd(pw); }
+        });
       };
-      var pdf; try { pdf = await task.promise; } catch (e) { if (!cancelled) toast('Could not open ' + f.name); return []; }
-      var out = [];
-      for (var i = 1; i <= Math.min(pdf.numPages, 30); i++) {
-        busy(true, 'Reading page ' + i + '…');
-        var p = await pdf.getPage(i), v1 = p.getViewport({ scale: 1 }), sc = Math.min(200 / 72, 2600 / Math.max(v1.width, v1.height)), vp = p.getViewport({ scale: sc });
-        var c = canvas(vp.width, vp.height), x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
-        await p.render({ canvasContext: x, viewport: vp }).promise;
-        out.push({ c: c, mm: [v1.width / 72 * MM, v1.height / 72 * MM] });
+      var pdf; try { pdf = await task.promise; } catch (e) { if (!cancelled) toast('Could not open ' + f.name); return 0; }
+      var n = Math.min(pdf.numPages, 30), got = 0, MAXPX = SMALL ? 1900 : 2600;
+      for (var i = 1; i <= n && !stopFlag; i++) {
+        busy(true, 'Reading page ' + i + (n > 1 ? ' of ' + n : '') + '…');
+        try {
+          var p = await late(pdf.getPage(i), 20000), v1 = p.getViewport({ scale: 1 }), c = null;
+          for (var tryN = 0; tryN < 2 && !c && !stopFlag; tryN++) {
+            var sc = Math.min(200 / 72, (tryN ? MAXPX * 0.6 : MAXPX) / Math.max(v1.width, v1.height)), vp = p.getViewport({ scale: sc });
+            var cc = canvas(vp.width, vp.height), x = cc.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cc.width, cc.height);
+            var rt = p.render({ canvasContext: x, viewport: vp });
+            try { await late(rt.promise, tryN ? 30000 : 25000); c = cc; } catch (e) { try { rt.cancel(); } catch (e2) {} cc.width = cc.height = 1; }
+          }
+          if (c) { got++; onPage({ c: c, mm: [v1.width / 72 * MM, v1.height / 72 * MM] }); }
+          else toast('Page ' + i + ' took too long and was skipped.');
+          try { p.cleanup(); } catch (e) {}
+        } catch (e) { toast('Page ' + i + ' could not be read.'); }
+        await new Promise(function (r) { setTimeout(r, 0); });
       }
-      return out;
+      try { pdf.destroy(); } catch (e) {}
+      return got;
     }
     async function addFiles(list) {
       list = [].slice.call(list || []); if (!list.length) return;
       var auto = !panel.querySelector('#sh-auto') || panel.querySelector('#sh-auto').checked;
       var cardsOn = !panel.querySelector('#sh-cards') || panel.querySelector('#sh-cards').checked;
-      busy(true, 'Opening…');
-      for (var i = 0; i < list.length; i++) {
+      stopFlag = false; busy(true, 'Opening…');
+      panel.hidden = true; [].forEach.call(bar.children, function (b) { b.classList.remove('on'); });
+      var first = !items.length;
+      function show() { if (first) { fitView(); first = false; } render(); }
+      for (var i = 0; i < list.length && !stopFlag; i++) {
         var f = list[i];
+        if (list.length > 1) busy(true, 'Opening ' + (i + 1) + ' of ' + list.length + '…');
         try {
           if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) {
-            var pgs = await loadPdf(f);
-            pgs.forEach(function (pg) {
+            await loadPdf(f, function (pg) {
               var cards = cardsOn ? findCards(pg.c) : [];
-              if (cards.length) cards.forEach(function (r) { addItem(cut(pg.c, r), { src: pg.c, rect: r, real: [85.6, 54] }); });
+              if (cards.length) cards.forEach(function (r) { addItem(cut(pg.c, r), { src: pg.c, rect: r, real: realOf(r) }); });
               else addItem(pg.c, { real: pg.mm });
+              show();
             });
           } else {
-            var img = await decode(f), r = auto ? autoBox(img) : null;
-            addItem(r ? cut(img, r) : img, { src: img, rect: r });
+            var img = await late(decode(f), 30000), r = auto ? (autoBox(img) || null) : null;
+            var cs = !r && auto ? findCards(img) : [];
+            if (cs.length > 1) cs.forEach(function (q) { addItem(cut(img, q), { src: img, rect: q, real: realOf(q) }); });
+            else addItem(r ? cut(img, r) : img, { src: img, rect: r });
+            show();
           }
         } catch (e) { toast('Could not open ' + f.name); }
+        await new Promise(function (r) { setTimeout(r, 0); });
       }
-      busy(false); panel.hidden = true; [].forEach.call(bar.children, function (b) { b.classList.remove('on'); });
-      fitView(); render();
+      busy(false); show();
     }
+    function realOf(r) { return r.width >= r.height ? [85.6, 54] : [54, 85.6]; }
     async function decode(f) {
       var b;
       try { b = await createImageBitmap(f, { imageOrientation: 'from-image' }); } catch (e) {
@@ -295,7 +386,7 @@
         if (it === sel) { var sz = el('span', 'sh-dim', it.w.toFixed(1) + ' × ' + it.h.toFixed(1) + ' mm'); d.appendChild(sz); }
         pg.appendChild(d);
       });
-      ctx.hidden = !sel;
+      ctx.hidden = !sel; empty.hidden = items.length > 0;
       top.querySelector('.sh-sub').textContent = items.length + (items.length === 1 ? ' document' : ' documents') + ' · ' + pages + (pages > 1 ? ' pages' : ' page') + ' · ' + (paper === '4x6' ? '4×6 in' : paper) + ' ' + orient;
       if (opts.onChange) opts.onChange(items);
     }
@@ -525,5 +616,5 @@
     requestAnimationFrame(function () { fitView(); render(); });
   }
 
-  window.SPSheet = { Editor: Editor, findCards: findCards, autoBox: autoBox };
+  window.SPSheet = { Editor: Editor, findCards: findCards, autoBox: autoBox, lineCards: lineCards, blobCards: blobCards };
 })();

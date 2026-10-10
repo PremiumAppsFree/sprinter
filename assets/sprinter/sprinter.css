@@ -171,3 +171,4 @@ button,a,label,[role=button]{touch-action:manipulation}
 @media print{.sp-arrange{display:none!important}}
 body:has(.sh-overlay) .sp-paperpill,body:has(.sh-overlay) .sp-arrange,body:has(.sh-overlay) .sp-papermenu{display:none!important}
 body.sp-ovl .sp-paperpill,body.sp-ovl .sp-arrange,body.sp-ovl .sp-papermenu{display:none!important}
+.sp-arrange[hidden],.sp-paperpill[hidden],.sp-papermenu[hidden],.sp-paperbox [hidden]{display:none!important}

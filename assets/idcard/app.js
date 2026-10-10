@@ -887,7 +887,7 @@
                 if (brandTitle) brandTitle.textContent = 'S Printer Album';
                 if (brandSubtitle) brandSubtitle.textContent = 'DOCUMENT ALBUM PRINT';
                 const uploadTip = document.getElementById('uploadMultiTip');
-                if (uploadTip) uploadTip.innerHTML = 'Ek A4 page me <b>4 front/back document sets</b> aayenge. Fold-ready album placement automatic aur locked rahega.';
+                if (uploadTip) uploadTip.innerHTML = 'Ek A4 page me <b>4 front/back document sets</b> aayenge. Fold-ready placement automatic hai — chahein to card ko pakad kar kahin bhi khiskayein, kone se chhota-bada karein.';
                 const status = document.getElementById('mobStatus');
                 if (status) status.innerText = 'Document Album: 4 sets ready';
                 relayoutQueueItems('pvc');
@@ -15476,7 +15476,7 @@ function refreshEditor(resetPoints = false) {
                 }
 
                 if(found) {
-                    if (isDocumentAlbumLaunch) {
+                    if (isDocumentAlbumLaunch && window.SP_ALBUM_LOCK === true) {   // S Printer: album sets can be dragged and resized
                         selectedItem = { index: found.i, side: found.side };
                         sheetDragIndex = -1;
                         sheetDragTarget = null;

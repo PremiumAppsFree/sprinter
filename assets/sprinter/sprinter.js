@@ -1,3 +1,26 @@
+/* PDF passwords you type on a page are remembered for this tab only (never saved or sent),
+ * so "Arrange on page" can open the same protected PDF without asking again. */
+(function () {
+  'use strict';
+  var list = [];
+  window.SPPw = {
+    add: function (v) { v = String(v || '').trim(); if (v.length < 4 || v.length > 64) return; var i = list.indexOf(v); if (i >= 0) list.splice(i, 1); list.unshift(v); if (list.length > 8) list.length = 8; },
+    list: function () { return list.slice(); }
+  };
+  function grab(e) {
+    var t = e.target; if (!t || t.tagName !== 'INPUT') return;
+    var hint = ((t.id || '') + ' ' + (t.name || '') + ' ' + (t.placeholder || '') + ' ' + (t.className || '')).toLowerCase();
+    if (t.type === 'password' || /pass|pwd/.test(hint)) window.SPPw.add(t.value);
+  }
+  document.addEventListener('change', grab, true);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Enter') grab(e); }, true);
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest && e.target.closest('button,[type=submit]'); if (!b) return;
+    var box = b.closest('form,[role=dialog],.modal,div'); if (!box) return;
+    [].forEach.call(box.querySelectorAll('input[type=password],input[id*=pass i],input[placeholder*=pass i]'), function (i) { window.SPPw.add(i.value); });
+  }, true);
+})();
+
 /*!
  * S Printer runtime helper.
  * The tools were originally backed by a PHP server (sessions, quotas, logins).
@@ -488,11 +511,12 @@
       var task = gd.apply(this, arguments);
       // remember the password the tool hands to pdf.js, so the signature date of a protected file can be read
       var given = arguments[0] && typeof arguments[0] === 'object' && arguments[0].password ? arguments[0].password : '';
+      if (given && window.SPPw) window.SPPw.add(given);
       if (check) {
         try {
           var userCb = null;
           Object.defineProperty(task, 'onPassword', { configurable: true, enumerable: true,
-            get: function () { return userCb && function (update, reason) { return userCb(function (pw) { given = pw; return update(pw); }, reason); }; },
+            get: function () { return userCb && function (update, reason) { return userCb(function (pw) { given = pw; if (window.SPPw) window.SPPw.add(pw); return update(pw); }, reason); }; },
             set: function (fn) { userCb = fn; } });
         } catch (e) {}
       }
@@ -1104,6 +1128,7 @@
     if (files.length) show();
   }
   document.addEventListener('change', function (e) { if (e.target && e.target.type === 'file') keep(e.target.files); }, true);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show); else show();
   document.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files) keep(e.dataTransfer.files); }, true);
   function show() {
     if (btn) { btn.hidden = false; return; }
@@ -1122,14 +1147,14 @@
   var ready = null;
   function libs() {
     if (ready) return ready;
-    var jobs = [load('assets/sheet/sheet.css?v=2', true), load('assets/vendor/cropper.min.css', true)];
+    var jobs = [load('assets/sheet/sheet.css?v=3', true), load('assets/vendor/cropper.min.css', true)];
     ready = Promise.all(jobs).then(function () {
       var js = [];
       if (!window.Cropper) js.push(load('assets/vendor/cropper.min.js'));
       if (!window.pdfjsLib) js.push(load('assets/vendor/pdf.min.js'));
       if (!(window.jspdf && window.jspdf.jsPDF)) js.push(load('assets/vendor/jspdf.umd.min.js'));
       return Promise.all(js);
-    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=2'); });
+    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=3'); });
     return ready;
   }
   function open() {
@@ -1166,8 +1191,9 @@
   function free(side, bottom, sz, mine) {
     var top = innerHeight - bottom - sz.h; if (top < 60) return false;
     var x0 = side === 'l' ? 14 : innerWidth - 14 - sz.w;
-    for (var fy = 0; fy <= 1; fy += 0.5) for (var fx = 0; fx <= 1; fx += 0.5) {
-      if (blocked(x0 + 2 + fx * (sz.w - 4), top + 2 + fy * (sz.h - 4), mine)) return false;
+    var nx = Math.max(3, Math.ceil(sz.w / 18)), ny = Math.max(3, Math.ceil(sz.h / 14));
+    for (var j = 0; j < ny; j++) for (var i = 0; i < nx; i++) {
+      if (blocked(x0 + 2 + i / (nx - 1) * (sz.w - 4), top + 2 + j / (ny - 1) * (sz.h - 4), mine)) return false;
     }
     return true;
   }
