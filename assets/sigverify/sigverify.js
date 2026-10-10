@@ -420,49 +420,71 @@
     ctx.lineWidth = Math.max(1, H * 0.008); ctx.strokeStyle = '#000'; ctx.stroke();       // outline
     ctx.restore();
   }
-  // Paint every *valid* signature widget on this page. Returns how many boxes were painted.
+  // Arial-metric font (Liberation Sans, SIL OFL) shipped with the site, so phones without Arial
+  // measure and wrap the text exactly like Adobe Reader does.
+  var SIGFONT = '"SPSigSans", Arial, Helvetica, "Liberation Sans", sans-serif', fontReady = null;
+  function sigFont() {
+    if (fontReady) return fontReady;
+    fontReady = new Promise(function (res) {
+      try {
+        if (!window.FontFace || !document.fonts) { res(); return; }
+        var sc = document.querySelector('script[src*="sigverify/sigverify.js"]');
+        var base = sc ? sc.src.replace(/sigverify\.js.*$/, '') : '../assets/sigverify/';
+        var ff = new FontFace('SPSigSans', 'url(' + base + 'LiberationSans-Regular.ttf)');
+        var t = setTimeout(res, 5000);
+        ff.load().then(function (f) { document.fonts.add(f); clearTimeout(t); res(); }, function () { clearTimeout(t); res(); });
+      } catch (e) { res(); }
+    });
+    return fontReady;
+  }
+  // Layout measured from Adobe Reader prints of a validated e-Aadhaar:
+  //  · detail text = 0.4617 × title size, line pitch = 1.012 × detail size
+  //  · lines wrap at 13.5 × detail size ("…by DS Unique / Identification Authority of India / 06 / Date… / IST")
+  //  · first detail baseline 1.106 × title size below the title baseline, indented 0.15 × title size
+  //  · tick width 0.434 × title width, its right tip at 72.6 % of the title, top 0.2 × title size above the baseline
   async function paint(ctx, page, viewport, result) {
     if (!result || result.status !== 'valid' || !result.signatures) return 0;
     var good = result.signatures.filter(function (s) { return s.status === 'valid'; });
     if (!good.length) return 0;
     var annots; try { annots = await page.getAnnotations(); } catch (e) { return 0; }
     var widgets = annots.filter(function (a) { return a.fieldType === 'Sig' && a.rect && Math.abs(a.rect[2] - a.rect[0]) > 4 && Math.abs(a.rect[3] - a.rect[1]) > 4; });
+    if (!widgets.length) return 0;
+    await sigFont();
     var n = 0;
     widgets.forEach(function (w, i) {
       var s = good[Math.min(i, good.length - 1)];
       var r = viewport.convertToViewportRectangle(w.rect);
       var x = Math.min(r[0], r[2]), y = Math.min(r[1], r[3]), W = Math.abs(r[2] - r[0]), H = Math.abs(r[3] - r[1]);
+      var font = function (f) { return f + 'px ' + SIGFONT; };
+      var paras = ['Digitally signed by ' + s.signer];
+      if (s.time) paras.push('Date: ' + fmtDate(s.time));
+      function wrap(bf, bw) {
+        ctx.font = font(bf); var out = [];
+        paras.forEach(function (p) { var line = ''; p.split(' ').forEach(function (wd) { var t = line ? line + ' ' + wd : wd; if (line && ctx.measureText(t).width > bw) { out.push(line); line = wd; } else line = t; }); out.push(line); });
+        return out;
+      }
+      // largest title size (Adobe: 0.2125 × box height) whose whole block fits inside the box
+      var tf = H * 0.2125, L;
+      for (var k = 0; k < 80; k++) {
+        ctx.font = font(tf);
+        var tw = ctx.measureText('Signature valid').width, bf = tf * 0.4617, pitch = bf * 1.012, bw = bf * 13.5;
+        var tx = x + Math.max(W * 0.04, (W - Math.max(tw, tf * 0.15 + bw)) * 0.42), base = y + tf * 1.572;   // Adobe: title baseline at 0.334 × box height when the title is 0.2125 × height
+        var rows = wrap(bf, bw), first = base + tf * 1.106, last = first + (rows.length - 1) * pitch;
+        var widest = Math.max(tw, tf * 0.15 + Math.max.apply(null, rows.map(function (q) { return ctx.measureText(q).width; })));
+        if (widest <= W * 0.94 && last + bf * 0.25 <= y + H * 0.99) { L = { tf: tf, tw: tw, bf: bf, pitch: pitch, tx: tx, base: base, rows: rows, first: first }; break; }
+        tf *= 0.97;
+      }
+      if (!L) return;
       ctx.save();
       ctx.beginPath(); ctx.rect(x, y, W, H); ctx.clip();
       ctx.fillStyle = '#fff'; ctx.fillRect(x, y, W, H);
-      // 1) the tick sits underneath the text, exactly like Adobe's validated signature box
-      adobeTick(ctx, x + W * 0.5, y, H);
-      var font = function (f) { return f + 'px Arial, Helvetica, "Liberation Sans", sans-serif'; };
+      // tick first, the text on top of it — like Adobe
+      var Ht = 0.434 * L.tw / 0.591, tipX = L.tx + 0.726 * L.tw, top = L.base - 0.2 * L.tf - 0.275 * Ht;
+      adobeTick(ctx, tipX - 0.261 * Ht, top, Ht);
       ctx.fillStyle = '#000'; ctx.textBaseline = 'alphabetic';
-      // 2) "Signature valid"
-      var tf = H * 0.2125; ctx.font = font(tf);
-      while (tf > 4 && ctx.measureText('Signature valid').width > W * 0.84) { tf -= 0.25; ctx.font = font(tf); }
-      ctx.fillText('Signature valid', x + W * 0.1, y + H * 0.334);
-      // 3) the signer text, wrapped the way the signature's own appearance is
-      var paras = ['Digitally signed by ' + s.signer];
-      if (s.time) paras.push('Date: ' + fmtDate(s.time));
-      // exactly Adobe's two paragraphs (signer + signing date); the check time is shown on screen, not in the box
-      var bx = x + W * 0.129, bw = W * 0.69;
-      var wrap = function (f) {
-        ctx.font = font(f); var out = [];
-        paras.forEach(function (p) {
-          var line = '';
-          p.split(' ').forEach(function (w) { var t = line ? line + ' ' + w : w; if (line && ctx.measureText(t).width > bw) { out.push(line); line = w; } else line = t; });
-          out.push(line);
-        });
-        return out;
-      };
-      var bf = H * 0.0981, pitch = H * 0.0993, rows = wrap(bf), first = H * 0.569;
-      while (bf > 3 && (first + (rows.length - 1) * pitch > H * 0.985 || rows.some(function (r) { return ctx.measureText(r).width > W * 0.86; }))) {
-        bf -= 0.25; pitch = bf * 1.012; rows = wrap(bf);
-      }
-      var by = y + first;
-      rows.forEach(function (r) { ctx.fillText(r, bx, by); by += pitch; });
+      ctx.font = font(L.tf); ctx.fillText('Signature valid', L.tx, L.base);
+      ctx.font = font(L.bf);
+      var by = L.first; L.rows.forEach(function (q) { ctx.fillText(q, L.tx + L.tf * 0.15, by); by += L.pitch; });
       ctx.restore(); n++;
     });
     return n;
