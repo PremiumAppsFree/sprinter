@@ -8,10 +8,10 @@
 <meta name="description" content="Check the digital signature of e-Aadhaar, e-PAN and other signed PDFs and print the full document with the verified tick.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=15">
-<script src="../assets/sprinter/sprinter.js?v=15"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=16">
+<script src="../assets/sprinter/sprinter.js?v=16"></script>
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
-<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=15">
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=16">
 </head>
 <body class="cp-body" data-doc="sign" data-size="full">
 <header class="sp-header" id="sp-header">
@@ -86,7 +86,16 @@
         </div>
 
         <div class="cp-opts" id="cp-opts-full" hidden>
-          <label class="cp-switch"><input type="checkbox" id="cp-actual" checked><span></span>Actual size (100%) when the page fits the paper</label>
+          <div class="cp-form">
+            <label>Page size on paper
+              <select id="cp-fit">
+                <option value="actual" selected>Actual size (100%)</option>
+                <option value="fit">Fit inside the margins</option>
+                <option value="fill">Fill page — edge to edge</option>
+                <option value="stretch">Stretch to the paper</option>
+              </select></label>
+            <label>Make smaller / bigger (%)<input type="number" id="cp-scale" min="5" max="400" step="1" value="100" inputmode="numeric"></label>
+          </div>
         </div>
 
         <div class="cp-slots" id="cp-slots"></div>
@@ -220,8 +229,8 @@
 <script src="../assets/vendor/pdf.min.js"></script>
 <script src="../assets/vendor/jspdf.umd.min.js"></script>
 <script src="../assets/vendor/forge.min.js"></script>
-<script src="../assets/sigverify/roots.js?v=15"></script>
-<script src="../assets/sigverify/sigverify.js?v=15"></script>
-<script src="../assets/cardprint/cardprint.js?v=15"></script>
+<script src="../assets/sigverify/roots.js?v=16"></script>
+<script src="../assets/sigverify/sigverify.js?v=16"></script>
+<script src="../assets/cardprint/cardprint.js?v=16"></script>
 </body>
 </html>

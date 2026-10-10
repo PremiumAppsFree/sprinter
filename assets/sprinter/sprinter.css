@@ -127,3 +127,7 @@
 .sp-gi{display:inline-flex;align-items:center;justify-content:center;width:1.15em;height:1.15em;vertical-align:-.2em;line-height:1;flex-shrink:0}
 .sp-gi svg{width:100%;height:100%;display:block;overflow:visible}
 button .sp-gi,a .sp-gi{margin:0 .1em}
+.sp-swrow{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.sp-swrow .sp-sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #cfd8e3;cursor:pointer;padding:0;transition:transform .15s}
+.sp-swrow .sp-sw:hover{transform:scale(1.12)}
+.sp-swrow .sp-sw[aria-pressed=true]{box-shadow:0 0 0 3px #0098D8}

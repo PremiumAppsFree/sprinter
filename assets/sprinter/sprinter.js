@@ -807,3 +807,32 @@
     if (a && e.isTrusted) saved(a.getAttribute('download'));
   }, true);
 })();
+
+/* One-tap background colours next to every background colour picker
+ * (Remove Background, photo tools, classic passport editor). */
+(function () {
+  'use strict';
+  var COLORS = ['#ffffff', '#e6f0fb', '#bfdcf5', '#6fb3e8', '#1d6fd1', '#0b3d91', '#d7263d', '#f1f1f1', '#c9ced6', '#fff5d6', '#000000'];
+  function add(input) {
+    if (!input || input.dataset.spSw) return; input.dataset.spSw = '1';
+    var row = document.createElement('div'); row.className = 'sp-swrow'; row.setAttribute('role', 'group'); row.setAttribute('aria-label', 'Background colours');
+    COLORS.forEach(function (c) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'sp-sw'; b.style.background = c; b.title = c; b.setAttribute('aria-label', 'Colour ' + c);
+      b.addEventListener('click', function () {
+        input.value = c;
+        input.dispatchEvent(new Event('input', { bubbles: true })); input.dispatchEvent(new Event('change', { bubbles: true }));
+        [].forEach.call(row.children, function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      });
+      row.appendChild(b);
+    });
+    var host = input.closest('label') || input;
+    host.parentNode.insertBefore(row, host.nextSibling);
+    var lab = input.id && document.querySelector('label[for="' + input.id + '"]');
+    [lab, input.closest('label')].forEach(function (l) {
+      if (l && /empty space/i.test(l.textContent)) l.childNodes.forEach(function (n) { if (n.nodeType === 3) n.nodeValue = n.nodeValue.replace(/Background\s*\/\s*empty space/i, 'Background colour'); });
+    });
+  }
+  function scan() { ['#background', '#bgColorPicker', 'input[type=color][id*="bg" i]', 'input[type=color][id*="background" i]'].forEach(function (q) { [].forEach.call(document.querySelectorAll(q), function (i) { if (i.type === 'color') add(i); }); }); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan); else scan();
+  setTimeout(scan, 1500);
+})();

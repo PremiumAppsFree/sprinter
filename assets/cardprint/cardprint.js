@@ -524,10 +524,13 @@
         var land = orient === 'landscape' || (orient === 'auto' && iw > ih);
         var W = land ? Math.max(p0[0], p0[1]) : Math.min(p0[0], p0[1]), H = land ? Math.min(p0[0], p0[1]) : Math.max(p0[0], p0[1]);
         if (isPVC) { W = 85.6; H = 54; }
+        var fit = ($('cp-fit') && $('cp-fit').value) || 'actual', sc = num('cp-scale', 100, 5, 400) / 100;
         var aw = W - 2 * m, ah = H - 2 * m, k = Math.min(aw / iw, ah / ih), w = iw * k, h = ih * k, y = pos === 'top' ? m : (H - h) / 2;
-        // a PDF page that fits the paper prints at its real size (100%)
         var mw = turned ? it.src.mmH : it.src.mmW, mh = turned ? it.src.mmW : it.src.mmH;
-        if (!isPVC && mw && $('cp-actual') && $('cp-actual').checked && mw <= W + 0.5 && mh <= H + 0.5) { w = mw; h = mh; y = (H - h) / 2; }
+        if (fit === 'actual' && !isPVC && mw && mw <= W + 0.5 && mh <= H + 0.5) { w = mw; h = mh; y = (H - h) / 2; }   // real size (100%)
+        else if (fit === 'fill') { var kc = Math.max(W / iw, H / ih); w = iw * kc; h = ih * kc; y = (H - h) / 2; }       // edge to edge, no white border
+        else if (fit === 'stretch') { w = W; h = H; y = 0; }                                                             // exactly the paper
+        if (sc !== 1) { var cy = y + h / 2; w *= sc; h *= sc; y = pos === 'top' && fit === 'fit' ? m : cy - h / 2; }
         for (var c = 0; c < copies; c++) pages.push({ W: W, H: H, items: [{ full: it, x: (W - w) / 2, y: y, w: w, h: h }] });
       });
       return pages;
@@ -780,7 +783,7 @@
     ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('drag'); }); });
     drop.addEventListener('drop', function (e) { e.preventDefault(); addFiles(e.dataTransfer.files); });
     ['cp-back', 'cp-longsep', 'cp-cw', 'cp-ch'].forEach(function (id) { $(id).addEventListener('change', function () { renderSlots(); update(); }); });
-    if ($('cp-actual')) $('cp-actual').addEventListener('change', update);
+    ['cp-fit', 'cp-scale'].forEach(function (id) { if ($(id)) { $(id).addEventListener('change', update); $(id).addEventListener('input', update); } });
     if ($('cp-addcard')) $('cp-addcard').addEventListener('click', addAnotherCard);
     ['cp-mirror', 'cp-maxpp', 'cp-pw', 'cp-ph'].forEach(function (id) { if ($(id)) { $(id).addEventListener('change', update); $(id).addEventListener('input', update); } });
     var cpv = function () { if ($('cp-custompaper')) $('cp-custompaper').hidden = $('cp-paper').value !== 'custom'; };
