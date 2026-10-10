@@ -7,7 +7,7 @@
   var DPI = 300, MM = 25.4;
   var PVC = { w: 85.6, h: 54 };
   var LONG = { w: 171.2, h: 54 };
-  var PAPERS = { A4: [210, 297], Letter: [215.9, 279.4], Legal: [215.9, 355.6], A5: [148, 210], '4x6': [101.6, 152.4], PVC: [54, 85.6] };
+  var PAPERS = { A4: [210, 297], A3: [297, 420], Letter: [215.9, 279.4], Legal: [215.9, 355.6], A5: [148, 210], '4x6': [101.6, 152.4], '5x7': [127, 177.8], PVC: [54, 85.6] };
   var DOCS = {
     aadhaar: { name: 'Aadhaar', pass: 'e-Aadhaar password: first 4 letters of the name in CAPITALS + year of birth. Example: RAJE1995' },
     pan: { name: 'PAN', pass: 'e-PAN password: date of birth as DDMMYYYY. Example: 15081995' },
@@ -25,7 +25,7 @@
   // ---------- state ----------
   var st = {
     size: 'small', sources: [], slots: {}, full: [],
-    page: 0, pages: [], warn: '', sigs: []
+    page: 0, pages: [], warn: '', sigs: [], queue: []
   };
   var srcSeq = 0;
 
@@ -58,15 +58,16 @@
     try {
       localStorage.setItem(PREF, JSON.stringify({
         paper: $('cp-paper').value, orient: $('cp-orient').value, arrange: $('cp-arrange').value, pos: $('cp-pos').value,
-        margin: $('cp-margin').value, gap: $('cp-gap').value, cut: $('cp-cut').checked, round: $('cp-round').checked, fold: $('cp-fold').checked
+        margin: $('cp-margin').value, gap: $('cp-gap').value, cut: $('cp-cut').checked, round: $('cp-round').checked, fold: $('cp-fold').checked,
+        dpi: $('cp-dpi') && $('cp-dpi').value, pw: $('cp-pw') && $('cp-pw').value, ph: $('cp-ph') && $('cp-ph').value, mirror: $('cp-mirror') && $('cp-mirror').checked
       }));
     } catch (e) {}
   }
   function loadPrefs() {
     try {
       var p = JSON.parse(localStorage.getItem(PREF) || 'null'); if (!p) return;
-      ['paper', 'orient', 'arrange', 'pos', 'margin', 'gap'].forEach(function (k) { if (p[k] != null && $('cp-' + k)) $('cp-' + k).value = p[k]; });
-      ['cut', 'round', 'fold'].forEach(function (k) { if (p[k] != null) $('cp-' + k).checked = !!p[k]; });
+      ['paper', 'orient', 'arrange', 'pos', 'margin', 'gap', 'dpi', 'pw', 'ph'].forEach(function (k) { if (p[k] != null && $('cp-' + k)) $('cp-' + k).value = p[k]; });
+      ['cut', 'round', 'fold', 'mirror'].forEach(function (k) { if (p[k] != null && $('cp-' + k)) $('cp-' + k).checked = !!p[k]; });
     } catch (e) {}
   }
 
@@ -90,6 +91,34 @@
     return list;
   }
 
+  // ---------- several different cards on one sheet ----------
+  function renderQueue() {
+    var box = $('cp-queue'); if (!box) return;
+    var cur = st.size !== 'full' ? currentSet(num('cp-gap', 4, 0, 30)) : null;
+    $('cp-addcard').hidden = st.size === 'full';
+    $('cp-addcard').disabled = !(cur && cur.ready);
+    box.hidden = !st.queue.length || st.size === 'full'; box.innerHTML = '';
+    if (!st.queue.length) return;
+    var h = document.createElement('p'); h.className = 'cp-queue-h'; h.textContent = 'Already on the sheet (' + st.queue.length + ')'; box.appendChild(h);
+    st.queue.forEach(function (q, i) {
+      var el = document.createElement('div'); el.className = 'cp-qi';
+      el.innerHTML = '<img alt=""><span></span><button type="button" aria-label="Remove this card">×</button>';
+      el.querySelector('img').src = q.thumb; el.querySelector('span').textContent = q.label + ' · ' + q.copies + (q.copies > 1 ? ' copies' : ' copy');
+      el.querySelector('button').onclick = function () { st.queue.splice(i, 1); renderQueue(); update(); };
+      box.appendChild(el);
+    });
+  }
+  function addAnotherCard() {
+    var cur = currentSet(num('cp-gap', 4, 0, 30)); if (!cur || !cur.ready) return;
+    var c = cur.unit.parts[0].c, t = document.createElement('canvas'), k = 120 / Math.max(c.width, c.height);
+    t.width = Math.round(c.width * k); t.height = Math.round(c.height * k); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+    var label = { small: 'Small card', long: 'Long size', custom: 'Custom' }[st.size] || 'Card';
+    st.queue.push({ unit: cur.unit, copies: Math.round(num('cp-copies', 1, 1, 60)), duplex: cur.duplex, thumb: t.toDataURL('image/jpeg', 0.8), label: label });
+    st.slots = {}; $('cp-copies').value = 1;
+    renderSlots(); renderQueue(); update();
+    toast('Added. Now add or crop the next card — it goes on the same sheet.');
+    var next = slotDefs()[0]; if (next && st.sources.length) setTimeout(function () { openCrop(next); }, 300);
+  }
   function renderSlots() {
     var box = $('cp-slots'); box.innerHTML = '';
     var full = st.size === 'full';
@@ -461,8 +490,12 @@
   }
 
   // ---------- layout ----------
+  function paperDims() {
+    if ($('cp-paper').value === 'custom') return [num('cp-pw', 210, 30, 1200), num('cp-ph', 297, 30, 1200)];
+    return PAPERS[$('cp-paper').value] || PAPERS.A4;
+  }
   function paperFor(orientChoice, unit) {
-    var p = PAPERS[$('cp-paper').value] || PAPERS.A4, W = p[0], H = p[1];
+    var p = paperDims(), W = p[0], H = p[1];
     if ($('cp-paper').value === 'PVC') return { W: 85.6, H: 54 };
     if (orientChoice === 'portrait') return { W: Math.min(W, H), H: Math.max(W, H) };
     if (orientChoice === 'landscape') return { W: Math.max(W, H), H: Math.min(W, H) };
@@ -485,7 +518,7 @@
         var s = st.sources.find(function (x) { return x.id === f.id; }); return s && { src: s, rot: f.rot };
       }).filter(Boolean);
       if (!items.length) return [];
-      var p0 = PAPERS[$('cp-paper').value] || PAPERS.A4;
+      var p0 = paperDims();
       items.forEach(function (it) {
         var turned = it.rot % 180 !== 0, iw = turned ? it.src.h : it.src.w, ih = turned ? it.src.w : it.src.h;
         var land = orient === 'landscape' || (orient === 'auto' && iw > ih);
@@ -500,70 +533,106 @@
       return pages;
     }
 
-    var defs = slotDefs(), S = st.slots;
-    var ready = defs.every(function (d) { return S[d.key] && S[d.key].canvas && Math.abs(S[d.key].w - d.w) < 0.01; });
-    var front = defs[0] && S[defs[0].key] && S[defs[0].key].canvas && S[defs[0].key].w === defs[0].w ? S[defs[0].key] : null;
-    if (!front) return [];
-    if (!ready) st.warn = 'Crop all sides to finish. Showing what is ready.';
+    var cur = currentSet(g);
+    if (cur && cur.warn) st.warn = cur.warn;
+    var sets = st.queue.slice();
+    if (cur && cur.unit) sets.push({ unit: cur.unit, copies: copies, duplex: cur.duplex });
+    if (!sets.length) return [];
+    var list = [];
+    sets.forEach(function (st2) { for (var i = 0; i < st2.copies; i++) list.push(st2.unit); });
+    var duplex = sets.some(function (x) { return x.duplex; });
+    var maxPP = Math.round(num('cp-maxpp', 0, 0, 200));
 
-    var units = [], duplex = false, cw, ch;
-    if (st.size === 'long') {
-      var sep = $('cp-longsep').checked;
-      var fold = $('cp-fold').checked;
-      var u = { w: LONG.w, h: LONG.h, parts: [], fold: fold ? LONG.w / 2 : null };
-      if (sep) { u.parts.push({ c: S.lfront && S.lfront.canvas, x: 0, y: 0, w: PVC.w, h: PVC.h }); if (S.lback && S.lback.canvas) u.parts.push({ c: S.lback.canvas, x: PVC.w, y: 0, w: PVC.w, h: PVC.h }); }
-      else u.parts.push({ c: S.strip.canvas, x: 0, y: 0, w: LONG.w, h: LONG.h });
-      units.push(u);
-    } else {
-      var cs = cardSize(); cw = cs.w; ch = cs.h;
-      var back = $('cp-back').checked && S.back && S.back.canvas && S.back.w === cw ? S.back.canvas : null;
-      var arr = $('cp-arrange').value;
-      if (back && isPVC) arr = 'duplex';
-      if (!back) units.push({ w: cw, h: ch, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }] });
-      else if (arr === 'side') units.push({ w: 2 * cw + g, h: ch, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }, { c: back, x: cw + g, y: 0, w: cw, h: ch }] });
-      else if (arr === 'stack') units.push({ w: cw, h: 2 * ch + g, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }, { c: back, x: 0, y: ch + g, w: cw, h: ch }] });
-      else { duplex = true; units.push({ w: cw, h: ch, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }], back: back }); }
-    }
-    var unit = units[0];
-    var list = []; for (var i = 0; i < copies; i++) list.push(unit);
-
-    // paper + orientation
-    var W, H, gr;
-    if (isPVC) {
-      W = 85.6; H = 54;
-      if (unit.w > W + 0.01 || unit.h > H + 0.01) { st.warn = 'This size does not fit on a PVC card. Choose A4 paper.'; return []; }
-      gr = { cols: 1, rows: 1, n: 1 };
-    } else {
-      var fixed = paperFor(orient);
-      if (fixed) { W = fixed.W; H = fixed.H; gr = grid(W, H, m, g, unit.w, unit.h); }
-      else {
-        var p = PAPERS[$('cp-paper').value] || PAPERS.A4, Pw = Math.min(p[0], p[1]), Ph = Math.max(p[0], p[1]);
-        var gp = grid(Pw, Ph, m, g, unit.w, unit.h), gl = grid(Ph, Pw, m, g, unit.w, unit.h);
-        if (gl.n > gp.n) { W = Ph; H = Pw; gr = gl; } else { W = Pw; H = Ph; gr = gp; }
+    // shelf packing: cards of different sizes fill rows, rows fill the page
+    function pack(W, H, units) {
+      var pagesOut = [], i = 0;
+      while (i < units.length) {
+        var rows = [], row = [], rowW = 0, rowH = 0, usedH = 0, count = 0;
+        while (i < units.length) {
+          var u = units[i];
+          if (u.w > W - 2 * m + 0.01 || u.h > H - 2 * m + 0.01) return null;          // never fits
+          if (maxPP && count >= maxPP) break;
+          var needW = row.length ? rowW + g + u.w : u.w;
+          if (needW > W - 2 * m + 0.01) {                                              // next row
+            rows.push({ items: row, w: rowW, h: rowH }); usedH += (rows.length > 1 ? g : 0) + rowH;
+            row = []; rowW = 0; rowH = 0; continue;
+          }
+          var hNeeded = usedH + (rows.length ? g : 0) + Math.max(rowH, u.h);
+          if (hNeeded > H - 2 * m + 0.01) break;                                       // page full
+          row.push(u); rowW = needW; rowH = Math.max(rowH, u.h); i++; count++;
+        }
+        if (row.length) { rows.push({ items: row, w: rowW, h: rowH }); }
+        if (!rows.length) return null;
+        pagesOut.push(rows);
       }
-      if (!gr.n) { st.warn = 'This size is too big for the paper. Try Landscape, a bigger paper or a smaller margin.'; return []; }
+      return pagesOut;
     }
-
-    function place(chunk, mirror) {
-      var used = Math.min(gr.cols, chunk.length), rowsUsed = Math.ceil(chunk.length / gr.cols);
-      var bw = used * unit.w + (used - 1) * g, bh = rowsUsed * unit.h + (rowsUsed - 1) * g;
-      var x0 = (W - bw) / 2, y0 = pos === 'top' ? m : (H - bh) / 2;
-      if (isPVC) { x0 = (W - unit.w) / 2; y0 = (H - unit.h) / 2; }
-      var items = [];
-      chunk.forEach(function (u, idx) {
-        var col = idx % gr.cols, row = Math.floor(idx / gr.cols);
-        if (mirror) col = used - 1 - col;
-        items.push({ unit: u, x: x0 + col * (unit.w + g), y: y0 + row * (unit.h + g), back: !!mirror });
+    function layout(W, H, rowsList, mirror) {
+      var totalH = rowsList.reduce(function (a, r, k) { return a + r.h + (k ? g : 0); }, 0);
+      var y = pos === 'top' ? m : (H - totalH) / 2, items = [];
+      if (isPVC) y = (H - totalH) / 2;
+      rowsList.forEach(function (r) {
+        var x = (W - r.w) / 2;
+        r.items.forEach(function (u) {
+          var xx = mirror ? W - x - u.w : x;
+          items.push({ unit: u, x: xx, y: y + (r.h - u.h) / 2, back: !!mirror });
+          x += u.w + g;
+        });
+        y += r.h + g;
       });
       return { W: W, H: H, items: items };
     }
-    for (var s = 0; s < list.length; s += gr.n) {
-      var chunk = list.slice(s, s + gr.n);
-      pages.push(place(chunk, false));
-      if (duplex && unit.back) pages.push(place(chunk, true));
+    var W, H, packed;
+    if (isPVC) {
+      W = 85.6; H = 54;
+      if (list.some(function (u) { return u.w > W + 0.01 || u.h > H + 0.01; })) { st.warn = 'This size does not fit on a PVC card. Choose A4 paper.'; return []; }
+      packed = list.map(function (u) { return [{ items: [u], w: u.w, h: u.h }]; });
+    } else {
+      var fixed = paperFor(orient);
+      if (fixed) { W = fixed.W; H = fixed.H; packed = pack(W, H, list); }
+      else {
+        var p = paperDims(), Pw = Math.min(p[0], p[1]), Ph = Math.max(p[0], p[1]);
+        var pp = pack(Pw, Ph, list), pl = pack(Ph, Pw, list);
+        var cnt = function (x) { return x ? x.length : 1e9; };
+        var first = function (x) { return x && x[0] ? x[0].reduce(function (a, r) { return a + r.items.length; }, 0) : 0; };
+        if (cnt(pl) < cnt(pp) || (cnt(pl) === cnt(pp) && first(pl) > first(pp))) { W = Ph; H = Pw; packed = pl; } else { W = Pw; H = Ph; packed = pp; }
+      }
+      if (!packed) { st.warn = 'This size is too big for the paper. Try Landscape, a bigger paper or a smaller margin.'; return []; }
     }
-    st.layoutInfo = { perPage: gr.n, W: W, H: H, duplex: duplex && !!unit.back };
+    packed.forEach(function (rowsList) {
+      pages.push(layout(W, H, rowsList, false));
+      if (duplex && rowsList.some(function (r) { return r.items.some(function (u) { return u.back; }); })) pages.push(layout(W, H, rowsList, true));
+    });
+    var per = packed.length ? packed[0].reduce(function (a, r) { return a + r.items.length; }, 0) : 0;
+    st.layoutInfo = { perPage: per, W: W, H: H, duplex: duplex, sets: sets.length };
     return pages;
+  }
+
+  // the card(s) being cropped right now, as one printable unit
+  function currentSet(g) {
+    var defs = slotDefs(), S = st.slots;
+    var ready = defs.every(function (d) { return S[d.key] && S[d.key].canvas && Math.abs(S[d.key].w - d.w) < 0.01; });
+    var front = defs[0] && S[defs[0].key] && S[defs[0].key].canvas && S[defs[0].key].w === defs[0].w ? S[defs[0].key] : null;
+    if (!front) return null;
+    var out = { warn: ready ? '' : 'Crop all sides to finish. Showing what is ready.', ready: ready, duplex: false };
+    var mirror = $('cp-mirror') && $('cp-mirror').checked, rnd = $('cp-round').checked;
+    if (st.size === 'long') {
+      var sep = $('cp-longsep').checked, fold = $('cp-fold').checked;
+      var u = { kind: 'long', w: LONG.w, h: LONG.h, parts: [], fold: fold ? LONG.w / 2 : null, mirror: mirror, round: rnd };
+      if (sep) { u.parts.push({ c: S.lfront && S.lfront.canvas, x: 0, y: 0, w: PVC.w, h: PVC.h }); if (S.lback && S.lback.canvas) u.parts.push({ c: S.lback.canvas, x: PVC.w, y: 0, w: PVC.w, h: PVC.h }); }
+      else u.parts.push({ c: S.strip.canvas, x: 0, y: 0, w: LONG.w, h: LONG.h });
+      out.unit = u; return out;
+    }
+    var cs = cardSize(), cw = cs.w, ch = cs.h;
+    var back = $('cp-back').checked && S.back && S.back.canvas && S.back.w === cw ? S.back.canvas : null;
+    var arr = $('cp-arrange').value;
+    if (back && $('cp-paper').value === 'PVC') arr = 'duplex';
+    var base = { kind: 'card', mirror: mirror, round: rnd };
+    if (!back) out.unit = Object.assign({ w: cw, h: ch, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }] }, base);
+    else if (arr === 'side') out.unit = Object.assign({ w: 2 * cw + g, h: ch, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }, { c: back, x: cw + g, y: 0, w: cw, h: ch }] }, base);
+    else if (arr === 'stack') out.unit = Object.assign({ w: cw, h: 2 * ch + g, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }, { c: back, x: 0, y: ch + g, w: cw, h: ch }] }, base);
+    else { out.duplex = true; out.unit = Object.assign({ w: cw, h: ch, parts: [{ c: front.canvas, x: 0, y: 0, w: cw, h: ch }], back: back }, base); }
+    return out;
   }
 
   // ---------- drawing ----------
@@ -577,7 +646,7 @@
     var x = c.getContext('2d'), k = dpi / MM;
     x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
     x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
-    var cut = $('cp-cut').checked, round = $('cp-round').checked && st.size !== 'full';
+    var cut = $('cp-cut').checked;
     var R = 3.18 * k;
     page.items.forEach(function (it) {
       if (it.full) {
@@ -589,18 +658,23 @@
         x.drawImage(adjusted(img), -dw / 2, -dh / 2, dw, dh); x.restore();
         return;
       }
-      var u = it.unit, ox = it.x * k, oy = it.y * k;
+      var u = it.unit, ox = it.x * k, oy = it.y * k, isLong = u.kind === 'long', round = !!u.round;
       var parts = it.back ? [{ c: u.back, x: 0, y: 0, w: u.w, h: u.h }] : u.parts;
+      var put = function (img, X, Y, w, h) {
+        if (!u.mirror) { x.drawImage(adjusted(img), X, Y, w, h); return; }
+        x.save(); x.translate(X + w, Y); x.scale(-1, 1); x.drawImage(adjusted(img), 0, 0, w, h); x.restore();
+      };
+      if (isLong && round) { x.save(); rr(x, ox, oy, u.w * k, u.h * k, R); x.clip(); }
       parts.forEach(function (p) {
         if (!p.c) return;
-        var X = ox + p.x * k, Y = oy + p.y * k, w = p.w * k, h = p.h * k;
-        if (round && st.size !== 'long') { x.save(); rr(x, X, Y, w, h, R); x.clip(); x.drawImage(adjusted(p.c), X, Y, w, h); x.restore(); }
-        else x.drawImage(adjusted(p.c), X, Y, w, h);
-        if (cut && st.size !== 'long') { x.lineWidth = Math.max(1, 0.2 * k); x.strokeStyle = '#8C96A3'; if (round) { rr(x, X, Y, w, h, R); x.stroke(); } else x.strokeRect(X, Y, w, h); }
+        var X = ox + (u.mirror ? (u.w - p.x - p.w) : p.x) * k, Y = oy + p.y * k, w = p.w * k, h = p.h * k;
+        if (round && !isLong) { x.save(); rr(x, X, Y, w, h, R); x.clip(); put(p.c, X, Y, w, h); x.restore(); }
+        else put(p.c, X, Y, w, h);
+        if (cut && !isLong) { x.lineWidth = Math.max(1, 0.2 * k); x.strokeStyle = '#8C96A3'; if (round) { rr(x, X, Y, w, h, R); x.stroke(); } else x.strokeRect(X, Y, w, h); }
       });
-      if (st.size === 'long') {
+      if (isLong && round) x.restore();
+      if (isLong) {
         var W2 = u.w * k, H2 = u.h * k;
-        if (round) { x.save(); rr(x, ox, oy, W2, H2, R); x.globalCompositeOperation = 'destination-in'; x.fill(); x.restore(); x.save(); x.globalCompositeOperation = 'destination-over'; x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.restore(); }
         if (cut) { x.lineWidth = Math.max(1, 0.2 * k); x.strokeStyle = '#8C96A3'; if (round) { rr(x, ox, oy, W2, H2, R); x.stroke(); } else x.strokeRect(ox, oy, W2, H2); }
         if (u.fold != null) { x.save(); x.setLineDash([2 * k, 1.5 * k]); x.lineWidth = Math.max(1, 0.25 * k); x.strokeStyle = '#9AA4B0'; x.beginPath(); x.moveTo(ox + u.fold * k, oy - 2 * k); x.lineTo(ox + u.fold * k, oy + H2 + 2 * k); x.stroke(); x.restore(); }
       }
@@ -616,6 +690,7 @@
   var updT;
   function update() { clearTimeout(updT); updT = setTimeout(doUpdate, 60); }
   async function doUpdate() {
+    try { renderQueue(); } catch (e) {}
     if (st.size === 'full') await ensureFullImages();
     st.pages = buildPages();
     if (st.page >= st.pages.length) st.page = Math.max(0, st.pages.length - 1);
@@ -629,9 +704,9 @@
       var pg = st.pages[st.page], cv = $('cp-canvas');
       var maxW = Math.min(cv.parentNode.clientWidth - 32, 760), dpi = Math.max(40, Math.min(120, maxW / (pg.W / MM)));
       var c = drawPage(pg, dpi); cv.width = c.width; cv.height = c.height; cv.getContext('2d').drawImage(c, 0, 0);
-      var pn = $('cp-paper').options[$('cp-paper').selectedIndex].text.split(' (')[0];
+      var pn = $('cp-paper').value === 'custom' ? 'Custom ' + Math.round(pg.W) + ' × ' + Math.round(pg.H) + ' mm' : $('cp-paper').options[$('cp-paper').selectedIndex].text.split(' (')[0];
       var t = pn + ' · ' + (pg.W > pg.H ? 'landscape' : 'portrait') + ' · ' + st.pages.length + (st.pages.length > 1 ? ' pages' : ' page');
-      if (st.size !== 'full' && st.layoutInfo) t += ' · up to ' + st.layoutInfo.perPage + ' per page' + (st.layoutInfo.duplex ? ' · back pages follow each front page' : '');
+      if (st.size !== 'full' && st.layoutInfo) t += (st.layoutInfo.sets > 1 ? ' · ' + st.layoutInfo.sets + ' different cards' : '') + ' · ' + st.layoutInfo.perPage + ' on page 1' + (st.layoutInfo.duplex ? ' · back pages follow each front page' : '');
       info.textContent = st.warn ? st.warn : t; info.className = 'cp-info' + (st.warn ? ' warn' : '');
     } else {
       info.textContent = st.warn || ''; info.className = 'cp-info' + (st.warn ? ' warn' : '');
@@ -645,7 +720,8 @@
     for (var i = 0; i < pages.length; i++) {
       busy(true, 'Preparing page ' + (i + 1) + ' of ' + pages.length + '…');
       await new Promise(function (r) { setTimeout(r, 0); });
-      var c = drawPage(pages[i], DPI);
+      var dpi = parseInt(($('cp-dpi') || {}).value, 10) || DPI, c;
+      try { c = drawPage(pages[i], dpi); if (!c.width) throw 0; } catch (e) { c = drawPage(pages[i], 300); }
       out.push({ W: pages[i].W, H: pages[i].H, url: c.toDataURL('image/jpeg', 0.95) });
       c.width = c.height = 1;
     }
@@ -705,6 +781,11 @@
     drop.addEventListener('drop', function (e) { e.preventDefault(); addFiles(e.dataTransfer.files); });
     ['cp-back', 'cp-longsep', 'cp-cw', 'cp-ch'].forEach(function (id) { $(id).addEventListener('change', function () { renderSlots(); update(); }); });
     if ($('cp-actual')) $('cp-actual').addEventListener('change', update);
+    if ($('cp-addcard')) $('cp-addcard').addEventListener('click', addAnotherCard);
+    ['cp-mirror', 'cp-maxpp', 'cp-pw', 'cp-ph'].forEach(function (id) { if ($(id)) { $(id).addEventListener('change', update); $(id).addEventListener('input', update); } });
+    var cpv = function () { if ($('cp-custompaper')) $('cp-custompaper').hidden = $('cp-paper').value !== 'custom'; };
+    $('cp-paper').addEventListener('change', cpv); cpv();
+    ['cp-dpi', 'cp-mirror', 'cp-pw', 'cp-ph'].forEach(function (id) { if ($(id)) $(id).addEventListener('change', savePrefs); });
     ['cp-paper', 'cp-orient', 'cp-arrange', 'cp-pos', 'cp-margin', 'cp-gap', 'cp-cut', 'cp-round', 'cp-fold', 'cp-bw', 'cp-copies'].forEach(function (id) {
       $(id).addEventListener('change', function () { savePrefs(); update(); }); $(id).addEventListener('input', update);
     });

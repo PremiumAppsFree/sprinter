@@ -198,3 +198,14 @@ body.cp-body{margin:0;background:var(--desk);color:var(--ink);font:15px/1.5 'SP 
 @keyframes spDsigPop{0%{transform:scale(.4)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.sp-dsig,.sp-dsig-ok .sp-dsig-ic{animation:none}}
 .sp-dsig-prod{display:block;margin-top:6px;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+/* several cards on one sheet */
+.cp-addcard{width:100%;margin-top:12px;border-style:dashed;border-color:#9fb3c8;color:var(--ink)}
+.cp-addcard:not(:disabled){border-color:var(--c);background:#F2FAFE;animation:cpPulse 2.4s ease-in-out infinite}
+@keyframes cpPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,152,216,0)}50%{box-shadow:0 0 0 5px rgba(0,152,216,.14)}}
+.cp-queue{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.cp-queue-h{margin:0;font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.cp-qi{display:flex;align-items:center;gap:10px;background:#F7F9FB;border:1px solid var(--line);border-radius:10px;padding:6px 8px;animation:cpIn .3s var(--ease)}
+.cp-qi img{width:54px;height:34px;object-fit:contain;background:#fff;border-radius:5px;border:1px solid var(--line)}
+.cp-qi span{flex:1;font-size:13.5px;font-weight:600}
+.cp-qi button{border:0;background:#E9EDF2;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px}
+.cp-custompaper{margin:0}

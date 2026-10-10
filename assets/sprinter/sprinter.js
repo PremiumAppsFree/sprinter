@@ -402,8 +402,8 @@
       return new Promise(function (res, rej) { var s = document.createElement('script'); s.src = SP_BASE + src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
     };
     sigLibs = (window.forge ? Promise.resolve() : one('assets/vendor/forge.min.js'))
-      .then(function () { return window.SP_TRUSTED_ROOTS ? 0 : one('assets/sigverify/roots.js?v=13'); })
-      .then(function () { return window.SPSig ? 0 : one('assets/sigverify/sigverify.js?v=13'); });
+      .then(function () { return window.SP_TRUSTED_ROOTS ? 0 : one('assets/sigverify/roots.js?v=15'); })
+      .then(function () { return window.SPSig ? 0 : one('assets/sigverify/sigverify.js?v=15'); });
     return sigLibs;
   }
   function sigManaged() { return document.body && document.body.classList.contains('cp-body'); } // the card tool does its own check

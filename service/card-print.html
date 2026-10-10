@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=15">
 <script src="../assets/sprinter/sprinter.js?v=15"></script>
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
-<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=14">
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=15">
 </head>
 <body class="cp-body" data-doc="card" data-size="small">
 <header class="sp-header" id="sp-header">
@@ -90,6 +90,8 @@
         </div>
 
         <div class="cp-slots" id="cp-slots"></div>
+        <button type="button" class="cp-btn cp-addcard" id="cp-addcard" hidden disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add another card to this sheet</button>
+        <div class="cp-queue" id="cp-queue" hidden></div>
         <p class="cp-note" id="cp-fullnote" hidden>Every uploaded page/photo prints on its own sheet. Use ↻ to turn a page.</p>
       </section>
     </div>
@@ -102,11 +104,14 @@
           <label>Paper
             <select id="cp-paper">
               <option value="A4" selected>A4 (210 × 297 mm)</option>
+              <option value="A3">A3 (297 × 420 mm)</option>
               <option value="Letter">Letter (8.5 × 11 in)</option>
               <option value="Legal">Legal (8.5 × 14 in)</option>
               <option value="A5">A5 (148 × 210 mm)</option>
               <option value="4x6">4 × 6 in photo</option>
+              <option value="5x7">5 × 7 in photo</option>
               <option value="PVC">PVC card printer (85.6 × 54 mm)</option>
+              <option value="custom">Custom paper size…</option>
             </select></label>
           <label>Orientation
             <select id="cp-orient"><option value="auto" selected>Auto</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
@@ -120,14 +125,23 @@
             </select></label>
           <label>Place on page
             <select id="cp-pos"><option value="top" selected>Top (saves paper)</option><option value="center">Centre</option></select></label>
+          <div class="cp-form cp-custompaper" id="cp-custompaper" hidden style="grid-column:1/-1">
+            <label>Paper width (mm)<input type="number" id="cp-pw" min="30" max="1200" step="0.1" value="210" inputmode="decimal"></label>
+            <label>Paper height (mm)<input type="number" id="cp-ph" min="30" max="1200" step="0.1" value="297" inputmode="decimal"></label>
+          </div>
           <label>Margin (mm)<input type="number" id="cp-margin" min="0" max="40" step="0.5" value="8" inputmode="decimal"></label>
           <label>Gap (mm)<input type="number" id="cp-gap" min="0" max="30" step="0.5" value="4" inputmode="decimal"></label>
+          <label>Print quality
+            <select id="cp-dpi"><option value="150">150 DPI (fast)</option><option value="300" selected>300 DPI (sharp)</option><option value="600">600 DPI (best)</option></select></label>
+          <label>Cards per page
+            <input type="number" id="cp-maxpp" min="0" max="200" value="0" inputmode="numeric" title="0 = as many as fit"></label>
         </div>
         <div class="cp-checks">
           <label class="cp-switch"><input type="checkbox" id="cp-cut" checked><span></span>Cut lines</label>
           <label class="cp-switch"><input type="checkbox" id="cp-round"><span></span>Rounded corners</label>
           <label class="cp-switch" id="cp-fold-wrap" hidden><input type="checkbox" id="cp-fold" checked><span></span>Fold line</label>
           <label class="cp-switch"><input type="checkbox" id="cp-bw"><span></span>Black &amp; white</label>
+          <label class="cp-switch"><input type="checkbox" id="cp-mirror"><span></span>Mirror (flip)</label>
         </div>
         <label class="cp-range">Brightness <input type="range" id="cp-bright" min="-30" max="30" value="0"><output id="cp-bright-v">0</output></label>
         <label class="cp-range">Contrast <input type="range" id="cp-contrast" min="-30" max="40" value="0"><output id="cp-contrast-v">0</output></label>
@@ -206,8 +220,8 @@
 <script src="../assets/vendor/pdf.min.js"></script>
 <script src="../assets/vendor/jspdf.umd.min.js"></script>
 <script src="../assets/vendor/forge.min.js"></script>
-<script src="../assets/sigverify/roots.js?v=14"></script>
-<script src="../assets/sigverify/sigverify.js?v=14"></script>
-<script src="../assets/cardprint/cardprint.js?v=14"></script>
+<script src="../assets/sigverify/roots.js?v=15"></script>
+<script src="../assets/sigverify/sigverify.js?v=15"></script>
+<script src="../assets/cardprint/cardprint.js?v=15"></script>
 </body>
 </html>

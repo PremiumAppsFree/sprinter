@@ -376,7 +376,7 @@
     });
     var order = ['modified', 'changed-after', 'error', 'untrusted', 'valid'];
     var overall = res.map(function (r) { return r.status; }).sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); })[0];
-    var out = { status: overall, signatures: res, encrypted: !!enc };
+    var out = { status: overall, signatures: res, encrypted: !!enc, verifiedAt: new Date() };
     Object.defineProperty(out, '_enc', { value: { E: enc, raw: sigs.filter(function (x) { return !x.broken; }) } });
     if (enc) unlock(out, '');                 // owner-password-only files open without a password
     return out;
@@ -446,6 +446,8 @@
       // 3) the signer text, wrapped the way the signature's own appearance is
       var paras = ['Digitally signed by ' + s.signer];
       if (s.time) paras.push('Date: ' + fmtDate(s.time));
+      // the moment this copy was checked (live, today) — clearly labelled, the signing date above stays true
+      if (result.verifiedAt) paras.push('Verified: ' + fmtDate(result.verifiedAt));
       var bx = x + W * 0.129, bw = W * 0.69;
       var wrap = function (f) {
         ctx.font = font(f); var out = [];
@@ -486,6 +488,7 @@
       h += '<details><summary>Details</summary><dl>';
       h += '<dt>Signed by</dt><dd>' + esc(sig.signer) + (sig.org && sig.org !== sig.signer ? ' · ' + esc(sig.org) : '') + '</dd>';
       if (sig.time) h += '<dt>Signed on</dt><dd>' + esc(fmtDate(sig.time)) + '</dd>';
+      if (result.verifiedAt) h += '<dt>Verified on</dt><dd>' + esc(fmtDate(result.verifiedAt)) + '</dd>';
       if (sig.reason) h += '<dt>Reason</dt><dd>' + esc(sig.reason) + '</dd>';
       if (sig.location) h += '<dt>Location</dt><dd>' + esc(sig.location) + '</dd>';
       if (sig.chain && sig.chain.length) h += '<dt>Certificate chain</dt><dd>' + sig.chain.map(function (c) { return esc(c.name); }).join(' → ') + '</dd>';
