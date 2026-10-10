@@ -420,7 +420,7 @@
     ctx.lineWidth = Math.max(1, H * 0.008); ctx.strokeStyle = '#000'; ctx.stroke();       // outline
     ctx.restore();
   }
-  // Arial-metric font (Liberation Sans, SIL OFL) shipped with the site, so phones without Arial
+  // Helvetica/Arial-metric font (Liberation Sans, SIL OFL) shipped with the site, so phones without Arial
   // measure and wrap the text exactly like Adobe Reader does.
   var SIGFONT = '"SPSigSans", Arial, Helvetica, "Liberation Sans", sans-serif', fontReady = null;
   function sigFont() {
@@ -437,61 +437,71 @@
     });
     return fontReady;
   }
-  // Layout measured from Adobe Reader prints of a validated e-Aadhaar:
-  //  · detail text = 0.4617 × title size, line pitch = 1.012 × detail size
-  //  · lines wrap at 13.5 × detail size ("…by DS Unique / Identification Authority of India / 06 / Date… / IST")
-  //  · first detail baseline 1.06 × title size below the title baseline, indented 0.15 × title size
-  //  · tick width 0.434 × title width, its right tip at 72.6 % of the title, top 0.2 × title size above the baseline
-  async function paint(ctx, page, viewport, result) {
-    if (!result || result.status !== 'valid' || !result.signatures) return 0;
+  // The signature box exactly as the signed e-Aadhaar draws it once the signature is valid
+  // (iText layers inside a 50 × 30 pt widget, the same file Adobe / verified copies show):
+  //  n1  green tick  — scale 0.27 at (11.5, 1.5), black copy shifted 2 right / 2 down
+  //  n2  details     — Helvetica 3.4, x 2, first baseline 15.6, pitch 3.3975, wrapped at 46
+  //  n4  title       — "Signature valid", Helvetica 4.7 at (2, 23.3)
+  // The "Date:" line shows the live date and time (IST, with seconds) at the moment of printing.
+  var TICK_BLACK = [[10, 48], [23, 61], [42, 42], [81, 90], [94, 77], [42, 16]];
+  var TICK_GREEN = [[8, 50], [21, 63], [40, 44], [79, 92], [92, 79], [40, 18]];
+  // spec in box units (origin bottom-left, y up); measure(text, size) → width in the same units
+  function boxSpec(s, now, measure) {
+    var paras = ['Digitally signed by ' + (s.signer || ''), 'Date: ' + fmtDate(now || new Date())], size = 3.4, lines;
+    var wrapAt = function (sz) {
+      var out = [];
+      paras.forEach(function (p) { var line = ''; p.split(' ').forEach(function (wd) { var t = line ? line + ' ' + wd : wd; if (line && measure(t, sz) > 46) { out.push(line); line = wd; } else line = t; }); out.push(line); });
+      return out;
+    };
+    lines = wrapAt(size);
+    for (var g = 0; g < 20 && lines.length * size * 0.9993 > 19.0; g++) { size *= 0.95; lines = wrapAt(size); }   // never spill under the box
+    var pitch = size * 0.99926, first = 15.6 - (3.4 - size);
+    return {
+      title: { text: 'Signature valid', size: 4.7, x: 2, y: 23.3 },
+      lines: lines.map(function (t, i) { return { text: t, size: size, x: 2, y: first - pitch * i }; }),
+      tick: { k: 0.27, x: 11.5, y: 1.5, black: TICK_BLACK, green: TICK_GREEN, rgb: [0.13, 0.62, 0.29] }
+    };
+  }
+  // widgets of valid signatures on this page, rect in PDF user space
+  async function sigWidgets(page, result) {
+    if (!result || result.status !== 'valid' || !result.signatures) return [];
     var good = result.signatures.filter(function (s) { return s.status === 'valid'; });
-    if (!good.length) return 0;
-    var annots; try { annots = await page.getAnnotations(); } catch (e) { return 0; }
-    var widgets = annots.filter(function (a) { return a.fieldType === 'Sig' && a.rect && Math.abs(a.rect[2] - a.rect[0]) > 4 && Math.abs(a.rect[3] - a.rect[1]) > 4; });
-    if (!widgets.length) return 0;
+    if (!good.length) return [];
+    var annots; try { annots = await page.getAnnotations(); } catch (e) { return []; }
+    return annots.filter(function (a) { return a.fieldType === 'Sig' && a.rect && Math.abs(a.rect[2] - a.rect[0]) > 4 && Math.abs(a.rect[3] - a.rect[1]) > 4; })
+      .map(function (w, i) { var r = w.rect; return { rect: [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])], s: good[Math.min(i, good.length - 1)] }; });
+  }
+  // draw one box on a canvas; X,Y = top-left, W,H in canvas pixels
+  var mctx = null;
+  function paintBox(ctx, X, Y, W, H, s, now) {
+    var k = Math.min(W / 50, H / 30);
+    if (!mctx) mctx = document.createElement('canvas').getContext('2d');
+    var measure = function (t, sz) { mctx.font = (sz * 100) + 'px ' + SIGFONT; return mctx.measureText(t).width / 100; };
+    var sp = boxSpec(s, now, measure);
+    var bx = function (u) { return X + u * k; }, by = function (v) { return Y + (30 - v) * k; };
+    ctx.save();
+    ctx.fillStyle = '#fff'; ctx.fillRect(X, Y, W, H);                 // hide the "?" / unknown mark under it
+    var poly = function (pts, col) {
+      ctx.beginPath();
+      pts.forEach(function (p, i) { var px = bx(sp.tick.x + p[0] * sp.tick.k), py = by(sp.tick.y + p[1] * sp.tick.k); if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py); });
+      ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+    };
+    poly(sp.tick.black, '#000');
+    poly(sp.tick.green, 'rgb(' + sp.tick.rgb.map(function (c) { return Math.round(c * 255); }).join(',') + ')');
+    ctx.fillStyle = '#000'; ctx.textBaseline = 'alphabetic';
+    sp.lines.forEach(function (l) { ctx.font = (l.size * k) + 'px ' + SIGFONT; ctx.fillText(l.text, bx(l.x), by(l.y)); });
+    ctx.font = (sp.title.size * k) + 'px ' + SIGFONT; ctx.fillText(sp.title.text, bx(sp.title.x), by(sp.title.y));
+    ctx.restore();
+  }
+  async function paint(ctx, page, viewport, result, now) {
+    var list = await sigWidgets(page, result);
+    if (!list.length) return 0;
     await sigFont();
-    var n = 0;
-    widgets.forEach(function (w, i) {
-      var s = good[Math.min(i, good.length - 1)];
+    list.forEach(function (w) {
       var r = viewport.convertToViewportRectangle(w.rect);
-      var x = Math.min(r[0], r[2]), y = Math.min(r[1], r[3]), W = Math.abs(r[2] - r[0]), H = Math.abs(r[3] - r[1]);
-      var font = function (f) { return f + 'px ' + SIGFONT; };
-      var paras = ['Digitally signed by ' + s.signer];
-      if (s.time) paras.push('Date: ' + fmtDate(s.time));
-      // live check time (with seconds) as its own line under the Adobe block — the signing date above stays true
-      var verifiedLine = 'Verified: ' + fmtDate(new Date());
-      function wrap(bf, bw) {
-        ctx.font = font(bf); var out = [];
-        paras.forEach(function (p) { var line = ''; p.split(' ').forEach(function (wd) { var t = line ? line + ' ' + wd : wd; if (line && ctx.measureText(t).width > bw) { out.push(line); line = wd; } else line = t; }); out.push(line); });
-        return out;
-      }
-      // Adobe prints the title at 0.25 × box height, starting at the left edge and touching the top
-      // (measured against the document's own address text in real Adobe prints)
-      var tf = H * 0.25, L;
-      for (var k = 0; k < 80; k++) {
-        ctx.font = font(tf);
-        var tw = ctx.measureText('Signature valid').width, bf = tf * 0.4617, pitch = bf * 1.012, bw = bf * 13.5;
-        var tx = x + W * 0.02, base = y + tf * 0.8;
-        var rows = wrap(bf, bw), first = base + tf * 1.06, last = first + (rows.length - 1) * pitch;
-        var widest = Math.max(tw, tf * 0.15 + Math.max.apply(null, rows.map(function (q) { return ctx.measureText(q).width; })));
-        if (widest <= W * 0.97 && last + bf * 0.25 <= y + H * 0.995) { L = { tf: tf, tw: tw, bf: bf, pitch: pitch, tx: tx, base: base, rows: rows, first: first }; break; }
-        tf *= 0.97;
-      }
-      if (!L) return;
-      ctx.save();
-      ctx.beginPath(); ctx.rect(x, y, W, H + L.pitch * 1.6); ctx.clip();   // room for the Verified line just under the box
-      ctx.fillStyle = '#fff'; ctx.fillRect(x, y, W, H);
-      // tick first, the text on top of it — like Adobe
-      var Ht = 0.434 * L.tw / 0.591, tipX = L.tx + 0.726 * L.tw, top = L.base - 0.2 * L.tf - 0.275 * Ht;
-      adobeTick(ctx, tipX - 0.261 * Ht, top, Ht);
-      ctx.fillStyle = '#000'; ctx.textBaseline = 'alphabetic';
-      ctx.font = font(L.tf); ctx.fillText('Signature valid', L.tx, L.base);
-      ctx.font = font(L.bf);
-      var by = L.first; L.rows.forEach(function (q) { ctx.fillText(q, L.tx + L.tf * 0.15, by); by += L.pitch; });
-      ctx.fillText(verifiedLine, L.tx + L.tf * 0.15, by);
-      ctx.restore(); n++;
+      paintBox(ctx, Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.abs(r[2] - r[0]), Math.abs(r[3] - r[1]), w.s, now);
     });
-    return n;
+    return list.length;
   }
 
   // ---------- result card (HTML) ----------
@@ -527,5 +537,5 @@
     return h + '</div></div>';
   }
 
-  window.SPSig = { verify: verify, unlock: unlock, paint: paint, describe: describe, fmtDate: fmtDate };
+  window.SPSig = { verify: verify, unlock: unlock, paint: paint, paintBox: paintBox, boxSpec: boxSpec, sigWidgets: sigWidgets, sigFont: sigFont, describe: describe, fmtDate: fmtDate };
 })();
