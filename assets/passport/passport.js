@@ -357,8 +357,11 @@
     var info = $('pp-info');
     if (!has) { info.textContent = st.warn || ''; return; }
     var pg = st.pages[st.page], cv = $('pp-canvas'), maxW = Math.min(cv.parentNode.clientWidth - 24, 640);
-    var d = Math.max(36, Math.min(110, maxW / (pg.W / MM)));
+    var dpr = Math.min(3, window.devicePixelRatio || 1), cssW = Math.min(maxW, pg.W / MM * 110);
+    var d = Math.max(36, cssW * dpr / (pg.W / MM));
+    d = Math.min(d, Math.sqrt(16e6 / ((pg.W / MM) * (pg.H / MM))));        // stay inside phone canvas limits
     var c = drawPage(pg, d); cv.width = c.width; cv.height = c.height; cv.getContext('2d').drawImage(c, 0, 0);
+    cv.style.width = Math.round(cssW) + 'px'; cv.style.height = 'auto'; cv.style.maxWidth = '100%';
     var pn = $('pp-paper').value === 'custom' ? 'Custom' : $('pp-paper').options[$('pp-paper').selectedIndex].text.split(' (')[0];
     var total = st.pages.reduce(function (a, p) { return a + p.items.length; }, 0);
     info.textContent = pn + ' · ' + (pg.W > pg.H ? 'landscape' : 'portrait') + ' · ' + st.info.per + ' photos fit per sheet' + (st.info.rotated ? ' (' + st.info.rotated + ' turned to use spare space)' : '') + ' · ' + total + ' in total · ' + st.pages.length + (st.pages.length > 1 ? ' sheets' : ' sheet');
@@ -385,6 +388,11 @@
     setTimeout(function () { window.print(); }, 60);
   }
   async function doPdf() {
+    if (!st.pages.length) return;
+    try {
+      var bytes = await originalPdf(); busy(false);
+      saveFile(base() + '.pdf', URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))); toast('PDF saved in original photo quality.'); return;
+    } catch (e) { busy(false); try { console.warn('original pdf', e); } catch (_) {} }
     var out = await renderAll(); if (!out.length) return;
     var J = window.jspdf && window.jspdf.jsPDF; if (!J) { toast('PDF maker did not load.'); return; }
     var o = function (p) { return p.W > p.H ? 'landscape' : 'portrait'; };
@@ -393,10 +401,33 @@
     saveFile(base() + '.pdf', URL.createObjectURL(pdf.output('blob')));
   }
   async function doJpg() { var out = await renderAll(); out.forEach(function (p, i) { setTimeout(function () { saveFile(base() + (out.length > 1 ? '-' + (i + 1) : '') + '.jpg', p.url); }, i * 400); }); }
+  // the photo at the full resolution of the original picture (never less than the chosen print quality)
+  function nativeDpi(p) {
+    var cr = p.crop || defaultCrop(p), srcPx = Math.max(cr.width / st.size.w, cr.height / st.size.h) * MM;
+    return Math.max(dpi(), Math.min(1600, srcPx));
+  }
   function doSingle() {
     var p = st.sel || st.people[0]; if (!p) return;
-    var c = photoCanvas(p, dpi()); if (window.SPPaper) SPPaper.tune(c);
-    c.toBlob(function (b) { saveFile(base() + '-single.jpg', URL.createObjectURL(b)); }, 'image/jpeg', 0.95);
+    var c = photoCanvas(p, nativeDpi(p)); if (window.SPPaper) SPPaper.tune(c);
+    c.toBlob(function (b) { saveFile(base() + '-single.jpg', URL.createObjectURL(b)); }, 'image/jpeg', 0.98);
+  }
+  // PDF: every photo goes in once, losslessly, at the original picture's resolution
+  async function originalPdf() {
+    var PL = await window.SPPdfLib(), out = await PL.PDFDocument.create(), PT = 72 / MM, imgs = {};
+    for (var i = 0; i < st.pages.length; i++) {
+      busy(true, 'Saving sheet ' + (i + 1) + ' of ' + st.pages.length + ' in original quality…'); await new Promise(function (r) { setTimeout(r, 0); });
+      var P = st.pages[i], pg = out.addPage([P.W * PT, P.H * PT]);
+      for (var j = 0; j < P.items.length; j++) {
+        var it = P.items[j], p = it.p;
+        if (!imgs[p.id]) { var c = photoCanvas(p, nativeDpi(p)); if (window.SPPaper) SPPaper.tune(c); imgs[p.id] = await out.embedPng(await window.SPCanvasPng(c)); c.width = c.height = 1; }
+        var x = it.x * PT, y = (P.H - it.y - it.h) * PT, w = it.w * PT, h = it.h * PT;
+        if (it.rot) pg.drawImage(imgs[p.id], { x: x, y: y + h, width: h, height: w, rotate: PL.degrees(-90) });
+        else pg.drawImage(imgs[p.id], { x: x, y: y, width: w, height: h });
+        if ($('pp-cut').checked) pg.drawRectangle({ x: x, y: y, width: w, height: h, borderColor: PL.rgb(0.604, 0.643, 0.69), borderWidth: 0.15 * PT });
+      }
+    }
+    out.setProducer('S Printer'); out.setCreator('S Printer');
+    return out.save({ useObjectStreams: true });
   }
 
 

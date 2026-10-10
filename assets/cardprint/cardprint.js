@@ -802,13 +802,15 @@
   // The preview is drawn at the screen's real pixel density (and redrawn sharper when you zoom),
   // so what you see is what prints. Drag a document/card to move it, pull its corner to resize,
   // pinch / Ctrl+wheel / + − to zoom, double-tap to zoom in or back to fit.
-  var V = { z: 1, px: 0, py: 0, sel: null, fitK: 1, pad: 14, rT: 0, raf: 0 };
+  var V = { locked: true, z: 1, px: 0, py: 0, sel: null, fitK: 1, pad: 14, rT: 0, raf: 0 };
   var ICO = {
     minus: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11h6M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11h6M11 8v6M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     fit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     reset: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     crop: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2v16h16M2 6h16v16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.6" fill="url(#spIcoG)"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9" fill="none" stroke="url(#spIcoG)" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15.6" r="1.7" fill="#fff"/></svg>',
+    unlock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.6" fill="url(#spIcoG)"/><path d="M8 10.5V7.6a4 4 0 0 1 7.7-1.5" fill="none" stroke="url(#spIcoG)" stroke-width="2.2" stroke-linecap="round"/><path d="M10 15.8l1.6 1.6 3-3.2" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     center: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="7" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
   };
   function setupViewer() {
@@ -824,14 +826,23 @@
       '<button type="button" id="cp-zlbl" class="cp-zlbl" title="Fit to screen">100%</button>' +
       '<button type="button" id="cp-zin" title="Zoom in" aria-label="Zoom in">' + ICO.plus + '</button>' +
       '<button type="button" id="cp-zfit" title="Fit to screen" aria-label="Fit to screen">' + ICO.fit + '</button></div>' +
-      '<div class="cp-vtools"><button type="button" id="cp-vcenter" title="Put the selected item in the middle of the page" hidden>' + ICO.center + '<span>Centre</span></button>' +
+      '<div class="cp-vtools"><button type="button" id="cp-vlock" class="cp-vlock" aria-pressed="true" title="Locked — the page scrolls normally. Tap to unlock and move / resize on the paper">' + ICO.lock + '<span>Locked</span></button><button type="button" id="cp-vcenter" title="Put the selected item in the middle of the page" hidden>' + ICO.center + '<span>Centre</span></button>' +
       '<button type="button" id="cp-vcrop" title="Crop the page" hidden>' + ICO.crop + '<span>Crop</span></button>' +
       '<button type="button" id="cp-vreset" title="Undo all moves and resizes" hidden>' + ICO.reset + '<span>Reset</span></button></div>';
     wrap.parentNode.insertBefore(bar, wrap);
     var hint = document.createElement('p'); hint.className = 'cp-vhint'; hint.id = 'cp-vhint';
-    hint.textContent = 'Drag to move · pull a corner to resize · pinch or + / − to zoom · double-tap to zoom';
+    var setHint = function () { hint.textContent = V.locked ? 'Locked: scroll freely · pinch or + / − to zoom · tap Locked to move or resize on the paper' : 'Unlocked: drag to move · pull a corner to resize · pinch or + / − to zoom · tap again to lock'; };
+    setHint();
+    var setLock = function (on) {
+      V.locked = on; wrap.classList.toggle('cp-locked', on);
+      var b = $('cp-vlock'); b.setAttribute('aria-pressed', String(on)); b.classList.toggle('is-open', !on);
+      b.innerHTML = (on ? ICO.lock : ICO.unlock) + '<span>' + (on ? 'Locked' : 'Unlocked') + '</span>';
+      if (on) V.sel = null; placeSel(); setHint();
+    };
     wrap.parentNode.insertBefore(hint, wrap.nextSibling);
 
+    $('cp-vlock').onclick = function () { setLock(!V.locked); };
+    wrap.classList.add('cp-locked');
     $('cp-zin').onclick = function () { zoomAt(V.z * 1.5); };
     $('cp-zout').onclick = function () { zoomAt(V.z / 1.5); };
     $('cp-zfit').onclick = $('cp-zlbl').onclick = function () { V.z = 1; V.px = V.py = 0; renderView(false); };
@@ -856,6 +867,12 @@
       if (ptrs.size === 2) { var t = two(); g = { t: 'pinch', d0: t.d, z0: V.z }; e.preventDefault(); return; }
       if (ptrs.size > 2) return;
       var now = Date.now(), dbl = now - lastTap < 320; lastTap = now;
+      if (V.locked) {      // locked: never move anything; the page scrolls, zoomed view pans
+        if (dbl && e.pointerType !== 'mouse') { lastTap = 0; g = null; zoomAt(V.z > 1.05 ? 1 : 2.5, e.clientX, e.clientY); e.preventDefault(); return; }
+        g = V.z > 1.001 ? { t: 'pan', x0: e.clientX, y0: e.clientY, px0: V.px, py0: V.py } : null;
+        if (!g && hitTest(mmAt(e.clientX, e.clientY))) { if (e.pointerType === 'mouse') nudgeLock(); else g = { t: 'tap', x0: e.clientX, y0: e.clientY, t0: Date.now() }; }
+        return;
+      }
       if (e.target.dataset && e.target.dataset.h && selItem()) {
         var it0 = selItem(), b0 = itemBox(it0), r0 = stage.getBoundingClientRect(), k0 = r0.width / st.pages[st.page].W;
         var ccx = r0.left + (b0.x + b0.w / 2) * k0, ccy = r0.top + (b0.y + b0.h / 2) * k0;
@@ -871,6 +888,7 @@
       if (!ptrs.has(e.pointerId)) return;
       ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (!g) return;
+      if (g.t === 'tap') { if (Math.hypot(e.clientX - g.x0, e.clientY - g.y0) > 8) g = null; return; }
       e.preventDefault();
       if (g.t === 'pinch' && ptrs.size >= 2) { var t = two(); zoomAt(g.z0 * t.d / g.d0, t.x, t.y, true); return; }
       if (g.t === 'pan') { V.px = g.px0 + e.clientX - g.x0; V.py = g.py0 + e.clientY - g.y0; layoutStage(); return; }
@@ -887,7 +905,7 @@
     var up = function (e) {
       if (!ptrs.has(e.pointerId)) return;
       ptrs.delete(e.pointerId);
-      if (ptrs.size === 0) { var was = g; g = null; if (was && was.t !== 'pan') renderView(false); }
+      if (ptrs.size === 0) { var was = g; g = null; if (was && was.t === 'tap') { if (Date.now() - was.t0 < 350) nudgeLock(); return; } if (was && was.t !== 'pan') renderView(false); }
       else if (g && g.t === 'pinch') g = null;
     };
     wrap.addEventListener('pointerup', up); wrap.addEventListener('pointercancel', up);
@@ -904,6 +922,11 @@
       e.preventDefault(); var a = adjOf(it._key), step = e.shiftKey ? 5 : 0.5; a.dx += dx * step; a.dy += dy * step; refreshPages(false);
     });
     var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { renderView(false); }, 150); });
+  }
+  var nudged = 0;
+  function nudgeLock() {
+    var b = $('cp-vlock'); if (!b || Date.now() - nudged < 4000) return; nudged = Date.now();
+    b.classList.remove('cp-nudge'); void b.offsetWidth; b.classList.add('cp-nudge');
   }
   function adjOf(key) { return st.adj[key] || (st.adj[key] = { dx: 0, dy: 0, k: 1 }); }
   function itemBox(it) { return it.full ? { x: it.x, y: it.y, w: it.w, h: it.h } : { x: it.x, y: it.y, w: it.unit.w, h: it.unit.h }; }
@@ -965,7 +988,7 @@
     if ($('cp-vreset')) $('cp-vreset').hidden = !anyAdj;
     if ($('cp-vcenter')) $('cp-vcenter').hidden = !it;
     if ($('cp-vcrop')) $('cp-vcrop').hidden = !(st.size === 'full' && pg && pg.items.some(function (x) { return x.full; }));
-    if (!it) { sel.hidden = true; return; }
+    if (!it || V.locked) { sel.hidden = true; return; }
     var b = itemBox(it), k = parseFloat($('cp-stage').style.width) / pg.W;
     sel.hidden = false;
     sel.style.left = b.x * k + 'px'; sel.style.top = b.y * k + 'px'; sel.style.width = b.w * k + 'px'; sel.style.height = b.h * k + 'px';

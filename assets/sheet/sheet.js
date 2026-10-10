@@ -591,8 +591,33 @@
       var b = e.target.closest('[data-o],.sh-close'); if (!b) return;
       if (b.classList.contains('sh-close')) { opts.onClose && opts.onClose(); return; }
       if (!items.length) { toast('Add a document first.'); return; }
+      var name0 = 'SPrinter-Sheet-' + (paper === '4x6' ? '4x6' : paper);
+      if (b.dataset.o === 'pdf' && window.SPPdfLib) {
+        // every picture goes in once, losslessly, at its own full resolution — nothing is re-drawn smaller
+        try {
+          var PL = await window.SPPdfLib(), doc = await PL.PDFDocument.create(), PT = 72 / MM, P0 = paperMM(), emb = new Map();
+          for (var pgi = 0; pgi < pages; pgi++) {
+            var list = items.filter(function (i) { return i.page === pgi; }); if (!list.length) continue;
+            busy(true, 'Saving page ' + (pgi + 1) + ' in original quality…'); await new Promise(function (r) { setTimeout(r, 0); });
+            var pg = doc.addPage([P0[0] * PT, P0[1] * PT]);
+            for (var ii = 0; ii < list.length; ii++) {
+              var it = list[ii], im = emb.get(it.c);
+              if (!im) {
+                var src = it.c;
+                if (window.SPPaper && SPPaper.get().paper !== 'exact') { var t = canvas(src.width, src.height); t.getContext('2d').drawImage(src, 0, 0); SPPaper.tune(t); src = t; }
+                im = await doc.embedPng(await window.SPCanvasPng(src)); emb.set(it.c, im);
+              }
+              var rx = it.x * PT, ry = (P0[1] - it.y - it.h) * PT, rw = it.w * PT, rh = it.h * PT;
+              pg.drawImage(im, { x: rx, y: ry, width: rw, height: rh });
+              if (cut$) pg.drawRectangle({ x: rx, y: ry, width: rw, height: rh, borderColor: PL.rgb(0.604, 0.643, 0.69), borderWidth: 0.18 * PT });
+            }
+          }
+          doc.setProducer('S Printer'); var bytes = await doc.save({ useObjectStreams: true }); busy(false);
+          save(name0 + '.pdf', URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))); toast('PDF saved in original quality.'); return;
+        } catch (err) { busy(false); try { console.warn('original pdf', err); } catch (_) {} }
+      }
       var out = await renderAll(); if (!out.length) return;
-      var o = b.dataset.o, name = 'SPrinter-Sheet-' + (paper === '4x6' ? '4x6' : paper);
+      var o = b.dataset.o, name = name0;
       if (o === 'jpg') out.forEach(function (p, i) { setTimeout(function () { save(name + (out.length > 1 ? '-' + (i + 1) : '') + '.jpg', p.url); }, i * 400); });
       else if (o === 'pdf') {
         var J = window.jspdf && window.jspdf.jsPDF; if (!J) { toast('PDF maker did not load.'); return; }

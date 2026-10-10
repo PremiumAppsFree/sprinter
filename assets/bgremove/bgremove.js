@@ -128,7 +128,7 @@
           r.ui.text('Removing the background' + (all.length > 1 ? ' — photo ' + (i + 1) + ' of ' + all.length : '') + '…');
           var img = await loadImage(all[i]);
           var m = await mask(img, function (s) { if (s === 'loading') r.ui.text('Loading the AI model (first time only, about 25 MB)…'); else r.ui.text('Removing the background…'); });
-          var png = r.colour === 'transparent';
+          var png = true;   // lossless — the photo keeps its full quality
           out.push(await toFile(compose(img, m, png ? null : r.colour), all[i].name, png));
         }
       } catch (err) {

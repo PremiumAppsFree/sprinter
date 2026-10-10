@@ -230,3 +230,13 @@ body.cp-body{margin:0;background:var(--desk);color:var(--ink);font:15px/1.5 'SP 
 .cp-vhint{font-size:12.5px;color:var(--muted);margin:8px 0 0;text-align:center}
 @media (max-width:900px){ .cp-view #cp-canvas{max-height:none!important} }
 @media (max-width:560px){ .cp-vbar button span{display:none} .cp-vbar button{height:40px;min-width:40px;padding:0 9px} }
+/* lock: by default the preview never moves anything, so scrolling the page is safe */
+.cp-view.cp-locked:not(.cp-zoomed),.cp-view.cp-locked:not(.cp-zoomed) .cp-vstage{touch-action:pan-y}
+.cp-view.cp-locked:not(.cp-zoomed) .cp-vstage{cursor:default}
+.cp-view:not(.cp-locked) .cp-vstage{cursor:move;outline:2px dashed rgba(37,99,235,.45);outline-offset:3px}
+.cp-vbar .cp-vlock{background:linear-gradient(145deg,#f0f9ff,#eef2ff);border-color:#c7d2fe}
+.cp-vbar .cp-vlock.is-open{background:linear-gradient(145deg,#fff7ed,#fdf2f8);border-color:#f9a8d4;color:#9d174d}
+.cp-vbar .cp-vlock svg{color:inherit}
+.cp-nudge{animation:cpNudge .7s cubic-bezier(.36,.07,.19,.97)}
+@keyframes cpNudge{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}}
+@media (max-width:560px){ .cp-vbar .cp-vlock span{display:inline} }

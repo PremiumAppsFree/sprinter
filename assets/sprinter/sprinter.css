@@ -172,3 +172,27 @@ button,a,label,[role=button]{touch-action:manipulation}
 body:has(.sh-overlay) .sp-paperpill,body:has(.sh-overlay) .sp-arrange,body:has(.sh-overlay) .sp-papermenu{display:none!important}
 body.sp-ovl .sp-paperpill,body.sp-ovl .sp-arrange,body.sp-ovl .sp-papermenu{display:none!important}
 .sp-arrange[hidden],.sp-paperpill[hidden],.sp-papermenu[hidden],.sp-paperbox [hidden]{display:none!important}
+
+/* premium coloured line icons (gradient stroke) */
+button svg[stroke="currentColor"],a svg[stroke="currentColor"],label svg[stroke="currentColor"],.sp-gi svg[stroke="currentColor"],
+button svg [stroke="currentColor"],a svg [stroke="currentColor"],label svg [stroke="currentColor"],.sp-gi svg [stroke="currentColor"]{stroke:url(#spIcoG)}
+.cp-btn-main svg[stroke="currentColor"],.cp-btn-main svg [stroke="currentColor"],.btn-primary svg[stroke="currentColor"],.btn-primary svg [stroke="currentColor"],
+.spbg-go svg[stroke="currentColor"],.spbg-go svg [stroke="currentColor"],[class*="-main"] svg[stroke="currentColor"],[class*="-main"] svg [stroke="currentColor"]{stroke:url(#spIcoL)}
+button:disabled svg[stroke="currentColor"],button:disabled svg [stroke="currentColor"]{stroke:currentColor}
+/* living icons */
+@media (prefers-reduced-motion:no-preference){
+  button svg,a.btn svg,.sp-gi svg{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  button:not(:disabled):hover>svg,button:not(:disabled):hover .sp-gi svg,a.btn:hover svg{transform:scale(1.14) rotate(-6deg)}
+  button:not(:disabled):active>svg,button:not(:disabled):active .sp-gi svg{transform:scale(.88)}
+  button:not(:disabled):focus-visible>svg{animation:spIcoPop .6s}
+  .tool .ic svg,.sp-anim-ico{animation:spIcoFloat 4.6s ease-in-out infinite;transform-origin:50% 60%}
+  .tool:nth-child(3n+1) .ic svg{animation-delay:-1.2s}.tool:nth-child(3n+2) .ic svg{animation-delay:-2.6s}
+  .tool:hover .ic svg{animation:spIcoWiggle .7s ease-in-out}
+  .tool .ic{position:relative;overflow:hidden}
+  .tool .ic::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.65) 50%,transparent 60%);transform:translateX(-120%);animation:spIcoShine 6s ease-in-out infinite;pointer-events:none}
+  .tool:nth-child(4n+2) .ic::after{animation-delay:1.5s}.tool:nth-child(4n+3) .ic::after{animation-delay:3s}.tool:nth-child(4n) .ic::after{animation-delay:4.5s}
+}
+@keyframes spIcoFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-2.5px) rotate(-3deg)}}
+@keyframes spIcoWiggle{0%,100%{transform:none}25%{transform:rotate(-10deg) scale(1.1)}50%{transform:rotate(8deg) scale(1.12)}75%{transform:rotate(-4deg) scale(1.06)}}
+@keyframes spIcoPop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes spIcoShine{0%,70%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}

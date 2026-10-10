@@ -1164,7 +1164,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
       if (!window.pdfjsLib) js.push(load('assets/vendor/pdf.min.js'));
       if (!(window.jspdf && window.jspdf.jsPDF)) js.push(load('assets/vendor/jspdf.umd.min.js'));
       return Promise.all(js);
-    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=4'); });
+    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=5'); });
     return ready;
   }
   function open() {
@@ -1236,4 +1236,58 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
   window.addEventListener('resize', function () { cur = null; soon(); }); window.addEventListener('scroll', soon, { passive: true }); setInterval(lift, 2000);
   new MutationObserver(function (m) { if (m.some(function (x) { return [].some.call(x.addedNodes, function (n) { return n.id === 'sp-paperpill' || n.id === 'sp-papermenu' || (n.classList && n.classList.contains('sp-arrange')); }); })) soon(); })
     .observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+/* Original-quality output helpers shared by every tool:
+ * SPPdfLib() loads pdf-lib on demand; SPCanvasPng(canvas) gives lossless PNG bytes. */
+(function () {
+  'use strict';
+  var base = (function () { var s = document.querySelector('script[src*="sprinter/sprinter.js"]'); return s ? s.src.replace(/sprinter\/sprinter\.js.*$/, '') : '../assets/'; })();
+  var p = null;
+  window.SPPdfLib = function () {
+    if (window.PDFLib) return Promise.resolve(window.PDFLib);
+    if (p) return p;
+    p = new Promise(function (res, rej) {
+      var s = document.createElement('script'); s.src = base + 'vendor/pdf-lib.min.js';
+      s.onload = function () { window.PDFLib ? res(window.PDFLib) : rej(new Error('pdf-lib')); }; s.onerror = function () { p = null; rej(new Error('pdf-lib')); };
+      document.head.appendChild(s);
+    });
+    return p;
+  };
+  window.SPCanvasPng = function (c) {
+    return new Promise(function (res, rej) {
+      if (!c.toBlob) { var d = atob(c.toDataURL('image/png').split(',')[1]), u = new Uint8Array(d.length); for (var i = 0; i < d.length; i++) u[i] = d.charCodeAt(i); res(u); return; }
+      c.toBlob(function (b) { if (!b) { rej(new Error('png')); return; } b.arrayBuffer().then(function (x) { res(new Uint8Array(x)); }, rej); }, 'image/png');
+    });
+  };
+})();
+
+/* Premium coloured icons + living (animated) icons everywhere.
+ * Every line icon drawn with currentColor gets the S Printer gradient, and icons move a little
+ * — gently on their own on the home page, with a pop when a button is pressed or hovered. */
+(function () {
+  'use strict';
+  function defs() {
+    if (document.getElementById('sp-ico-defs')) return;
+    var d = document.createElement('div'); d.id = 'sp-ico-defs'; d.setAttribute('aria-hidden', 'true');
+    d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    d.innerHTML = '<svg width="0" height="0" focusable="false"><defs>' +
+      '<linearGradient id="spIcoG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16b8f3"/><stop offset=".55" stop-color="#4f46e5"/><stop offset="1" stop-color="#d6247a"/></linearGradient>' +
+      '<linearGradient id="spIcoL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset=".55" stop-color="#a5b4fc"/><stop offset="1" stop-color="#f9a8d4"/></linearGradient>' +
+      '</defs></svg>';
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+  if (document.body) defs(); else document.addEventListener('DOMContentLoaded', defs);
+})();
+
+/* Photo tools from the classic engine save their sheets as JPEG; keep those at top quality
+ * (never below 0.97) so a gallery photo does not lose detail. Not on the size changer pages,
+ * whose whole job is to make files smaller. */
+(function () {
+  'use strict';
+  if (!/\/(passport-photo-classic|joint-photo-maker|notary-photo-maker|4x6-photo-print|4x6-photos-on-a4|a4-photo-print|id-card-print|aadhaar-print-classic|pan-card-print-classic|voter-id-print-classic|ayushman-print-classic|document-auto-crop|pdf-to-jpg)(\.html)?$/.test(location.pathname)) return;
+  var P = HTMLCanvasElement.prototype, toURL = P.toDataURL, toBlob = P.toBlob;
+  var big = function (c) { return c.width * c.height > 400000; };
+  P.toDataURL = function (type, q) { if (/jpe?g/i.test(type || '') && big(this) && !(q >= 0.97)) q = 0.97; return toURL.call(this, type, q); };
+  if (toBlob) P.toBlob = function (cb, type, q) { if (/jpe?g/i.test(type || '') && big(this) && !(q >= 0.97)) q = 0.97; return toBlob.call(this, cb, type, q); };
 })();
