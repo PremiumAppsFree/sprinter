@@ -39,7 +39,7 @@
   function save() {
     try {
       localStorage.setItem(PREF, JSON.stringify({ unit: $('pp-unit').value, w: st.size.w, h: st.size.h, preset: $('pp-preset').value,
-        paper: $('pp-paper').value, orient: $('pp-orient').value, margin: $('pp-margin').value, gap: $('pp-gap').value, fill: $('pp-fill').checked,
+        paper: $('pp-paper').value, orient: $('pp-orient').value, margin: $('pp-margin').value, gap: $('pp-gap').value, fill: $('pp-fill').checked, rows: $('pp-rows') ? $('pp-rows').checked : true,
         spare: $('pp-spare').checked, cut: $('pp-cut').checked, pos: $('pp-pos').value, pw: $('pp-pw').value, ph: $('pp-ph').value, pu: $('pp-punit').value }));
     } catch (e) {}
   }
@@ -48,7 +48,7 @@
       var p = JSON.parse(localStorage.getItem(PREF) || 'null'); if (!p) return;
       ['unit', 'preset', 'paper', 'orient', 'margin', 'gap', 'pos', 'pw', 'ph'].forEach(function (k) { if (p[k] != null && $('pp-' + k)) $('pp-' + k).value = p[k]; });
       if (p.pu) $('pp-punit').value = p.pu;
-      ['fill', 'spare', 'cut'].forEach(function (k) { if (p[k] != null) $('pp-' + k).checked = !!p[k]; });
+      ['fill', 'spare', 'cut', 'rows'].forEach(function (k) { if (p[k] != null && $('pp-' + k)) $('pp-' + k).checked = !!p[k]; });
       if (p.w > 5 && p.h > 5) st.size = { w: p.w, h: p.h };
     } catch (e) {}
   }
@@ -296,6 +296,13 @@
   function renderEditor() {
     var p = st.sel, ed = $('pp-editor');
     ed.hidden = !p; if (!p) return;
+    var eh = $('pp-edhead');
+    if (eh) {
+      var no = st.people.indexOf(p) + 1, t = photoCanvas(p, 90 / Math.max(st.size.w, st.size.h) * MM);
+      eh.innerHTML = '<span class="pp-edno">' + no + '</span><div><small>Editing</small><b></b></div>';
+      eh.querySelector('b').textContent = (p.label || '').trim() || 'Person ' + no;
+      eh.insertBefore(t, eh.firstChild);
+    }
     $('pp-b').value = p.adj.b; $('pp-c').value = p.adj.c; $('pp-s').value = p.adj.s;
     ['b', 'c', 's'].forEach(function (k) { $('pp-' + k + '-v').textContent = p.adj[k]; });
     $('pp-bgstate').textContent = p.mask ? 'Background removed — choose a colour' : 'Original background';
@@ -357,21 +364,42 @@
     opts.forEach(function (o) { var s = slots(o[0], o[1], w, h, m, g, spare); if (!pick || s.length > pick.s.length) pick = { W: o[0], H: o[1], s: s }; });
     if (!pick || !pick.s.length) { st.warn = 'This photo size does not fit on the paper.'; return []; }
     st.warn = '';
-    var per = pick.s.length, list = [], fill = $('pp-fill').checked;
-    var fixed = ready.filter(function (p) { return p.copies > 0; }), auto = ready.filter(function (p) { return !(p.copies > 0); });
-    fixed.forEach(function (p) { for (var i = 0; i < p.copies; i++) list.push(p); });
-    if (auto.length) {
-      if (fill) {
-        // share the rest of the (last) sheet between the photos without a copy count
-        var used = list.length % per, left = (used ? per - used : (list.length ? 0 : per));
-        if (!left && !list.length) left = per;
-        if (!left) left = per;
-        var each = Math.max(1, Math.floor(left / auto.length)), extra = left - each * auto.length;
-        auto.forEach(function (p, i) { var n = each + (i < extra ? 1 : 0); for (var k = 0; k < n; k++) list.push(p); });
-      } else auto.forEach(function (p) { list.push(p); });
+    var per = pick.s.length, fill = $('pp-fill').checked, slotsP = pick.s;
+    var rowOwn = !!($('pp-rows') && $('pp-rows').checked) && ready.length > 1;
+    var rowKey = function (sl) { return (sl.rot ? 'r' : 'u') + Math.round(sl.y * 10); };
+    // lay the people out in their own order; with "own row" each person starts on a fresh row
+    function lay(groups) {
+      var pages = [], cur = null, idx = per;
+      groups.forEach(function (gp, gi) {
+        if (!gp.n) return;
+        if (rowOwn && cur && idx > 0 && idx < per) {
+          var k = rowKey(slotsP[idx - 1]);
+          while (idx < per && rowKey(slotsP[idx]) === k) idx++;
+        }
+        for (var c = 0; c < gp.n; c++) {
+          if (idx >= per) { cur = { W: pick.W, H: pick.H, items: [] }; pages.push(cur); idx = 0; }
+          var sl = slotsP[idx++]; cur.items.push({ p: gp.p, x: sl.x, y: sl.y, w: sl.w, h: sl.h, rot: sl.rot });
+        }
+      });
+      return pages;
     }
-    var pages = [];
-    for (var i = 0; i < list.length; i += per) pages.push({ W: pick.W, H: pick.H, items: list.slice(i, i + per).map(function (p, k) { var s = pick.s[k]; return { p: p, x: s.x, y: s.y, w: s.w, h: s.h, rot: s.rot }; }) });
+    var groups = ready.map(function (p) { return { p: p, n: p.copies > 0 ? p.copies : 0, auto: !(p.copies > 0) }; });
+    var autos = groups.filter(function (g2) { return g2.auto; });
+    if (autos.length) {
+      if (!fill) autos.forEach(function (g2) { g2.n = 1; });
+      else {
+        var base = lay(groups), pagesFixed = Math.max(1, base.length);
+        var room = pagesFixed * per - base.reduce(function (a, pg) { return a + pg.items.length; }, 0);
+        if (base.length && !room) { pagesFixed++; room = per; }          // the fixed ones filled the page exactly
+        var each = Math.max(1, Math.floor(room / autos.length));
+        autos.forEach(function (g2, i) { g2.n = each + (i < room - each * autos.length ? 1 : 0); });
+        // shrink until everything fits on the same number of sheets (row breaks can cost a few slots)
+        for (var guard = 0; guard < 400 && lay(groups).length > pagesFixed; guard++) {
+          var big = autos.reduce(function (a, g2) { return !a || g2.n > a.n ? g2 : a; }, null); if (!big || big.n <= 1) break; big.n--;
+        }
+      }
+    }
+    var pages = lay(groups);
     st.info = { per: per, rotated: pick.s.filter(function (s) { return s.rot; }).length };
     return pages;
   }
@@ -541,7 +569,7 @@
     ['b', 'c', 's'].forEach(function (k) { $('pp-' + k).addEventListener('input', function () { if (!st.sel) return; st.sel.adj[k] = +this.value; $('pp-' + k + '-v').textContent = this.value; renderPeopleSoon(); update(); }); });
     $('pp-adjreset').onclick = function () { if (st.sel) { st.sel.adj = { b: 0, c: 0, s: 0 }; renderEditor(); renderPeople(); update(); } };
     ['pp-border', 'pp-bw', 'pp-bc', 'pp-text', 'pp-name', 'pp-date', 'pp-tsize'].forEach(function (id) { $(id).addEventListener('input', function () { $('pp-textopts').hidden = !$('pp-text').checked; renderPeopleSoon(); update(); }); $(id).addEventListener('change', update); });
-    ['pp-paper', 'pp-orient', 'pp-margin', 'pp-gap', 'pp-fill', 'pp-spare', 'pp-cut', 'pp-pos', 'pp-pw', 'pp-ph', 'pp-punit'].forEach(function (id) {
+    ['pp-paper', 'pp-orient', 'pp-margin', 'pp-gap', 'pp-fill', 'pp-rows', 'pp-spare', 'pp-cut', 'pp-pos', 'pp-pw', 'pp-ph', 'pp-punit'].forEach(function (id) {
       $(id).addEventListener('change', function () { $('pp-cp').hidden = $('pp-paper').value !== 'custom'; save(); update(); }); $(id).addEventListener('input', update);
     });
     $('pp-prev').onclick = function () { if (st.page > 0) { st.page--; update(); } };
