@@ -104,31 +104,74 @@
     for (var i = 0; i < files.length; i++) {
       try {
         var img = await decode(files[i]);
-        var p = { id: ++seq, name: files[i].name, img: img, mask: null, bg: null, adj: { b: 0, c: 0, s: 0 }, copies: 0, dirty: true };
+        var prev = st.people[st.people.length - 1];
+        var p = { id: ++seq, name: files[i].name, img: img, mask: null, bg: null, adj: { b: 0, c: 0, s: 0 }, copies: prev && prev.copies > 0 ? prev.copies : 0, label: '', dirty: true };
         p.crop = defaultCrop(p);
         st.people.push(p); st.sel = p;
       } catch (e) { toast('Could not open ' + files[i].name); }
     }
     busy(false); renderPeople(); renderEditor(); update();
+    if (files.length > 1 || st.people.length > 1) toast(st.people.length + ' people on the sheet — set copies for each one.');
     if (st.sel) openCrop(st.sel);
+  }
+  var SVG = {
+    minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>',
+    crop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14M2 6h14a2 2 0 0 1 2 2v14"/></svg>',
+    del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>',
+    add: '<svg viewBox="0 0 24 24" aria-hidden="true"><g transform="scale(.75)"><circle cx="13" cy="11" r="5" fill="url(#spIcoG)"/><path d="M3.5 27c.8-5.8 4.6-8.8 9.5-8.8s8.7 3 9.5 8.8z" fill="url(#spIcoG)"/><circle cx="24.5" cy="9.5" r="6" fill="#fff"/><circle cx="24.5" cy="9.5" r="5" fill="url(#spIcoG)"/><path d="M24.5 7v5M22 9.5h5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></g></svg>'
+  };
+  function totalPhotos() { return st.pages.reduce(function (a, pg) { return a + pg.items.length; }, 0); }
+  function countFor(p) { return st.pages.reduce(function (a, pg) { return a + pg.items.filter(function (it) { return it.p === p; }).length; }, 0); }
+  function renderSummary() {
+    var el = $('pp-sum'); if (!el) return;
+    if (!st.people.length) { el.innerHTML = ''; return; }
+    var n = totalPhotos(), sheets = st.pages.length;
+    el.innerHTML = '<b>' + st.people.length + (st.people.length > 1 ? ' people' : ' person') + '</b><span>' + n + ' photo' + (n === 1 ? '' : 's') + ' · ' + sheets + ' sheet' + (sheets === 1 ? '' : 's') + (st.info ? ' · ' + st.info.per + ' fit per sheet' : '') + '</span>';
+    [].forEach.call(document.querySelectorAll('.pp-person'), function (card) {
+      var p = st.people.find(function (x) { return String(x.id) === card.dataset.id; }), o = card.querySelector('.pp-onsheet');
+      if (p && o) { var c = countFor(p); o.textContent = p.copies > 0 ? (c < p.copies ? c + ' of ' + p.copies + ' fit' : c + ' on the sheet') : c + ' (fills the free space)'; }
+    });
   }
   function renderPeople() {
     var box = $('pp-people'); box.innerHTML = '';
     $('pp-people-wrap').hidden = !st.people.length;
+    $('pp-drop').classList.toggle('pp-drop-small', st.people.length > 0);
     st.people.forEach(function (p, i) {
-      var el = document.createElement('div'); el.className = 'pp-person' + (p === st.sel ? ' on' : '');
-      var th = photoCanvas(p, 120 / Math.max(st.size.w, st.size.h) * MM);
-      el.innerHTML = '<button type="button" class="pp-pick" aria-label="Edit this photo"></button><div class="pp-pmeta"><b></b><label class="pp-copies">Copies <input type="number" min="0" max="200" inputmode="numeric" title="0 = share the sheet"></label></div><button type="button" class="pp-del" aria-label="Remove">×</button>';
-      el.querySelector('.pp-pick').appendChild(th);
-      el.querySelector('b').textContent = 'Photo ' + (i + 1);
-      var cp = el.querySelector('input'); cp.value = p.copies || '';
-      cp.placeholder = 'auto';
-      cp.oninput = function () { p.copies = Math.max(0, parseInt(cp.value, 10) || 0); update(); };
-      el.querySelector('.pp-pick').onclick = function () { st.sel = p; renderPeople(); renderEditor(); };
-      el.querySelector('.pp-del').onclick = function () { st.people = st.people.filter(function (x) { return x !== p; }); if (st.sel === p) st.sel = st.people[0] || null; renderPeople(); renderEditor(); update(); };
+      var el = document.createElement('div'); el.className = 'pp-person' + (p === st.sel ? ' on' : ''); el.dataset.id = p.id;
+      var th = photoCanvas(p, 140 / Math.max(st.size.w, st.size.h) * MM);
+      el.innerHTML =
+        '<button type="button" class="pp-pick" aria-label="Edit this person\'s photo"><span class="pp-no">' + (i + 1) + '</span></button>' +
+        '<div class="pp-pmeta">' +
+          '<div class="pp-ptop"><input class="pp-pname" type="text" maxlength="40" placeholder="Person ' + (i + 1) + ' — name (optional)" aria-label="Name for person ' + (i + 1) + '">' +
+          (p === st.sel ? '<em class="pp-editing">Editing</em>' : '') + '</div>' +
+          '<div class="pp-qty"><span class="pp-qlbl">Copies</span><div class="pp-step"><button type="button" data-d="-1" aria-label="Fewer copies">' + SVG.minus + '</button><input type="number" min="0" max="200" inputmode="numeric" aria-label="Copies"><button type="button" data-d="1" aria-label="More copies">' + SVG.plus + '</button></div>' +
+          '<div class="pp-chips">' + [0, 2, 4, 6, 8].map(function (n) { return '<button type="button" data-n="' + n + '">' + (n ? n : 'Fill') + '</button>'; }).join('') + '</div></div>' +
+          '<small class="pp-onsheet"></small>' +
+        '</div>' +
+        '<div class="pp-pact"><button type="button" class="pp-crop1" title="Crop / straighten">' + SVG.crop + '</button><button type="button" class="pp-del" title="Remove this person">' + SVG.del + '</button></div>';
+      el.querySelector('.pp-pick').insertBefore(th, el.querySelector('.pp-no'));
+      var nm = el.querySelector('.pp-pname'); nm.value = p.label || '';
+      nm.oninput = function () { p.label = nm.value; p.dirty = true; renderSoon(); update(); };
+      nm.onfocus = function () { if (st.sel !== p) { st.sel = p; renderEditor(); [].forEach.call(box.children, function (c) { c.classList.toggle('on', c === el); }); var bd = box.querySelector('.pp-editing'); if (bd) el.querySelector('.pp-ptop').appendChild(bd); } };
+      var cp = el.querySelector('.pp-step input'); cp.value = p.copies || ''; cp.placeholder = 'Fill';
+      var setN = function (n) { p.copies = Math.max(0, Math.min(200, n | 0)); cp.value = p.copies || ''; mark(); update(); };
+      var mark = function () { [].forEach.call(el.querySelectorAll('.pp-chips button'), function (b) { b.setAttribute('aria-pressed', String(+b.dataset.n === (p.copies || 0))); }); };
+      cp.oninput = function () { setN(parseInt(cp.value, 10) || 0); };
+      [].forEach.call(el.querySelectorAll('.pp-step button'), function (b) { b.onclick = function () { setN((p.copies || 0) + (+b.dataset.d)); }; });
+      [].forEach.call(el.querySelectorAll('.pp-chips button'), function (b) { b.onclick = function () { setN(+b.dataset.n); }; });
+      mark();
+      el.querySelector('.pp-pick').onclick = function () { st.sel = p; renderPeople(); renderEditor(); var ed = $('pp-editor'); if (ed && innerWidth < 900) ed.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+      el.querySelector('.pp-crop1').onclick = function () { st.sel = p; renderPeople(); renderEditor(); openCrop(p); };
+      el.querySelector('.pp-del').onclick = function () {
+        el.classList.add('pp-out');
+        setTimeout(function () { st.people = st.people.filter(function (x) { return x !== p; }); if (st.sel === p) st.sel = st.people[st.people.length - 1] || null; renderPeople(); renderEditor(); update(); }, 220);
+      };
       box.appendChild(el);
     });
+    renderSummary();
   }
+  var rsT; function renderSoon() { clearTimeout(rsT); rsT = setTimeout(function () { var f = document.activeElement, id = f && f.closest && f.closest('.pp-person') && f.closest('.pp-person').dataset.id, pos = f && f.selectionStart; [].forEach.call(document.querySelectorAll('.pp-person'), function (card) { var p = st.people.find(function (x) { return String(x.id) === card.dataset.id; }); if (!p) return; var old = card.querySelector('.pp-pick canvas'), th = photoCanvas(p, 140 / Math.max(st.size.w, st.size.h) * MM); if (old) old.replaceWith(th); }); if (id && f && f.setSelectionRange) try { f.setSelectionRange(pos, pos); } catch (e) {} }, 250); }
 
   // ---------- one finished photo ----------
   function adjFilter(a) { return 'brightness(' + (100 + a.b) + '%) contrast(' + (100 + a.c) + '%) saturate(' + (100 + a.s) + '%)'; }
@@ -163,8 +206,9 @@
     } else x.drawImage(src, cr.x, cr.y, cr.width, cr.height, 0, 0, W, H);
     x.filter = 'none';
     // name / date band
-    var name = $('pp-name').value.trim(), date = $('pp-date').checked;
-    if ($('pp-text').checked && (name || date)) {
+    var name = ((p.label || '').trim() || $('pp-name').value.trim()), date = $('pp-date').checked;
+    if (($('pp-text').checked || (p.label || '').trim()) && (name || ($('pp-text').checked && date))) {
+      if (!$('pp-text').checked) date = false;
       var lines = []; if (name) lines.push(name); if (date) { var t = new Date(); lines.push(('0' + t.getDate()).slice(-2) + '/' + ('0' + (t.getMonth() + 1)).slice(-2) + '/' + t.getFullYear()); }
       var fs = H * num('pp-tsize', 7, 4, 14) / 100, bh = fs * (lines.length * 1.18 + 0.5);
       x.fillStyle = '#fff'; x.fillRect(0, H - bh, W, bh);
@@ -350,6 +394,7 @@
   function doUpdate() {
     st.pages = buildPages();
     if (st.page >= st.pages.length) st.page = Math.max(0, st.pages.length - 1);
+    renderSummary();
     var has = st.pages.length > 0;
     ['pp-print', 'pp-pdf', 'pp-jpg', 'pp-single', 'pp-edit'].forEach(function (id) { if ($(id)) $(id).disabled = !has; });
     $('pp-empty').hidden = has; $('pp-canvas').style.visibility = has ? 'visible' : 'hidden';
@@ -472,6 +517,7 @@
     ['pp-w', 'pp-h'].forEach(function (id) { $(id).addEventListener('change', setSizeFromInputs); $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') setSizeFromInputs(); }); });
     $('pp-swap').onclick = function () { st.size = { w: st.size.h, h: st.size.w }; showSize(); sizeChanged(); };
     $('pp-file').addEventListener('change', function (e) { addFiles(e.target.files); e.target.value = ''; });
+    if ($('pp-addperson')) { $('pp-addperson').querySelector('.pp-addic').innerHTML = SVG.add; $('pp-addperson').onclick = function () { $('pp-file').click(); }; }
     var drop = $('pp-drop');
     ['dragenter', 'dragover'].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('drag'); }); });
     ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('drag'); }); });

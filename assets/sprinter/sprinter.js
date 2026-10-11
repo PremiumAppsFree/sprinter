@@ -1272,8 +1272,8 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
     var d = document.createElement('div'); d.id = 'sp-ico-defs'; d.setAttribute('aria-hidden', 'true');
     d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
     d.innerHTML = '<svg width="0" height="0" focusable="false"><defs>' +
-      '<linearGradient id="spIcoG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16b8f3"/><stop offset=".55" stop-color="#4f46e5"/><stop offset="1" stop-color="#d6247a"/></linearGradient>' +
-      '<linearGradient id="spIcoL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset=".55" stop-color="#a5b4fc"/><stop offset="1" stop-color="#f9a8d4"/></linearGradient>' +
+      '<linearGradient id="spIcoG" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22"><stop offset="0" stop-color="#16b8f3"/><stop offset=".55" stop-color="#4f46e5"/><stop offset="1" stop-color="#d6247a"/></linearGradient>' +
+      '<linearGradient id="spIcoL" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22"><stop offset="0" stop-color="#7dd3fc"/><stop offset=".55" stop-color="#a5b4fc"/><stop offset="1" stop-color="#f9a8d4"/></linearGradient>' +
       '</defs></svg>';
     document.body.insertBefore(d, document.body.firstChild);
   }

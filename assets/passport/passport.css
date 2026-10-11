@@ -41,3 +41,43 @@ body.pp-body{margin:0;background:var(--desk);color:var(--ink);font:15px/1.5 'SP 
 .pp-crop-tools button:hover{border-color:var(--c)}
 @media (max-width:560px){.pp-size{grid-template-columns:1fr auto 1fr;}.pp-size .pp-unitwrap{grid-column:1/-1}}
 @media (prefers-reduced-motion:reduce){.pp-hero svg{animation:none}}
+
+/* people list — each person with their own copies */
+.pp-drop-small{padding:12px 14px!important;flex-direction:row!important;gap:12px!important;text-align:left!important;min-height:0!important}
+.pp-drop-small .cp-drop-ic{width:40px!important;height:40px!important}
+.pp-drop-small small{display:none}
+.pp-sum{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:14px 0 2px;padding:10px 14px;border-radius:12px;background:linear-gradient(120deg,#eff8ff,#f5f3ff 60%,#fdf2f8);border:1px solid #dbe4f3}
+.pp-sum b{font:800 15px/1.2 'SP Lexend',sans-serif;color:var(--ink)}.pp-sum span{font-size:13.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.pp-person{display:grid!important;grid-template-columns:auto 1fr auto;align-items:start!important;gap:12px!important;padding:10px!important}
+.pp-person.pp-out{animation:ppOut .22s ease-in forwards}
+@keyframes ppOut{to{opacity:0;transform:translateX(30px) scale(.97)}}
+.pp-pick{position:relative;width:auto;height:auto;display:block;padding:0;border:0;background:#eef2f6;border-radius:10px;overflow:hidden;cursor:pointer;line-height:0;box-shadow:0 2px 8px rgba(27,35,48,.12)}
+.pp-pick canvas{width:64px!important;height:auto!important;display:block}
+.pp-no{position:absolute;left:4px;top:4px;min-width:20px;height:20px;border-radius:10px;background:linear-gradient(135deg,#16b8f3,#4f46e5);color:#fff;font:700 12px/20px 'SP Inter',sans-serif;text-align:center;padding:0 5px;box-shadow:0 2px 6px rgba(79,70,229,.4)}
+.pp-pmeta{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pp-ptop{display:flex;align-items:center;gap:8px}
+.pp-pname{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:9px;padding:8px 10px;font:600 14px 'SP Inter',sans-serif;color:var(--ink);background:#fff}
+.pp-pname:focus{outline:0;border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.15)}
+.pp-editing{font:700 11px/1 'SP Inter',sans-serif;font-style:normal;color:#4f46e5;background:#eef2ff;border-radius:999px;padding:5px 8px;white-space:nowrap}
+.pp-qty{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pp-qlbl{font-size:13px;font-weight:700;color:var(--ink2)}
+.pp-step{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.pp-step button{width:34px;height:34px;border:0;background:#f4f6f9;cursor:pointer;display:grid;place-items:center;padding:0}
+.pp-step button svg{width:16px;height:16px}
+.pp-step input{width:46px;height:34px;border:0;text-align:center;font:700 15px 'SP Inter',sans-serif;color:var(--ink);-moz-appearance:textfield}
+.pp-step input::-webkit-outer-spin-button,.pp-step input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pp-chips{display:flex;gap:5px;flex-wrap:wrap}
+.pp-chips button{height:30px;min-width:34px;padding:0 9px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font:700 12.5px 'SP Inter',sans-serif;color:var(--ink2);cursor:pointer;transition:all .2s}
+.pp-chips button[aria-pressed=true]{background:linear-gradient(135deg,#16b8f3,#4f46e5);border-color:transparent;color:#fff;box-shadow:0 3px 10px rgba(79,70,229,.3)}
+.pp-onsheet{font-size:12.5px;color:var(--muted)}
+.pp-pact{display:flex;flex-direction:column;gap:6px}
+.pp-pact button{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.pp-pact button svg{width:18px;height:18px}
+.pp-pact .pp-del:hover{border-color:#fecaca;background:#fef2f2}
+.pp-addperson{width:100%;display:flex;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;border-radius:14px;border:2px dashed #a5b4fc;background:linear-gradient(120deg,#f8faff,#faf5ff);cursor:pointer;text-align:left;font:inherit;color:var(--ink);transition:transform .2s,border-color .2s,box-shadow .2s}
+.pp-addperson:hover{border-color:#6366f1;box-shadow:0 8px 22px rgba(99,102,241,.15);transform:translateY(-1px)}
+.pp-addperson .pp-addic{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:12px;background:#fff;box-shadow:0 3px 10px rgba(27,35,48,.1)}
+.pp-addperson .pp-addic svg{width:32px;height:32px}
+.pp-addperson b{display:block;font:800 15px/1.25 'SP Lexend',sans-serif}.pp-addperson small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+@media (prefers-reduced-motion:no-preference){.pp-addperson .pp-addic svg{animation:spIcoFloat 3.6s ease-in-out infinite}}
+@media (max-width:420px){.pp-chips button{min-width:30px;padding:0 7px}.pp-pick canvas{width:56px!important}}
