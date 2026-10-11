@@ -24,13 +24,70 @@
   var HASH = {}; HASH[OID.sha1] = 'sha1'; HASH[OID.sha256] = 'sha256'; HASH[OID.sha384] = 'sha384'; HASH[OID.sha512] = 'sha512';
   HASH[OID.sha1Rsa] = 'sha1'; HASH[OID.sha256Rsa] = 'sha256'; HASH[OID.sha384Rsa] = 'sha384'; HASH[OID.sha512Rsa] = 'sha512';
   var SUBTLE = { sha1: 'SHA-1', sha256: 'SHA-256', sha384: 'SHA-384', sha512: 'SHA-512' };
+  // ECDSA (eSign / eKYC certificates from C-DAC, Protean, CSC … use elliptic-curve keys)
+  var EC_SIG = { '1.2.840.10045.4.1': 'sha1', '1.2.840.10045.4.3.2': 'sha256', '1.2.840.10045.4.3.3': 'sha384', '1.2.840.10045.4.3.4': 'sha512' };
+  var EC_CURVE = { '1.2.840.10045.3.1.7': ['P-256', 32], '1.3.132.0.34': ['P-384', 48], '1.3.132.0.35': ['P-521', 66] };
+  var DUMMY_RSA_SPKI = null;
+  function dummySpki() {
+    if (DUMMY_RSA_SPKI) return DUMMY_RSA_SPKI;
+    var pk = forge.pki.setRsaPublicKey(new forge.jsbn.BigInteger('00c0ffee0000000000000000000000000000000000000000000000000000000001', 16), new forge.jsbn.BigInteger('10001', 16));
+    DUMMY_RSA_SPKI = forge.pki.publicKeyToAsn1(pk); return DUMMY_RSA_SPKI;
+  }
+  // parse any certificate; elliptic-curve ones get a placeholder key for forge plus the real key kept aside
+  function certFromAsn1(node) {
+    var asn1 = forge.asn1, der = asn1.toDer(node).getBytes(), c;
+    try { c = forge.pki.certificateFromAsn1(node); c.__der = der; return c; } catch (e) {}
+    var copy = asn1.fromDer(der, { strict: false }), tbs = copy.value[0].value, k = tbs[0].tagClass === asn1.Class.CONTEXT_SPECIFIC ? 1 : 0;
+    var spkiNode = tbs[k + 5], spkiDer = asn1.toDer(spkiNode).getBytes();
+    var keyAlg = asn1.derToOid(spkiNode.value[0].value[0].value);
+    if (keyAlg !== '1.2.840.10045.2.1') throw new Error('unsupported key');
+    var curve = asn1.derToOid(spkiNode.value[0].value[1].value);
+    tbs[k + 5] = dummySpki();
+    c = forge.pki.certificateFromAsn1(copy);
+    var orig = asn1.fromDer(der, { strict: false });
+    c.tbsCertificate = orig.value[0]; c.md = null; c.__der = der;
+    c.publicKey = { ec: true, spki: spkiDer, curve: curve, verify: function () { return false; } };
+    return c;
+  }
+  function b2u(bin) { var u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i) & 255; return u; }
+  function ecRaw(derSig, n) {      // DER SEQUENCE{r,s} → r||s as WebCrypto wants
+    var seq = forge.asn1.fromDer(derSig, { strict: false }), out = new Uint8Array(2 * n);
+    [0, 1].forEach(function (i) { var v = seq.value[i].value; while (v.length > n && v.charCodeAt(0) === 0) v = v.slice(1); var b = b2u(v); out.set(b, i * n + n - b.length); });
+    return out;
+  }
+  async function ecVerify(pub, hash, dataBin, derSig) {
+    try {
+      var cv = EC_CURVE[pub.curve]; if (!cv || !window.crypto || !crypto.subtle) return false;
+      var key = await crypto.subtle.importKey('spki', b2u(pub.spki), { name: 'ECDSA', namedCurve: cv[0] }, false, ['verify']);
+      return await crypto.subtle.verify({ name: 'ECDSA', hash: SUBTLE[hash] || 'SHA-256' }, key, ecRaw(derSig, cv[1]), b2u(dataBin));
+    } catch (e) { return false; }
+  }
+  // does `parent` sign `child`? (RSA via forge, ECDSA via WebCrypto)
+  async function signs(parent, child) {
+    try {
+      if (!sameName(child.issuer, parent.subject)) return false;
+      if (parent.publicKey && parent.publicKey.ec) {
+        var h = EC_SIG[child.signatureOid]; if (!h) return false;
+        return await ecVerify(parent.publicKey, h, forge.asn1.toDer(child.tbsCertificate).getBytes(), child.signature);
+      }
+      return parent.verify(child);
+    } catch (e) { return false; }
+  }
 
   var roots = null;
   function trustedRoots() {
     if (roots) return roots;
     roots = [];
-    (window.SP_TRUSTED_ROOTS || []).forEach(function (pem) { try { roots.push(forge.pki.certificateFromPem(pem)); } catch (e) {} });
+    (window.SP_TRUSTED_ROOTS || []).forEach(function (pem) { try { roots.push(certFromAsn1(forge.asn1.fromDer(forge.pem.decode(pem)[0].body, { strict: false }))); } catch (e) {} });
     return roots;
+  }
+  // licensed-CA and sub-CA certificates of India PKI (shipped with the site), used when a PDF leaves them out
+  var caPool = null;
+  function bundledCAs() {
+    if (caPool) return caPool;
+    caPool = [];
+    (window.SP_CA_POOL || []).forEach(function (pem) { try { caPool.push(certFromAsn1(forge.asn1.fromDer(forge.pem.decode(pem)[0].body, { strict: false }))); } catch (e) {} });
+    return caPool;
   }
 
   // ---------- small helpers ----------
@@ -50,7 +107,7 @@
   function issuerAttr(cert, short) { var a = cert && cert.issuer.getField(short); return a ? String(a.value) : ''; }
   function nameOf(cert) { return attr(cert, 'CN') || attr(cert, 'O') || 'Unknown'; }
   function sameName(a, b) { return !!(a && b && a.hash && a.hash === b.hash); }
-  function derOf(cert) { return forge.asn1.toDer(forge.pki.certificateToAsn1(cert)).getBytes(); }
+  function derOf(cert) { return cert.__der || (cert.__der = forge.asn1.toDer(forge.pki.certificateToAsn1(cert)).getBytes()); }
   function within(cert, when) { return when >= cert.validity.notBefore && when <= cert.validity.notAfter; }
   function pdfDate(s) {
     var m = /D:(\d{4})(\d\d)?(\d\d)?(\d\d)?(\d\d)?(\d\d)?([Z+\-])?(\d\d)?'?(\d\d)?/.exec(s || '');
@@ -247,7 +304,7 @@
     for (; i < sd.length; i++) {
       var n = sd[i];
       if (n.tagClass === asn1.Class.CONTEXT_SPECIFIC && n.type === 0) {
-        n.value.forEach(function (c) { try { certs.push(forge.pki.certificateFromAsn1(c)); } catch (e) { certs.push(null); } });
+        n.value.forEach(function (c) { try { certs.push(certFromAsn1(c)); } catch (e) { certs.push(null); } });
       } else if (n.tagClass === asn1.Class.UNIVERSAL && n.type === asn1.Type.SET) signerInfos = n.value;
     }
     if (!signerInfos || !signerInfos.length) throw new Error('no signer');
@@ -281,23 +338,23 @@
   }
 
   function verifyRsa(cert, alg, digestBin, sigBin) {
-    if (!cert.publicKey || !cert.publicKey.verify) return false;
+    if (!cert.publicKey || !cert.publicKey.verify || cert.publicKey.ec) return false;
     try { return cert.publicKey.verify(digestBin, sigBin); } catch (e) { return false; }
   }
 
-  function buildChain(leaf, pool, when) {
+  async function buildChain(leaf, pool, when) {
     var trusted = trustedRoots(), chain = [leaf], cur = leaf, guard = 0;
-    var issuedBy = function (child, parent) {
-      try { return sameName(child.issuer, parent.subject) && parent.verify(child); } catch (e) { return false; }
-    };
+    pool = pool.concat(bundledCAs());
+    var find = async function (list, test) { for (var i = 0; i < list.length; i++) if (await test(list[i])) return list[i]; return null; };
     while (guard++ < 8) {
-      var root = trusted.find(function (r) { return derOf(r) === derOf(cur) || issuedBy(cur, r); });
+      var c0 = cur;
+      var root = await find(trusted, function (r) { return derOf(r) === derOf(c0) || signs(r, c0); });
       if (root) {
         if (derOf(root) !== derOf(cur)) chain.push(root);
         var expired = chain.filter(function (c) { return !within(c, when); });
         return { ok: !expired.length, chain: chain, root: root, expired: expired };
       }
-      var up = pool.find(function (p) { return p !== cur && derOf(p) !== derOf(cur) && issuedBy(cur, p); });
+      var up = await find(pool, function (p) { return p !== c0 && derOf(p) !== derOf(c0) && chain.indexOf(p) < 0 && signs(p, c0); });
       if (!up) return { ok: false, chain: chain, root: null, reason: 'chain' };
       chain.push(up); cur = up;
     }
@@ -332,7 +389,7 @@
     if (s.signedAttrs) {
       var sa = forge.asn1.create(forge.asn1.Class.UNIVERSAL, forge.asn1.Type.SET, true, s.signedAttrs.value);
       signedBin = forge.asn1.toDer(sa).getBytes();
-      sigOk = verifyRsa(cert, alg, mdOf(alg, signedBin).digest().getBytes(), s.signature);
+      sigOk = cert.publicKey.ec ? await ecVerify(cert.publicKey, EC_SIG[s.sigAlg] || alg, signedBin, s.signature) : verifyRsa(cert, alg, mdOf(alg, signedBin).digest().getBytes(), s.signature);
     } else if (cms.encapContent && /sha1$/i.test(sig.subFilter)) {
       sigOk = verifyRsa(cert, alg, mdOf(alg, cms.encapContent).digest().getBytes(), s.signature);
     } else {
@@ -344,7 +401,7 @@
     r.time = mDate || cmsDate; r.cmsTime = cmsDate;
     r.timeSource = mDate ? 'pdf' : (cmsDate ? 'signature' : 'none');
     var when = r.time || new Date();
-    var chain = buildChain(cert, cms.certs, when);
+    var chain = await buildChain(cert, cms.certs, when);
     r.chain = chain.chain.map(function (c) { return { name: nameOf(c), org: attr(c, 'O'), from: c.validity.notBefore, to: c.validity.notAfter }; });
     r.root = chain.root ? nameOf(chain.root) : '';
 
@@ -361,11 +418,29 @@
     return r;
   }
 
+  async function sigInObjectStreams(u8) {
+    if (!window.DecompressionStream) return false;
+    var text = latin(u8, 0, u8.length), re = /\/Type\s*\/ObjStm[\s\S]{0,400}?stream\r?\n/g, m, n = 0;
+    while ((m = re.exec(text)) && n++ < 400) {
+      var start = m.index + m[0].length, end = text.indexOf('endstream', start); if (end < 0) continue;
+      while (end > start && (u8[end - 1] === 10 || u8[end - 1] === 13)) end--;
+      try {
+        var ds = new DecompressionStream('deflate'), out = new Response(new Blob([u8.subarray(start, end)]).stream().pipeThrough(ds));
+        var ab = new Uint8Array(await out.arrayBuffer()), str = latin(ab, 0, ab.length);
+        if (/\/ByteRange\s*\[/.test(str) && /\/(adbe\.pkcs7|ETSI\.CAdES)/.test(str)) return true;
+      } catch (e) {}
+    }
+    return false;
+  }
   async function verify(input) {
     if (!forge) return { status: 'error', signatures: [], message: 'Signature checker did not load.' };
     var u8 = input instanceof Uint8Array ? input : new Uint8Array(input);
     var sigs = findSignatures(u8);
-    if (!sigs.length) return { status: 'unsigned', signatures: [] };
+    if (!sigs.length) {
+      // a signature dictionary packed inside a compressed object stream can't be checked: the file was re-saved
+      try { if (await sigInObjectStreams(u8)) return { status: 'stripped', signatures: [] }; } catch (e) {}
+      return { status: 'unsigned', signatures: [] };
+    }
     var enc = null; try { enc = readEncryption(latin(u8, 0, u8.length)); } catch (e) {}
     var res = [];
     for (var i = 0; i < sigs.length; i++) res.push(await checkOne(u8, sigs[i], enc));

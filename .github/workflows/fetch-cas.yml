@@ -1,0 +1,26 @@
+name: Fetch India PKI CA certificates
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 1 * *'
+permissions:
+  contents: write
+  actions: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect licensed CA and sub-CA certificates
+        run: python3 .github/build/fetch_cas.py
+      - name: Commit
+        run: |
+          git config user.name PremiumAppsFree
+          git config user.email sahanurmiya431@gmail.com
+          git add assets/sigverify/intermediates.js
+          git commit -m "Update India PKI CA certificates" || echo nothing
+          git push
+      - name: Redeploy the site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main || true
