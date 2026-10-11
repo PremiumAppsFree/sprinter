@@ -367,6 +367,16 @@
         sig.producer = info.Producer || info.Creator || '';
       } catch (e) {}
     }
+    // Adobe look: the signature box keeps the document's own text; only its status layers change
+    var look = null;
+    if (sig && sig.signatures && sig.signatures.length && window.PDFLib) {
+      try {
+        busy(true, 'Preparing the signature box…');
+        var plain = (usedPw || sig.encrypted) ? await decryptPdf(data, usedPw) : data.slice();
+        look = await adobeLook(plain, sig.status === 'valid');
+        if (look) { var pdf2 = await lib.getDocument({ data: look.slice() }).promise; pdf = pdf2; }
+      } catch (e) { look = null; try { console.warn('signature look', e); } catch (_) {} }
+    }
     var n = Math.min(pdf.numPages, 20);
     for (var i = 1; i <= n; i++) {
       busy(true, 'Reading page ' + i + ' of ' + n + '…');
@@ -379,7 +389,7 @@
       await page.render({ canvasContext: x, viewport: vp }).promise;
       var painted = 0;
       var sigBoxes = null;
-      if (sig && sig.status === 'valid') {
+      if (!look && sig && sig.status === 'valid') {
         try {
           painted = await SPSig.paint(x, page, vp, sig);
           if (painted && SPSig.sigWidgets) sigBoxes = (await SPSig.sigWidgets(page, sig)).map(function (w) {
@@ -390,9 +400,72 @@
       }
       await addCanvasSource(c, file.name.replace(/\.pdf$/i, '') + (n > 1 ? ' · p' + i : ''),
         { mmW: v1.width / 72 * MM, mmH: v1.height / 72 * MM, fileKey: fileKey, signed: painted > 0, sigBoxes: sigBoxes,
-          pdfref: { bytes: data, doc: pdf, page: i, sig: sig, key: fileKey, pw: usedPw, rotate: page.rotate || 0, locked: !!(usedPw || (sig && sig.encrypted)) } });
+          pdfref: look ? { bytes: look, doc: pdf, page: i, sig: sig, key: fileKey + '#look', pw: '', rotate: page.rotate || 0, locked: false }
+                       : { bytes: data, doc: pdf, page: i, sig: sig, key: fileKey, pw: usedPw, rotate: page.rotate || 0, locked: !!(usedPw || (sig && sig.encrypted)) } });
     }
     if (pdf.numPages > 20) toast('Only the first 20 pages were added.');
+  }
+
+  // ---------- signature box exactly as Adobe Reader shows it ----------
+  // Signed PDFs (iText / UIDAI / e-District / eSign …) carry a layered signature box: n0 background,
+  // n1 status icon ("?"), n2 the signer's own text (name, date, reason, location), n3 overlay, n4 status text.
+  // Adobe keeps n2 untouched and, for a valid signature, shows a green tick in n1 and "Signature valid" in n4.
+  // Here the same layers are swapped and the box is drawn into the page, so preview, print and PDF match Adobe.
+  var ADOBE_TICK = 'q 0 0 0 rg 10 48 m 23 61 l 42 42 l 81 90 l 94 77 l 42 16 l h f 0.13 0.62 0.29 rg 8 50 m 21 63 l 40 44 l 79 92 l 92 79 l 40 18 l h f Q\n';
+  async function adobeLook(bytes, valid) {
+    var PL = window.PDFLib, d = await PL.PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: false });
+    var ctx = d.context, N = function (k) { return PL.PDFName.of(k); }, done = 0, helv = null;
+    var num = function (o) { o = ctx.lookup(o); return o && o.asNumber ? o.asNumber() : (o && o.numberValue != null ? o.numberValue : +o); };
+    var arr = function (o) { o = ctx.lookup(o); if (!o || !o.asArray) return null; return o.asArray().map(num); };
+    var form = function (content, bbox, res) { return ctx.stream(content, { Type: 'XObject', Subtype: 'Form', FormType: 1, BBox: bbox, Matrix: [1, 0, 0, 1, 0, 0], Resources: res || {} }); };
+    var setXo = function (xo, name, obj) { var cur = xo.get(N(name)); if (cur instanceof PL.PDFRef) ctx.assign(cur, obj); else xo.set(N(name), ctx.register(obj)); };
+    var text = function (st) { try { var b = PL.decodePDFRawStream(st).decode(); var s2 = ''; for (var i = 0; i < b.length; i++) s2 += String.fromCharCode(b[i]); return s2; } catch (e) { return ''; } };
+    d.getPages().forEach(function (page) {
+      var annots = page.node.Annots(); if (!annots) return;
+      for (var ai = annots.size() - 1; ai >= 0; ai--) {
+        var aref = annots.get(ai), a = ctx.lookup(aref); if (!a || !a.get) continue;
+        var ft = a.get(N('FT')) || (a.lookup(N('Parent')) && a.lookup(N('Parent')).get(N('FT')));
+        if (!ft || ft.toString() !== '/Sig') continue;
+        var ap = a.lookup(N('AP')), nref = ap && ap.get(N('N')), apN = nref && ctx.lookup(nref);
+        if (!apN || !apN.dict) continue;
+        var flags = num(a.get(N('F')) || 0) | 0;
+        if (valid) {
+          var res = apN.dict.lookup(N('Resources')), xo = res && res.lookup(N('XObject')), frm = xo && xo.lookup(N('FRM'));
+          var fres = frm && frm.dict && frm.dict.lookup(N('Resources')), lx = fres && fres.lookup(N('XObject'));
+          if (lx && lx.get(N('n1'))) {
+            setXo(lx, 'n1', form(ADOBE_TICK, [0, 0, 100, 100]));
+            if (lx.get(N('n3'))) setXo(lx, 'n3', form('% DSBlank\n', [0, 0, 100, 100]));
+            var n4 = lx.lookup(N('n4'));
+            if (n4 && n4.dict) {
+              var bb = arr(n4.dict.get(N("BBox"))) || [0, 0, 100, 20];
+              // Adobe fills the status layer: text 0.835 × its height (smaller only if too wide), top-left aligned
+              var w = bb[2] - bb[0], h = bb[3] - bb[1], size = Math.min(h * 0.835, (w * 0.96) / 6.589);
+              var x0 = bb[0] + w * 0.02, y0 = bb[3] - size * 0.8;
+              if (!helv) helv = ctx.register(ctx.obj({ Type: 'Font', Subtype: 'Type1', BaseFont: 'Helvetica', Encoding: 'WinAnsiEncoding' }));
+              var fd = ctx.obj({}); fd.set(N('SPH'), helv); var rd = ctx.obj({}); rd.set(N('Font'), fd);
+              var st2 = ctx.stream('BT\n1 0 0 1 ' + x0 + ' ' + y0 + ' Tm\n/SPH ' + size.toFixed(2) + ' Tf\n0 0 0 rg\n(Signature valid)Tj\nET\n', { Type: 'XObject', Subtype: 'Form', FormType: 1, BBox: bb, Matrix: [1, 0, 0, 1, 0, 0] });
+              st2.dict.set(N('Resources'), rd);
+              setXo(lx, 'n4', st2);
+            }
+          }
+        }
+        // draw the box into the page (like printing from Adobe) and drop the field itself
+        if (!(flags & 2)) {
+          var rect = arr(a.get(N('Rect'))), bbox = arr(apN.dict.get(N('BBox'))) || [0, 0, 1, 1], mtx = arr(apN.dict.get(N('Matrix'))) || [1, 0, 0, 1, 0, 0];
+          if (rect) {
+            var rx = Math.min(rect[0], rect[2]), ry = Math.min(rect[1], rect[3]), rw = Math.abs(rect[2] - rect[0]), rh = Math.abs(rect[3] - rect[1]);
+            var pts = [[bbox[0], bbox[1]], [bbox[2], bbox[1]], [bbox[0], bbox[3]], [bbox[2], bbox[3]]].map(function (p) { return [mtx[0] * p[0] + mtx[2] * p[1] + mtx[4], mtx[1] * p[0] + mtx[3] * p[1] + mtx[5]]; });
+            var bx0 = Math.min.apply(null, pts.map(function (p) { return p[0]; })), by0 = Math.min.apply(null, pts.map(function (p) { return p[1]; }));
+            var bw = Math.max.apply(null, pts.map(function (p) { return p[0]; })) - bx0 || 1, bh = Math.max.apply(null, pts.map(function (p) { return p[1]; })) - by0 || 1;
+            var sx = rw / bw, sy = rh / bh, name = page.node.newXObject('SPSig', nref);
+            page.pushOperators(PL.pushGraphicsState(), PL.concatTransformationMatrix(sx, 0, 0, sy, rx - bx0 * sx, ry - by0 * sy), PL.drawObject(name), PL.popGraphicsState());
+          }
+        }
+        annots.remove(ai); done++;
+      }
+    });
+    if (!done) return null;
+    return d.save({ useObjectStreams: false });
   }
 
   async function addFiles(files) {
