@@ -5,6 +5,7 @@ import re, ssl, subprocess, sys, urllib.request, urllib.parse, tempfile, os, jso
 ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'}
 def get(u, n=8_000_000):
+    u = urllib.parse.quote(u.strip(), safe=':/%?=&()#+,;@~')
     try:
         r = urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=25, context=ctx)
         return r.read(n)
