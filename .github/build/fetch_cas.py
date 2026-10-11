@@ -19,6 +19,11 @@ SEED_CERTS = open(os.path.join(os.path.dirname(__file__), 'ca_certs.txt')).read(
 CERT_RE = re.compile(rb'href\s*=\s*["\']([^"\']+?\.(?:cer|crt|der|pem|p7b|p7c))["\']', re.I)
 LINK_RE = re.compile(rb'href\s*=\s*["\']([^"\'#]+)["\']', re.I)
 seen_urls, certs = set(), {}
+# keep what earlier runs found (CA sites are sometimes down)
+try:
+    _old = open('assets/sigverify/intermediates.js').read()
+    for _p in json.loads(_old[_old.index('['):_old.rindex(']') + 1]): certs[hashlib.sha256(_p.encode()).hexdigest()] = _p
+except Exception: pass
 def to_pems(data):
     out = []
     with tempfile.TemporaryDirectory() as d:
