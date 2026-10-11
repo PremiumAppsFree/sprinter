@@ -400,7 +400,7 @@
       }
       await addCanvasSource(c, file.name.replace(/\.pdf$/i, '') + (n > 1 ? ' · p' + i : ''),
         { mmW: v1.width / 72 * MM, mmH: v1.height / 72 * MM, fileKey: fileKey, signed: painted > 0, sigBoxes: sigBoxes,
-          pdfref: look ? { bytes: look, doc: pdf, page: i, sig: sig, key: fileKey + '#look', pw: '', rotate: page.rotate || 0, locked: false }
+          pdfref: look ? { bytes: look, lookSrc: plain, doc: pdf, page: i, sig: sig, key: fileKey + '#look', pw: '', rotate: page.rotate || 0, locked: false }
                        : { bytes: data, doc: pdf, page: i, sig: sig, key: fileKey, pw: usedPw, rotate: page.rotate || 0, locked: !!(usedPw || (sig && sig.encrypted)) } });
     }
     if (pdf.numPages > 20) toast('Only the first 20 pages were added.');
@@ -412,6 +412,27 @@
   // Adobe keeps n2 untouched and, for a valid signature, shows a green tick in n1 and "Signature valid" in n4.
   // Here the same layers are swapped and the box is drawn into the page, so preview, print and PDF match Adobe.
   var ADOBE_TICK = 'q 0 0 0 rg 10 48 m 23 61 l 42 42 l 81 90 l 94 77 l 42 16 l h f 0.13 0.62 0.29 rg 8 50 m 21 63 l 40 44 l 79 92 l 92 79 l 40 18 l h f Q\n';
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function nowIST() { var t = new Date(Date.now() + 330 * 60000); return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate(), H: t.getUTCHours(), M: t.getUTCMinutes(), S: t.getUTCSeconds() }; }
+  var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+  // replace every date-time inside the text strings of a content stream, keeping the document's own format
+  function liveDates(src) {
+    var n = nowIST(), hms = function (sec, sep) { return p2(n.H) + ':' + p2(n.M) + (sec ? ':' + p2(n.S) : ''); };
+    return src.replace(/\((?:\\.|[^\\)])*\)/g, function (lit) {
+      return lit
+        .replace(/(\d{4})([.\-\/])(\d{2})\2(\d{2})(\s+|T)(\d{2}):(\d{2})(:\d{2})?/g, function (m0, y, sep, mo, d, sp, H, M, S) { return n.y + sep + p2(n.m) + sep + p2(n.d) + sp + hms(!!S); })
+        .replace(/(\d{2})-([A-Z][a-z]{2})-(\d{4})(\s+)(\d{2}):(\d{2})(:\d{2})?/g, function (m0, d, mon, y, sp, H, M, S) { return p2(n.d) + '-' + MON[n.m - 1] + '-' + n.y + sp + hms(!!S); })
+        .replace(/(\d{2})([\/\-.])(\d{2})\2(\d{4})(\s+)(\d{2}):(\d{2})(:\d{2})?/g, function (m0, d, sep, mo, y, sp, H, M, S) { return p2(n.d) + sep + p2(n.m) + sep + n.y + sp + hms(!!S); });
+    });
+  }
+  // only plain (single-byte) fonts can be rewritten safely; CID / Identity-H text is left as it is
+  function simpleFonts(st) {
+    try {
+      var res = st.dict.lookup(window.PDFLib.PDFName.of('Resources')), fonts = res && res.lookup(window.PDFLib.PDFName.of('Font'));
+      if (!fonts) return true;
+      return fonts.entries().every(function (e) { var f = fonts.lookup(e[0]); var sub = f && f.get(window.PDFLib.PDFName.of('Subtype')); return !sub || !/Type0/.test(sub.toString()); });
+    } catch (e) { return false; }
+  }
   async function adobeLook(bytes, sigList) {
     var PL = window.PDFLib, d = await PL.PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: false });
     var ctx = d.context, N = function (k) { return PL.PDFName.of(k); }, done = 0, helv = null;
@@ -442,6 +463,16 @@
           if (lx && lx.get(N('n1'))) {
             setXo(lx, 'n1', form(ADOBE_TICK, [0, 0, 100, 100]));
             if (me) me.tick = true;
+            // the signer's own text stays — only its date / time is brought up to now (live, with seconds)
+            var n2 = lx.lookup(N('n2'));
+            if (n2 && n2.dict && simpleFonts(n2)) {
+              var c2 = text(n2), c3 = liveDates(c2);
+              if (c3 !== c2) {
+                var ns = ctx.stream(c3, {});
+                n2.dict.entries().forEach(function (e) { var k = e[0].toString(); if (!/^\/(Filter|Length|DecodeParms)$/.test(k)) ns.dict.set(e[0], e[1]); });
+                setXo(lx, 'n2', ns);
+              }
+            }
             if (lx.get(N('n3'))) setXo(lx, 'n3', form('% DSBlank\n', [0, 0, 100, 100]));
             var n4 = lx.lookup(N('n4'));
             if (n4 && n4.dict) {
@@ -1193,6 +1224,7 @@
   async function vectorPdf() {
     var PL = window.PDFLib; if (!PL || !origMode()) return null;
     var pages = buildPages(); if (!pages.length) return null;
+    Object.keys(plainPdf).forEach(function (k) { if (/#look$/.test(k)) delete plainPdf[k]; });   // fresh live time for every print / PDF
     var O = PL, PT = 72 / MM, out = await PL.PDFDocument.create(), docs = {}, bySrc = new Map(), byCanvas = new Map(), names = {}, now = new Date(), helv = null;
     var cm = function (a, b, c, d, e, f) { return O.concatTransformationMatrix(a, b, c, d, e, f); };
     var useObj = function (pg, obj) { var k = pg.ref.toString() + '|' + obj.ref.toString(); return names[k] || (names[k] = pg.node.newXObject('SPObj', obj.ref)); };
@@ -1203,7 +1235,7 @@
       var r = null, ref = src.pdfref;
       if (ref && !ref.rotate) {
         try {
-          var plain = plainPdf[ref.key] || (plainPdf[ref.key] = ref.locked ? await decryptPdf(ref.bytes, ref.pw) : ref.bytes.slice());
+          var plain = plainPdf[ref.key] || (plainPdf[ref.key] = ref.lookSrc ? ((await adobeLook(ref.lookSrc, ref.sig && ref.sig.signatures)) || ref.bytes.slice()) : ref.locked ? await decryptPdf(ref.bytes, ref.pw) : ref.bytes.slice());
           var d = docs[ref.key] || (docs[ref.key] = await PL.PDFDocument.load(plain, { updateMetadata: false }));
           var sp = d.getPage(ref.page - 1);
           if (!sp.getRotation().angle) {
