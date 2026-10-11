@@ -582,7 +582,7 @@
       for (var p = 0; p < pages; p++) {
         if (!items.some(function (i) { return i.page === p; })) continue;
         busy(true, 'Preparing page ' + (p + 1) + '…'); await new Promise(function (r) { setTimeout(r, 0); });
-        var c = drawPage(p, (window.SPPaper && SPPaper.dpi()) || DPI); if (window.SPPaper) SPPaper.tune(c); out.push({ W: P[0], H: P[1], url: c.toDataURL('image/jpeg', 0.98) }); c.width = c.height = 1;
+        var dq = (window.SPExportDpi && SPExportDpi()) || (window.SPPaper && SPPaper.dpi()) || DPI; if (window.SPSafeDpi) dq = SPSafeDpi(P[0], P[1], dq); var c = drawPage(p, dq); if (!c.width || c.toDataURL('image/jpeg', 0.1).length < 100) c = drawPage(p, Math.min(DPI, dq)); if (window.SPPaper) SPPaper.tune(c); out.push({ W: P[0], H: P[1], url: c.toDataURL('image/jpeg', 0.98) }); c.width = c.height = 1;
       }
       busy(false); return out;
     }
@@ -592,7 +592,7 @@
       if (b.classList.contains('sh-close')) { opts.onClose && opts.onClose(); return; }
       if (!items.length) { toast('Add a document first.'); return; }
       var name0 = 'SPrinter-Sheet-' + (paper === '4x6' ? '4x6' : paper);
-      if (b.dataset.o === 'pdf' && window.SPPdfLib) {
+      if ((b.dataset.o === 'pdf' || (b.dataset.o !== 'jpg' && !window.SPIsMobile && window.SPPrintPdf)) && window.SPPdfLib) {
         // every picture goes in once, losslessly, at its own full resolution — nothing is re-drawn smaller
         try {
           var PL = await window.SPPdfLib(), doc = await PL.PDFDocument.create(), PT = 72 / MM, P0 = paperMM(), emb = new Map();
@@ -613,6 +613,7 @@
             }
           }
           doc.setProducer('S Printer'); var bytes = await doc.save({ useObjectStreams: true }); busy(false);
+          if (b.dataset.o !== 'pdf') { if (await window.SPPrintPdf(bytes)) return; throw new Error('print fallback'); }
           save(name0 + '.pdf', URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))); toast('PDF saved in original quality.'); return;
         } catch (err) { busy(false); try { console.warn('original pdf', err); } catch (_) {} }
       }

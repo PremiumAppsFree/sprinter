@@ -382,7 +382,7 @@
       busy(true, 'Reading page ' + i + ' of ' + n + '…');
       var page = await pdf.getPage(i);
       var v1 = page.getViewport({ scale: 1 });
-      var want = Math.max(300, (window.SPPaper && SPPaper.dpi()) || 300) / 72, scale = Math.min(want, (window.SPMaxSide || 4800) / Math.max(v1.width, v1.height), 8.4);
+      var want = Math.max(300, (window.SPExportDpi && SPExportDpi()) || (window.SPPaper && SPPaper.dpi()) || 300) / 72, scale = Math.min(want, (window.SPMaxSide || 4800) / Math.max(v1.width, v1.height), 8.4);
       var vp = page.getViewport({ scale: scale });
       var c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
       var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
@@ -1121,8 +1121,9 @@
     for (var i = 0; i < pages.length; i++) {
       busy(true, 'Preparing page ' + (i + 1) + ' of ' + pages.length + '…');
       await new Promise(function (r) { setTimeout(r, 0); });
-      var dpi = (window.SPPaper && SPPaper.dpi()) || parseInt(($('cp-dpi') || {}).value, 10) || DPI, c;
-      try { c = drawPage(pages[i], dpi); if (!c.width) throw 0; } catch (e) { c = drawPage(pages[i], 300); }
+      var dpi = (window.SPExportDpi && SPExportDpi()) || (window.SPPaper && SPPaper.dpi()) || DPI, c;
+      if (window.SPSafeDpi) dpi = SPSafeDpi(pages[i].W, pages[i].H, dpi);
+      try { c = drawPage(pages[i], dpi); if (!c.width || c.toDataURL('image/jpeg', 0.1).length < 100) throw 0; } catch (e) { c = drawPage(pages[i], Math.min(300, dpi)); }
       if (window.SPPaper) SPPaper.tune(c);
       out.push({ W: pages[i].W, H: pages[i].H, url: c.toDataURL('image/jpeg', 0.98) });
       c.width = c.height = 1;
@@ -1132,6 +1133,10 @@
   function fileBase() { return 'SPrinter-' + DOC.name.replace(/\s+/g, '') + '-' + st.size; }
 
   async function doPrint() {
+    // computers: print the real PDF (sharp text, original pictures) — like printing from Adobe Reader
+    if (!window.SPIsMobile && window.SPPrintPdf) {
+      try { var vb = await vectorPdf(); busy(false); if (vb && await window.SPPrintPdf(vb)) return; } catch (e) { busy(false); }
+    }
     var out; try { out = await renderAll(); } finally { busy(false); }
     if (!out.length) return;
     var root = $('cp-print-root'); root.innerHTML = '';

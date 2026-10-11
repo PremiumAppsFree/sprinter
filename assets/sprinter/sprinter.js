@@ -416,8 +416,17 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
   var SMALLDEV = (window.innerWidth || 1000) < 820 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
   window.SPMaxSide = SMALLDEV ? 4800 : 7200;
   // print resolution chosen in Paper & quality (300 / 450 / 600 dpi) — used by every tool, including the photo-print ones
-  window.__spDPI = function () { try { return (window.SPPaper && window.SPPaper.dpi()) || 300; } catch (e) { return 300; } };
+  // classic photo tools build their sheets at this resolution: never below 450 dpi on computers (360 on phones)
+  window.__spDPI = function () { var d = 300; try { d = (window.SPPaper && window.SPPaper.dpi()) || 300; } catch (e) {} return Math.max(d, SMALLDEV ? 360 : 450); };
   var MAX_SIDE = window.SPMaxSide;
+  // pictures that leave the site (print on phones, JPG files) are made at least this sharp
+  window.SPIsMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+  // never ask for a canvas the browser can't make (huge pages, phones)
+  window.SPSafeDpi = function (wMM, hMM, dpi) {
+    var wi = wMM / 25.4, hi = hMM / 25.4, side = SMALLDEV ? 4800 : 9000, area = SMALLDEV ? 16e6 : 60e6;
+    return Math.max(72, Math.min(dpi, side / Math.max(wi, hi), Math.sqrt(area / (wi * hi))));
+  };
+  window.SPExportDpi = function () { var d = 300; try { d = (window.SPPaper && window.SPPaper.dpi()) || 300; } catch (e) {} return Math.max(d, SMALLDEV ? 400 : 600); };
   var BOOST = /\/(pdf-to-jpg|document-auto-crop)(\.html)?$/.test(location.pathname);
   // ---- automatic digital-signature check for every tool that opens a PDF ----
   var SP_BASE = (function () {
@@ -1165,7 +1174,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
       if (!window.pdfjsLib) js.push(load('assets/vendor/pdf.min.js'));
       if (!(window.jspdf && window.jspdf.jsPDF)) js.push(load('assets/vendor/jspdf.umd.min.js'));
       return Promise.all(js);
-    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=5'); });
+    }).then(function () { return window.SPSheet ? 0 : load('assets/sheet/sheet.js?v=6'); });
     return ready;
   }
   function open() {
@@ -1291,4 +1300,36 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
   var big = function (c) { return c.width * c.height > 400000; };
   P.toDataURL = function (type, q) { if (/jpe?g/i.test(type || '') && big(this) && !(q >= 0.97)) q = 0.97; return toURL.call(this, type, q); };
   if (toBlob) P.toBlob = function (cb, type, q) { if (/jpe?g/i.test(type || '') && big(this) && !(q >= 0.97)) q = 0.97; return toBlob.call(this, cb, type, q); };
+})();
+
+
+/* Print the real PDF (vector text, original images) instead of a picture of it — what Adobe does.
+ * Works in desktop Chrome, Edge and Firefox through their built-in PDF viewer; phones fall back. */
+(function () {
+  'use strict';
+  window.SPPrintPdf = function (bytes) {
+    return new Promise(function (resolve) {
+      var ua = navigator.userAgent, okBrowser = /Chrome\/|Chromium\/|Edg\/|Firefox\//.test(ua) && !/HeadlessChrome/.test(ua);
+      if (window.SPIsMobile || !bytes || !okBrowser || navigator.pdfViewerEnabled === false) { resolve(false); return; }
+      try {
+        var url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        var old = document.getElementById('sp-pdf-print'); if (old) old.remove();
+        var f = document.createElement('iframe'); f.id = 'sp-pdf-print'; f.setAttribute('aria-hidden', 'true');
+        f.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;border:0;opacity:0.01;pointer-events:none;z-index:-1';
+        var done = false, fail = setTimeout(function () { if (!done) { done = true; f.remove(); resolve(false); } }, 15000);
+        f.onload = function () {
+          setTimeout(function () {
+            if (done) return;
+            try {
+              var go = function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} };
+              if (window.SPPrintAnim) window.SPPrintAnim(go); else go();
+              done = true; clearTimeout(fail); resolve(true);
+              setTimeout(function () { URL.revokeObjectURL(url); }, 600000);
+            } catch (e) { done = true; clearTimeout(fail); f.remove(); resolve(false); }
+          }, 700);
+        };
+        f.src = url; document.body.appendChild(f);
+      } catch (e) { resolve(false); }
+    });
+  };
 })();

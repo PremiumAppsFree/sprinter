@@ -440,16 +440,21 @@
     info.textContent = pn + ' · ' + (pg.W > pg.H ? 'landscape' : 'portrait') + ' · ' + st.info.per + ' photos fit per sheet' + (st.info.rotated ? ' (' + st.info.rotated + ' turned to use spare space)' : '') + ' · ' + total + ' in total · ' + st.pages.length + (st.pages.length > 1 ? ' sheets' : ' sheet');
   }
   async function renderAll() {
-    var out = [], d = dpi();
+    var out = [], d = (window.SPExportDpi && SPExportDpi()) || dpi();
     for (var i = 0; i < st.pages.length; i++) {
       busy(true, 'Preparing sheet ' + (i + 1) + ' of ' + st.pages.length + '…'); await new Promise(function (r) { setTimeout(r, 0); });
-      var c = drawPage(st.pages[i], d); if (window.SPPaper) SPPaper.tune(c); out.push({ W: st.pages[i].W, H: st.pages[i].H, url: c.toDataURL('image/jpeg', 0.98) }); c.width = c.height = 1;
+      var dd = window.SPSafeDpi ? SPSafeDpi(st.pages[i].W, st.pages[i].H, d) : d;
+      var c; try { c = drawPage(st.pages[i], dd); if (!c.width || c.toDataURL('image/jpeg', 0.1).length < 100) throw 0; } catch (e) { c = drawPage(st.pages[i], Math.min(300, dd)); }
+      if (window.SPPaper) SPPaper.tune(c); out.push({ W: st.pages[i].W, H: st.pages[i].H, url: c.toDataURL('image/jpeg', 0.98) }); c.width = c.height = 1;
     }
     busy(false); return out;
   }
   function saveFile(name, url) { var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 800); }
   function base() { return 'SPrinter-Passport-' + fmt(st.size.w, $('pp-unit').value) + 'x' + fmt(st.size.h, $('pp-unit').value) + $('pp-unit').value; }
   async function doPrint() {
+    if (!window.SPIsMobile && window.SPPrintPdf && st.pages.length) {
+      try { var vb = await originalPdf(); busy(false); if (await window.SPPrintPdf(vb)) return; } catch (e) { busy(false); }
+    }
     var out = await renderAll(); if (!out.length) return;
     var root = $('cp-print-root'); root.innerHTML = '';
     var W = out[0].W, H = out[0].H, style = $('cp-print-style') || document.createElement('style'); style.id = 'cp-print-style';
