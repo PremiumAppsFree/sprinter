@@ -373,7 +373,7 @@
       try {
         busy(true, 'Preparing the signature box…');
         var plain = (usedPw || sig.encrypted) ? await decryptPdf(data, usedPw) : data.slice();
-        look = await adobeLook(plain, sig.status === 'valid');
+        look = await adobeLook(plain, sig.signatures);
         if (look) { var pdf2 = await lib.getDocument({ data: look.slice() }).promise; pdf = pdf2; }
       } catch (e) { look = null; try { console.warn('signature look', e); } catch (_) {} }
     }
@@ -412,7 +412,7 @@
   // Adobe keeps n2 untouched and, for a valid signature, shows a green tick in n1 and "Signature valid" in n4.
   // Here the same layers are swapped and the box is drawn into the page, so preview, print and PDF match Adobe.
   var ADOBE_TICK = 'q 0 0 0 rg 10 48 m 23 61 l 42 42 l 81 90 l 94 77 l 42 16 l h f 0.13 0.62 0.29 rg 8 50 m 21 63 l 40 44 l 79 92 l 92 79 l 40 18 l h f Q\n';
-  async function adobeLook(bytes, valid) {
+  async function adobeLook(bytes, sigList) {
     var PL = window.PDFLib, d = await PL.PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: false });
     var ctx = d.context, N = function (k) { return PL.PDFName.of(k); }, done = 0, helv = null;
     var num = function (o) { o = ctx.lookup(o); return o && o.asNumber ? o.asNumber() : (o && o.numberValue != null ? o.numberValue : +o); };
@@ -429,11 +429,19 @@
         var ap = a.lookup(N('AP')), nref = ap && ap.get(N('N')), apN = nref && ctx.lookup(nref);
         if (!apN || !apN.dict) continue;
         var flags = num(a.get(N('F')) || 0) | 0;
+        // which signature is this box for? (each one is judged on its own, like Adobe)
+        var par = a.lookup(N('Parent')), vd = a.lookup(N('V')) || (par && par.lookup(N('V'))), br = vd && vd.get ? arr(vd.get(N('ByteRange'))) : null;
+        var me = br && (sigList || []).find(function (r) { return r.byteRange && r.byteRange.join(',') === br.join(','); });
+        if (!me && (sigList || []).length === 1) me = sigList[0];
+        var tName = a.lookup(N('T')) || (par && par.lookup(N('T')));
+        if (me) { try { me.field = tName && tName.decodeText ? tName.decodeText() : (tName ? String(tName.value || tName) : ''); me.page = d.getPages().indexOf(page) + 1; } catch (e) {} }
+        var valid = !!(me && me.status === 'valid');
         if (valid) {
           var res = apN.dict.lookup(N('Resources')), xo = res && res.lookup(N('XObject')), frm = xo && xo.lookup(N('FRM'));
           var fres = frm && frm.dict && frm.dict.lookup(N('Resources')), lx = fres && fres.lookup(N('XObject'));
           if (lx && lx.get(N('n1'))) {
             setXo(lx, 'n1', form(ADOBE_TICK, [0, 0, 100, 100]));
+            if (me) me.tick = true;
             if (lx.get(N('n3'))) setXo(lx, 'n3', form('% DSBlank\n', [0, 0, 100, 100]));
             var n4 = lx.lookup(N('n4'));
             if (n4 && n4.dict) {

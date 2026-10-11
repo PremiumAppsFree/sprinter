@@ -404,6 +404,11 @@
     var chain = await buildChain(cert, cms.certs, when);
     r.chain = chain.chain.map(function (c) { return { name: nameOf(c), org: attr(c, 'O'), from: c.validity.notBefore, to: c.validity.notAfter }; });
     r.root = chain.root ? nameOf(chain.root) : '';
+    // extra details shown in the Adobe-style signature panel
+    try { r.tsa = !!(s.unsignedAttrs && attrsMap(s.unsignedAttrs)[OID.tsToken]); } catch (e) { r.tsa = false; }
+    r.serial = cert.serialNumber; r.certFrom = cert.validity.notBefore; r.certTo = cert.validity.notAfter;
+    r.email = attr(cert, 'E') || ''; r.hash = alg.toUpperCase().replace('SHA', 'SHA-'); r.subFilter = sig.subFilter;
+    r.expiredAtSigning = !within(cert, when); r.chainOk = chain.ok;
 
     if (!contentOk) r.problems.push('The document was changed after it was signed (its content does not match the signature).');
     if (!sigOk) r.problems.push('The signature itself is not correct for the signer certificate.');
@@ -581,34 +586,73 @@
 
   // ---------- result card (HTML) ----------
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  function describe(result, fileName) {
-    var st = result.status, sig = (result.signatures || [])[0] || {};
-    var head = {
-      valid: ['ok', '✓', 'Digital signature valid', 'The document has not been changed since it was signed. The green tick is added to the signature box for printing.'],
-      modified: ['bad', '?', 'Signature NOT valid — document edited', 'This file was changed after it was signed, so the tick is not added. Download a fresh copy from the official site.'],
-      'changed-after': ['bad', '?', 'Changed after signing', 'Something was added to this PDF after it was signed, so the tick is not added.'],
-      untrusted: ['warn', '?', 'Signature not verified', 'The content is intact, but the signer certificate does not lead to an official India PKI root (or was not valid at signing time).'],
-      unsigned: ['none', '–', 'No digital signature', 'This PDF has no digital signature, so there is nothing to verify.'],
-      'unsigned-official': ['bad', '?', 'This copy has lost its digital signature', 'An e-Aadhaar / e-PAN downloaded from the official site is always digitally signed. This file was saved again by another app or website (for example a "remove password" / unlock tool, a PDF editor or "Print to PDF"), which deletes the signature. Download a fresh copy from the official site and open that original file here, with its password.'],
-      stripped: ['bad', '?', 'Signature removed', 'The signature box is there, but the signature data was removed when this file was saved again by another app. The tick cannot be added — open the original downloaded file.'],
-      error: ['warn', '?', 'Could not check the signature', 'The signature in this file could not be read.']
-    }[st] || ['warn', '?', 'Could not check', ''];
-    var h = '<div class="sp-dsig sp-dsig-' + head[0] + '" role="status"><div class="sp-dsig-ic" aria-hidden="true">' + head[1] + '</div><div class="sp-dsig-tx"><b>' + head[2] + '</b><span>' + esc(head[3]) + '</span>';
-    if (sig.signer) {
-      h += '<details><summary>Details</summary><dl>';
-      h += '<dt>Signed by</dt><dd>' + esc(sig.signer) + (sig.org && sig.org !== sig.signer ? ' · ' + esc(sig.org) : '') + '</dd>';
-      if (sig.time) h += '<dt>Signed on</dt><dd>' + esc(fmtDate(sig.time)) + '</dd>';
-      if (result.verifiedAt) h += '<dt>Verified on</dt><dd>' + esc(fmtDate(result.verifiedAt)) + '</dd>';
-      if (sig.reason) h += '<dt>Reason</dt><dd>' + esc(sig.reason) + '</dd>';
-      if (sig.location) h += '<dt>Location</dt><dd>' + esc(sig.location) + '</dd>';
-      if (sig.chain && sig.chain.length) h += '<dt>Certificate chain</dt><dd>' + sig.chain.map(function (c) { return esc(c.name); }).join(' → ') + '</dd>';
-      h += '<dt>Trusted root</dt><dd>' + (sig.root ? esc(sig.root) + ' (India PKI)' : 'Not found') + '</dd>';
-      if (sig.problems && sig.problems.length) h += '<dt>Problems</dt><dd>' + sig.problems.map(esc).join('<br>') + '</dd>';
-      if (result.signatures.length > 1) h += '<dt>Signatures</dt><dd>' + result.signatures.length + '</dd>';
-      h += '<dt>Note</dt><dd>Checked offline in your browser. Certificate revocation (CRL/OCSP) is not checked.</dd>';
-      h += '</dl></details>';
+  // ---------- Adobe-style signature panel (HTML) ----------
+  var IC = {
+    ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#1a9e4b"/><path d="M6.8 12.4l3.3 3.3 7-7.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    bad: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#d92d20"/><path d="M8.3 8.3l7.4 7.4M15.7 8.3l-7.4 7.4" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 2.9a2 2 0 0 1 3.4 0l9 15.6A2 2 0 0 1 21 21.5H3a2 2 0 0 1-1.7-3z" fill="#f5b300"/><path d="M12 8.5v5.5M12 17.4h.01" stroke="#1B2330" stroke-width="2.4" stroke-linecap="round"/></svg>',
+    none: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#8a96a6"/><path d="M7.5 12h9" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>',
+    pen: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.6L15.7 4.9a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8z" fill="url(#spIcoG)"/><path d="M3 21.5h8" stroke="#1B2330" stroke-width="1.6" stroke-linecap="round"/></svg>'
+  };
+  var KIND = { valid: 'ok', modified: 'bad', 'changed-after': 'bad', untrusted: 'warn', error: 'warn' };
+  function sigTitle(r) {
+    return { valid: 'Signature is valid', modified: 'Signature is INVALID', 'changed-after': 'Signature is invalid — the document was changed after signing', untrusted: 'Signature validity is UNKNOWN', error: 'Signature could not be validated' }[r.status] || 'Signature status unknown';
+  }
+  function sigFacts(r) {
+    var f = [];
+    if (r.status === 'modified') f.push(['bad', 'The document has been altered or corrupted since the signature was applied.']);
+    else if (r.status === 'error') f.push(['warn', 'The signature data could not be read.']);
+    else if (!r.wholeFile && !r.laterSigned) f.push(['bad', 'The document has been changed (more was added) after this signature was applied.']);
+    else f.push(['ok', 'The document has not been modified since this signature was applied.']);
+    if (r.status !== 'error' && r.status !== 'modified') {
+      if (r.root && r.chainOk) f.push(['ok', 'The signer\u2019s identity is valid (certificate chain leads to ' + r.root + ', India PKI).']);
+      else if (r.root && r.expiredAtSigning) f.push(['warn', 'The signer\u2019s certificate had expired (or was not yet valid) at the signing time.']);
+      else if (r.root) f.push(['warn', 'A certificate in the chain was not valid at the signing time.']);
+      else f.push(['warn', 'The signer\u2019s identity is unknown: the certificate does not lead to a trusted India PKI (CCA India) root.']);
     }
-    if (!sig.signer && result.producer && /unsigned|stripped/.test(st)) h += '<small class="sp-dsig-prod">This file was last saved with: ' + esc(result.producer) + '</small>';
+    if (r.status !== 'error' && r.expiredAtSigning && !r.root) f.push(['warn', 'The signer\u2019s certificate was not valid at the signing time (valid ' + fmtShort(r.certFrom) + ' to ' + fmtShort(r.certTo) + ').']);
+    if (r.time) f.push(['none', r.tsa ? 'The signature includes an embedded timestamp.' : 'Signing time is from the clock on the signer\u2019s computer.']);
+    if (r.time) f.push(['none', 'Signature was validated as of the signing time: ' + fmtDate(r.time)]);
+    return f;
+  }
+  function fmtShort(d) { return d ? fmtDate(d).replace(/ \d\d:\d\d:\d\d IST$/, '') : ''; }
+  function describe(result, fileName) {
+    var st = result.status, list = result.signatures || [];
+    var banner = {
+      valid: ['ok', 'Signed and all signatures are valid.', 'The document has not been changed since it was signed.' + (list.some(function (r) { return r.tick; }) ? ' The signature box shows the green tick and "Signature valid", exactly as Adobe Reader shows it.' : ' The signature box is printed exactly as it is in the document (this one has no status icon, so Adobe Reader shows it unchanged too).')],
+      modified: ['bad', 'At least one signature is invalid.', 'This file was changed after it was signed. Download a fresh copy from the official site.'],
+      'changed-after': ['bad', 'At least one signature has problems.', 'Something was added to this PDF after it was signed.'],
+      untrusted: ['warn', 'At least one signature requires validating.', 'The content is intact, but the signer\u2019s identity could not be confirmed (certificate chain or validity).'],
+      unsigned: ['none', 'This document is not digitally signed.', 'There is no digital signature in this PDF, so there is nothing to validate.'],
+      'unsigned-official': ['bad', 'This copy has lost its digital signature.', 'An e-Aadhaar / e-PAN downloaded from the official site is always digitally signed. This file was saved again by another app or website (an unlock tool, a PDF editor or "Print to PDF"), which deletes the signature. Open the original downloaded file here, with its password.'],
+      stripped: ['bad', 'The signature data was removed.', 'The signature box is there, but its data was damaged when this file was saved again by another app. Open the original downloaded file.'],
+      error: ['warn', 'The signature could not be validated.', 'The signature in this file could not be read.']
+    }[st] || ['warn', 'Signature status unknown.', ''];
+    var h = '<div class="sp-dsig sp-dsig-' + banner[0] + '" role="status"><div class="sp-dsig-ic" aria-hidden="true">' + IC[banner[0]] + '</div><div class="sp-dsig-tx"><b>' + esc(banner[1]) + '</b><span>' + esc(banner[2]) + '</span>';
+    if (list.length) {
+      h += '<div class="sp-sigpanel"><div class="sp-sp-head">' + IC.pen + '<b>Signature Panel</b><small>' + list.length + (list.length > 1 ? ' signatures' : ' signature') + ' · checked ' + esc(fmtDate(result.verifiedAt || new Date())) + '</small></div>';
+      list.slice().sort(function (a, b) { return (a.byteRange[2] + a.byteRange[3]) - (b.byteRange[2] + b.byteRange[3]); }).forEach(function (r, i) {
+        var k = KIND[r.status] || 'warn';
+        h += '<details class="sp-sp-item sp-sp-' + k + '"' + (list.length === 1 ? ' open' : '') + '><summary><span class="sp-sp-ic">' + IC[k] + '</span><span class="sp-sp-sum"><em>Rev. ' + (i + 1) + ':</em> Signed by <b>' + esc(r.signer || 'unknown signer') + '</b>' + (r.email ? ' &lt;' + esc(r.email) + '&gt;' : '') + '</span></summary>';
+        h += '<div class="sp-sp-body"><p class="sp-sp-title">' + esc(sigTitle(r)) + (r.signer ? ', signed by ' + esc(r.signer) : '') + (r.time ? ' on ' + esc(fmtDate(r.time)) : '') + '.</p><ul>';
+        sigFacts(r).forEach(function (f) { h += '<li class="sp-f-' + f[0] + '">' + esc(f[1]) + '</li>'; });
+        h += '</ul><dl class="sp-sp-dl">';
+        if (r.reason) h += '<dt>Reason</dt><dd>' + esc(r.reason) + '</dd>';
+        if (r.location) h += '<dt>Location</dt><dd>' + esc(r.location) + '</dd>';
+        if (r.field) h += '<dt>Field</dt><dd>' + esc(r.field) + (r.page ? ' on page ' + r.page : '') + '</dd>';
+        if (r.time) h += '<dt>Signing time</dt><dd>' + esc(fmtDate(r.time)) + '</dd>';
+        if (r.org && r.org !== r.signer) h += '<dt>Organisation</dt><dd>' + esc(r.org) + '</dd>';
+        if (r.issuer) h += '<dt>Issued by</dt><dd>' + esc(r.issuer) + '</dd>';
+        if (r.certFrom) h += '<dt>Certificate valid</dt><dd>' + esc(fmtShort(r.certFrom)) + ' to ' + esc(fmtShort(r.certTo)) + '</dd>';
+        if (r.serial) h += '<dt>Serial number</dt><dd class="sp-mono">' + esc(r.serial) + '</dd>';
+        if (r.hash) h += '<dt>Algorithm</dt><dd>' + esc(r.hash) + (r.subFilter ? ' · ' + esc(r.subFilter) : '') + '</dd>';
+        if (r.chain && r.chain.length) h += '<dt>Certificate chain</dt><dd><ol class="sp-chain">' + r.chain.slice().reverse().map(function (c) { return '<li>' + esc(c.name) + (c.to ? ' <small>(till ' + esc(fmtShort(c.to)) + ')</small>' : '') + '</li>'; }).join('') + '</ol></dd>';
+        if (r.problems && r.problems.length && r.status !== 'valid') h += '<dt>Problems</dt><dd>' + r.problems.map(esc).join('<br>') + '</dd>';
+        h += '</dl></div></details>';
+      });
+      h += '<p class="sp-sp-note">Checked offline in this browser against the CCA India roots. Revocation (CRL / OCSP) is not checked.</p></div>';
+    }
+    if (!list.length && result.producer && /unsigned|stripped/.test(st)) h += '<small class="sp-dsig-prod">This file was last saved with: ' + esc(result.producer) + '</small>';
     return h + '</div></div>';
   }
 
