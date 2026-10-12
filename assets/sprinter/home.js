@@ -104,3 +104,11 @@
     } else maker.classList.add('in');
   }
 })();
+
+/* cinematic hero: play the printing scene when it comes into view */
+(function () {
+  var sc = document.querySelector('.cine-scene'); if (!sc) return;
+  if (!('IntersectionObserver' in window)) { sc.classList.add('play'); return; }
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { sc.classList.add('play'); io.disconnect(); } }); }, { threshold: 0.35 });
+  io.observe(sc);
+})();
