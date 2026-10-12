@@ -464,15 +464,7 @@
             setXo(lx, 'n1', form(ADOBE_TICK, [0, 0, 100, 100]));
             if (me) me.tick = true;
             // the signer's own text stays — only its date / time is brought up to now (live, with seconds)
-            var n2 = lx.lookup(N('n2'));
-            if (n2 && n2.dict && simpleFonts(n2)) {
-              var c2 = text(n2), c3 = liveDates(c2);
-              if (c3 !== c2) {
-                var ns = ctx.stream(c3, {});
-                n2.dict.entries().forEach(function (e) { var k = e[0].toString(); if (!/^\/(Filter|Length|DecodeParms)$/.test(k)) ns.dict.set(e[0], e[1]); });
-                setXo(lx, 'n2', ns);
-              }
-            }
+
             if (lx.get(N('n3'))) setXo(lx, 'n3', form('% DSBlank\n', [0, 0, 100, 100]));
             var n4 = lx.lookup(N('n4'));
             if (n4 && n4.dict) {
@@ -487,6 +479,22 @@
               setXo(lx, 'n4', st2);
             }
           }
+        }
+        // live date / time in the signer's own text — layered boxes (n2) and plain ones alike
+        if (valid) {
+          var lres = apN.dict.lookup(N('Resources')), lxo = lres && lres.lookup(N('XObject')), lfrm = lxo && lxo.lookup(N('FRM'));
+          var lfres = lfrm && lfrm.dict && lfrm.dict.lookup(N('Resources')), llx = lfres && lfres.lookup(N('XObject'));
+          var targets = [];
+          if (llx && llx.get(N('n2'))) targets.push([llx, 'n2']);
+          else if (lfrm && lfrm.dict) targets.push([lxo, 'FRM']);
+          else targets.push([null, 'AP']);
+          targets.forEach(function (t) {
+            var st0 = t[0] ? t[0].lookup(N(t[1])) : apN; if (!st0 || !st0.dict || !simpleFonts(st0)) return;
+            var c2 = text(st0), c3 = liveDates(c2); if (c3 === c2) return;
+            var ns = ctx.stream(c3, {});
+            st0.dict.entries().forEach(function (e) { var k = e[0].toString(); if (!/^\/(Filter|Length|DecodeParms)$/.test(k)) ns.dict.set(e[0], e[1]); });
+            if (t[0]) setXo(t[0], t[1], ns); else if (nref instanceof PL.PDFRef) { ctx.assign(nref, ns); apN = ns; }
+          });
         }
         // draw the box into the page (like printing from Adobe) and drop the field itself
         if (!(flags & 2)) {
