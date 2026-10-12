@@ -1172,7 +1172,7 @@
   function fileBase() { return 'SPrinter-' + DOC.name.replace(/\s+/g, '') + '-' + st.size; }
 
   async function doPrint(skipChoice) {
-    if (window.SPIsMobile && window.SPMobilePrint && skipChoice !== true) {
+    if (window.SPMobilePrint && skipChoice !== true) {
       window.SPMobilePrint(async function () { try { return await vectorPdf(); } finally { busy(false); } }, function () { doPrint(true); }, fileBase());
       return;
     }

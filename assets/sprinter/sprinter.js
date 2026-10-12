@@ -828,7 +828,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
   document.addEventListener('click', function (e) {
     var b = e.target && e.target.closest && e.target.closest('button,a,[role=button]');
     if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') return;
-    if (window.SPIsMobile && (/^(cp|pp)-print$/.test(b.id) || (b.closest('#sp-mp') && !b.classList.contains('q')))) return;   // phone print chooser opens first
+    if (/^(cp|pp)-print$/.test(b.id) || (b.closest('#sp-mp') && !b.classList.contains('q'))) return;   // the print chooser opens first
     var label = ((b.id || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.textContent || '')).toLowerCase();
     if (/\bprint\b/.test(label) && !/preview|guide|how to|setting|size|layout/.test(label) && !b.closest('nav,header,footer')) show();
   }, true);
@@ -1341,31 +1341,49 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
  * save the real PDF and print it from the phone's PDF viewer (vector text, like Adobe). */
 (function () {
   'use strict';
+  var PREF = 'sp-print-way';
+  // makePdf → the real PDF bytes; quickPrint → print from the browser (PDF on computers, picture on phones)
   window.SPMobilePrint = function (makePdf, quickPrint, name) {
-    var css = '#sp-mp{position:fixed;inset:0;z-index:2147483300;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px;font:15px/1.45 "SP Inter",Inter,system-ui,sans-serif}' +
-      '#sp-mp .b{background:#fff;border-radius:18px;max-width:440px;width:100%;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}#sp-mp h3{margin:0 0 4px;font:800 18px/1.25 "SP Lexend",system-ui,sans-serif;color:#1B2330}' +
-      '#sp-mp p{margin:0 0 14px;color:#5B6676;font-size:13.5px}#sp-mp button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;border:1.5px solid #d5dce6;background:#fff;margin-top:8px;font:inherit;color:#1B2330;cursor:pointer}' +
+    var pc = !window.SPIsMobile, saved = null;
+    try { saved = localStorage.getItem(PREF); } catch (e) {}
+    var savePdf = async function () {
+      var bytes = await makePdf(); if (!bytes) { quickPrint(); return; }
+      var file = new File([bytes], (name || 'SPrinter') + '.pdf', { type: 'application/pdf' });
+      if (!pc && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: file.name }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+      var u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(u); }, 60000);
+      if (pc) tip('PDF saved. Open it (Adobe Reader) and press Ctrl+P — your HP printer’s own window opens; in Properties choose Quality: Best.', saved === 'adobe');
+    };
+    if (pc && saved === 'adobe') { savePdf().catch(function () { quickPrint(); }); return; }
+    if (pc && saved === 'browser') { quickPrint(); tip('Printing from the browser (your saved choice).', true); return; }
+    var css = '#sp-mp{position:fixed;inset:0;z-index:2147483300;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px;font:15px/1.45 "SP Inter",Inter,system-ui,sans-serif}@media(min-width:640px){#sp-mp{align-items:center}}' +
+      '#sp-mp .b{background:#fff;border-radius:18px;max-width:460px;width:100%;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}#sp-mp h3{margin:0 0 4px;font:800 18px/1.25 "SP Lexend",system-ui,sans-serif;color:#1B2330}' +
+      '#sp-mp p{margin:0 0 12px;color:#5B6676;font-size:13.5px}#sp-mp button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;border:1.5px solid #d5dce6;background:#fff;margin-top:8px;font:inherit;color:#1B2330;cursor:pointer}' +
       '#sp-mp button b{display:block;font:700 15px/1.25 "SP Lexend",system-ui,sans-serif}#sp-mp button small{display:block;color:#5B6676;font-size:12.5px;margin-top:2px}#sp-mp .best{border-color:#a5b4fc;background:linear-gradient(120deg,#f5f8ff,#faf5ff)}' +
-      '#sp-mp svg{width:30px;height:30px;flex:none}#sp-mp .x{border:0;background:none;justify-content:center;color:#5B6676;font-weight:600}';
+      '#sp-mp svg{width:30px;height:30px;flex:none}#sp-mp .x{border:0;background:none;justify-content:center;color:#5B6676;font-weight:600}#sp-mp label{display:flex;gap:8px;align-items:center;font-size:13px;color:#5B6676;margin-top:10px}' +
+      '#sp-tip{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483400;background:#1B2330;color:#fff;padding:12px 16px;border-radius:12px;font:600 14px/1.45 system-ui,sans-serif;max-width:min(92vw,560px);box-shadow:0 14px 34px rgba(0,0,0,.3)}';
     if (!document.getElementById('sp-mp-css')) { var st = document.createElement('style'); st.id = 'sp-mp-css'; st.textContent = css; document.head.appendChild(st); }
     var ov = document.createElement('div'); ov.id = 'sp-mp';
-    ov.innerHTML = '<div class="b" role="dialog" aria-modal="true"><h3>Print</h3><p>On a phone the sharpest print comes from the PDF itself — exactly like printing from Adobe.</p>' +
-      '<button type="button" class="best"><svg viewBox="0 0 24 24"><path d="M6 2.5h8l5 5V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4A1.5 1.5 0 0 1 6 2.5z" fill="url(#spIcoG)"/><path d="M14 2.5V7a.6.6 0 0 0 .6.6H19" fill="#fff" opacity=".55"/><path d="M8.5 15.5l2.2 2.2 4.8-5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Best quality — print the PDF</b><small>Saves the PDF; open it, then tap ⋮ (menu) and Print. Sharp text, original photos.</small></span></button>' +
-      '<button type="button" class="q"><svg viewBox="0 0 24 24" fill="none" stroke="url(#spIcoG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg><span><b>Quick print</b><small>Prints straight from this page (high-resolution picture).</small></span></button>' +
+    var bestTxt = pc ? '<b>Best quality — print from Adobe / your printer’s own window</b><small>Saves the PDF. Open it in Adobe Reader and press Ctrl+P: the HP / Canon / Epson printer window opens with its Properties (Quality: Best), exactly like your Adobe prints.</small>'
+                     : '<b>Best quality — print the PDF</b><small>Saves the PDF; open it, then tap ⋮ (menu) and Print. Sharp text, original photos.</small>';
+    var quickTxt = pc ? '<b>Print from the browser</b><small>Sends the same PDF to Chrome’s print window. Tip: press Ctrl+Shift+P there (or “Print using system dialog”) to get your printer’s own window too.</small>'
+                      : '<b>Quick print</b><small>Prints straight from this page (high-resolution picture).</small>';
+    ov.innerHTML = '<div class="b" role="dialog" aria-modal="true"><h3>Print</h3><p>' + (pc ? 'Choose how to print. Both use the original PDF — no quality is lost.' : 'On a phone the sharpest print comes from the PDF itself — exactly like printing from Adobe.') + '</p>' +
+      '<button type="button" class="best"><svg viewBox="0 0 24 24"><path d="M6 2.5h8l5 5V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4A1.5 1.5 0 0 1 6 2.5z" fill="url(#spIcoG)"/><path d="M14 2.5V7a.6.6 0 0 0 .6.6H19" fill="#fff" opacity=".55"/><path d="M8.5 15.5l2.2 2.2 4.8-5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>' + bestTxt + '</span></button>' +
+      '<button type="button" class="q"><svg viewBox="0 0 24 24" fill="none" stroke="url(#spIcoG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg><span>' + quickTxt + '</span></button>' +
+      (pc ? '<label><input type="checkbox" class="rem"> Remember my choice on this computer</label>' : '') +
       '<button type="button" class="x">Cancel</button></div>';
     document.body.appendChild(ov);
     var close = function () { ov.remove(); };
+    var remember = function (v) { var r = ov.querySelector('.rem'); if (r && r.checked) { try { localStorage.setItem(PREF, v); } catch (e) {} } };
     ov.querySelector('.x').onclick = close; ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
-    ov.querySelector('.q').onclick = function () { close(); quickPrint(); };
-    ov.querySelector('.best').onclick = async function () {
-      close();
-      try {
-        var bytes = await makePdf(); if (!bytes) { quickPrint(); return; }
-        var file = new File([bytes], (name || 'SPrinter') + '.pdf', { type: 'application/pdf' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: file.name }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
-        var u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function () { URL.revokeObjectURL(u); }, 60000);
-      } catch (e) { quickPrint(); }
-    };
+    ov.querySelector('.q').onclick = function () { remember('browser'); close(); quickPrint(); };
+    ov.querySelector('.best').onclick = function () { remember('adobe'); close(); savePdf().catch(function () { quickPrint(); }); };
   };
+  window.SPPrintChoiceReset = function () { try { localStorage.removeItem(PREF); } catch (e) {} };
+  function tip(t, change) {
+    var d = document.getElementById('sp-tip'); if (d) d.remove(); d = document.createElement('div'); d.id = 'sp-tip'; d.textContent = t;
+    if (change) { var c = document.createElement('button'); c.type = 'button'; c.textContent = 'Change print method'; c.style.cssText = 'margin-left:10px;background:#fff;color:#1B2330;border:0;border-radius:8px;padding:4px 10px;font:700 13px system-ui,sans-serif;cursor:pointer'; c.onclick = function () { window.SPPrintChoiceReset(); d.remove(); }; d.appendChild(c); }
+    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 12000);
+  }
 })();
