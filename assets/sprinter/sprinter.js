@@ -413,7 +413,8 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
 
   // PDF render cap
   // biggest page picture: keeps the document's own quality (up to ~600 dpi on A4 on computers, ~400 dpi on phones)
-  var SMALLDEV = (window.innerWidth || 1000) < 820 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+  // phones / tablets / low-memory devices get smaller canvases (window width does not matter: a narrow PC window is still a PC)
+  var SMALLDEV = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)) || (navigator.deviceMemory && navigator.deviceMemory < 4);
   window.SPMaxSide = SMALLDEV ? 4800 : 7200;
   // print resolution chosen in Paper & quality (300 / 450 / 600 dpi) — used by every tool, including the photo-print ones
   // classic photo tools build their sheets at this resolution: never below 450 dpi on computers (360 on phones)
@@ -827,6 +828,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
   document.addEventListener('click', function (e) {
     var b = e.target && e.target.closest && e.target.closest('button,a,[role=button]');
     if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') return;
+    if (window.SPIsMobile && (/^(cp|pp)-print$/.test(b.id) || (b.closest('#sp-mp') && !b.classList.contains('q')))) return;   // phone print chooser opens first
     var label = ((b.id || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.textContent || '')).toLowerCase();
     if (/\bprint\b/.test(label) && !/preview|guide|how to|setting|size|layout/.test(label) && !b.closest('nav,header,footer')) show();
   }, true);
@@ -1331,5 +1333,39 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
         f.src = url; document.body.appendChild(f);
       } catch (e) { resolve(false); }
     });
+  };
+})();
+
+
+/* Phones can't print a PDF from a web page, so Print offers the sharp way first:
+ * save the real PDF and print it from the phone's PDF viewer (vector text, like Adobe). */
+(function () {
+  'use strict';
+  window.SPMobilePrint = function (makePdf, quickPrint, name) {
+    var css = '#sp-mp{position:fixed;inset:0;z-index:2147483300;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px;font:15px/1.45 "SP Inter",Inter,system-ui,sans-serif}' +
+      '#sp-mp .b{background:#fff;border-radius:18px;max-width:440px;width:100%;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}#sp-mp h3{margin:0 0 4px;font:800 18px/1.25 "SP Lexend",system-ui,sans-serif;color:#1B2330}' +
+      '#sp-mp p{margin:0 0 14px;color:#5B6676;font-size:13.5px}#sp-mp button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;border:1.5px solid #d5dce6;background:#fff;margin-top:8px;font:inherit;color:#1B2330;cursor:pointer}' +
+      '#sp-mp button b{display:block;font:700 15px/1.25 "SP Lexend",system-ui,sans-serif}#sp-mp button small{display:block;color:#5B6676;font-size:12.5px;margin-top:2px}#sp-mp .best{border-color:#a5b4fc;background:linear-gradient(120deg,#f5f8ff,#faf5ff)}' +
+      '#sp-mp svg{width:30px;height:30px;flex:none}#sp-mp .x{border:0;background:none;justify-content:center;color:#5B6676;font-weight:600}';
+    if (!document.getElementById('sp-mp-css')) { var st = document.createElement('style'); st.id = 'sp-mp-css'; st.textContent = css; document.head.appendChild(st); }
+    var ov = document.createElement('div'); ov.id = 'sp-mp';
+    ov.innerHTML = '<div class="b" role="dialog" aria-modal="true"><h3>Print</h3><p>On a phone the sharpest print comes from the PDF itself — exactly like printing from Adobe.</p>' +
+      '<button type="button" class="best"><svg viewBox="0 0 24 24"><path d="M6 2.5h8l5 5V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4A1.5 1.5 0 0 1 6 2.5z" fill="url(#spIcoG)"/><path d="M14 2.5V7a.6.6 0 0 0 .6.6H19" fill="#fff" opacity=".55"/><path d="M8.5 15.5l2.2 2.2 4.8-5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Best quality — print the PDF</b><small>Saves the PDF; open it, then tap ⋮ (menu) and Print. Sharp text, original photos.</small></span></button>' +
+      '<button type="button" class="q"><svg viewBox="0 0 24 24" fill="none" stroke="url(#spIcoG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg><span><b>Quick print</b><small>Prints straight from this page (high-resolution picture).</small></span></button>' +
+      '<button type="button" class="x">Cancel</button></div>';
+    document.body.appendChild(ov);
+    var close = function () { ov.remove(); };
+    ov.querySelector('.x').onclick = close; ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+    ov.querySelector('.q').onclick = function () { close(); quickPrint(); };
+    ov.querySelector('.best').onclick = async function () {
+      close();
+      try {
+        var bytes = await makePdf(); if (!bytes) { quickPrint(); return; }
+        var file = new File([bytes], (name || 'SPrinter') + '.pdf', { type: 'application/pdf' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: file.name }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+        var u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(u); }, 60000);
+      } catch (e) { quickPrint(); }
+    };
   };
 })();

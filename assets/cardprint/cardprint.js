@@ -1171,7 +1171,11 @@
   }
   function fileBase() { return 'SPrinter-' + DOC.name.replace(/\s+/g, '') + '-' + st.size; }
 
-  async function doPrint() {
+  async function doPrint(skipChoice) {
+    if (window.SPIsMobile && window.SPMobilePrint && skipChoice !== true) {
+      window.SPMobilePrint(async function () { try { return await vectorPdf(); } finally { busy(false); } }, function () { doPrint(true); }, fileBase());
+      return;
+    }
     // computers: print the real PDF (sharp text, original pictures) — like printing from Adobe Reader
     if (!window.SPIsMobile && window.SPPrintPdf) {
       try { var vb = await vectorPdf(); busy(false); if (vb && await window.SPPrintPdf(vb)) return; } catch (e) { busy(false); }

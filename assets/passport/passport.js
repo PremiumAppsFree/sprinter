@@ -451,7 +451,11 @@
   }
   function saveFile(name, url) { var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 800); }
   function base() { return 'SPrinter-Passport-' + fmt(st.size.w, $('pp-unit').value) + 'x' + fmt(st.size.h, $('pp-unit').value) + $('pp-unit').value; }
-  async function doPrint() {
+  async function doPrint(skipChoice) {
+    if (window.SPIsMobile && window.SPMobilePrint && skipChoice !== true && st.pages.length) {
+      window.SPMobilePrint(async function () { try { return await originalPdf(); } finally { busy(false); } }, function () { doPrint(true); }, base());
+      return;
+    }
     if (!window.SPIsMobile && window.SPPrintPdf && st.pages.length) {
       try { var vb = await originalPdf(); busy(false); if (await window.SPPrintPdf(vb)) return; } catch (e) { busy(false); }
     }
