@@ -26,10 +26,11 @@
   function whole(pg) { return [[0, 0], [pg.w, 0], [pg.w, pg.h], [0, pg.h]]; }
 
   // ---------- pages ----------
-  async function addImage(blob, name) {
+  async function addImage(blob, name, o) {
+    o = o || {};
     var img; try { img = await loadImg(blob); } catch (e) { toast('This picture could not be opened (' + (name || 'file') + '). Save it as JPG or PNG.'); return; }
     var d = E.dims(img), pg = { id: ++st.seq, img: img, w: d.w, h: d.h, quad: null, auto: false, rot: 0, name: name || 'scan' };
-    if (st.auto) {
+    if (st.auto && !o.noAuto) {
       await tick();
       var r = null; try { r = E.detect(img); } catch (e) {}
       if (r) { pg.quad = inset(r.quad, 0.004); pg.auto = true; }
@@ -54,7 +55,7 @@
       var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
       await page.render({ canvasContext: x, viewport: vp }).promise;
       var b = await blobOf(c, 'image/png'); c.width = c.height = 1;
-      await addImage(b, file.name.replace(/\.pdf$/i, '') + ' p' + i);
+      await addImage(b, file.name.replace(/\.pdf$/i, '') + ' p' + i, { noAuto: true });
     }
     if (pdf.numPages > n) toast('Only the first ' + n + ' pages were added.');
   }
@@ -257,6 +258,96 @@
     cam = null; $('sc-cam').hidden = true; document.body.classList.remove('sc-noscroll');
   }
 
+  // ---------- scan straight from the printer (Windows helper on 127.0.0.1) ----------
+  var HELPER = 'http://127.0.0.1:47321', pr = { open: false, poll: 0, st: null };
+  var WIN = /Windows/i.test(navigator.userAgent) && !MOBILE;
+  function prefs(v) { try { if (v) localStorage.setItem('sp-scan-pr', JSON.stringify(v)); else return JSON.parse(localStorage.getItem('sp-scan-pr') || '{}'); } catch (e) { return {}; } }
+  async function hFetch(path, opt, ms) {
+    var ctl = window.AbortController ? new AbortController() : null, t = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 2500);
+    try { return await fetch(HELPER + path, Object.assign({ cache: 'no-store', signal: ctl && ctl.signal, targetAddressSpace: 'loopback' }, opt || {})); }
+    finally { clearTimeout(t); }
+  }
+  async function helperStatus() {
+    try { var r = await hFetch('/status'); if (!r.ok) return null; var j = await r.json(); return j && j.app === 'sprinter-scan' ? j : null; } catch (e) { return null; }
+  }
+  function prShow(which) { ['setup', 'nowin', 'ready', 'busy'].forEach(function (k) { $('sc-pr-' + k).hidden = k !== which; }); }
+  function prMsg(t, err) { var m = $('sc-pr-msg'); if (!t) { m.hidden = true; return; } m.hidden = false; m.className = 'sc-pr-msg' + (err ? ' err' : ''); m.textContent = t; }
+  function prFill(j) {
+    pr.st = j; $('sc-pr-dot').hidden = false;
+    var sel = $('sc-pr-dev'), keep = sel.value || prefs().dev;
+    sel.innerHTML = '';
+    (j.scanners || []).forEach(function (d) { var o = document.createElement('option'); o.value = d.id; o.textContent = d.name || 'Scanner'; sel.appendChild(o); });
+    if (keep && [].some.call(sel.options, function (o) { return o.value === keep; })) sel.value = keep;
+    $('sc-pr-startup').checked = !!j.startup;
+    var none = !(j.scanners || []).length;
+    $('sc-pr-go').disabled = none;
+    if (j.error) prMsg(j.error, true);
+    else if (none) prMsg('No scanner found. Turn the printer on and make sure it shows in Windows Settings → Bluetooth & devices → Printers & scanners. This list updates by itself.', true);
+    else if (!$('sc-pr-msg').dataset.keep) prMsg('');
+  }
+  async function prTick() {
+    if (!pr.open) return;
+    if ($('sc-pr-busy').hidden) {
+      var j = await helperStatus();
+      if (!pr.open) return;
+      if (j) { if ($('sc-pr-ready').hidden) prShow('ready'); prFill(j); }
+      else { $('sc-pr-dot').hidden = true; if (WIN) prShow('setup'); else prShow('nowin'); }
+    }
+    pr.poll = setTimeout(prTick, pr.st ? 4000 : 1500);
+  }
+  function openPrinter() {
+    pr.open = true; $('sc-pr').hidden = false; prMsg(''); $('sc-pr-msg').dataset.keep = '';
+    var p = prefs();
+    if (p.dpi) seg2('sc-pr-dpi', p.dpi); if (p.mode) seg2('sc-pr-mode', p.mode); if (p.src) seg2('sc-pr-src', p.src);
+    prShow(WIN ? 'setup' : 'nowin');
+    clearTimeout(pr.poll); prTick();
+  }
+  function closePrinter() { pr.open = false; clearTimeout(pr.poll); $('sc-pr').hidden = true; }
+  function seg2(id, v) { [].forEach.call(document.querySelectorAll('#' + id + ' [data-v]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === String(v))); }); }
+  function segVal(id) { var b = document.querySelector('#' + id + ' [aria-pressed=true]'); return b ? b.getAttribute('data-v') : ''; }
+  async function prScan() {
+    var dev = $('sc-pr-dev').value, dpi = segVal('sc-pr-dpi') || '300', mode = segVal('sc-pr-mode') || 'color', src = segVal('sc-pr-src') || 'flatbed';
+    prefs({ dev: dev, dpi: dpi, mode: mode, src: src });
+    prMsg(''); prShow('busy');
+    try {
+      var r = await hFetch('/scan?id=' + encodeURIComponent(dev) + '&dpi=' + dpi + '&mode=' + mode + '&source=' + src, {}, 240000);
+      var j = await r.json();
+      if (!r.ok || !j.ok) throw new Error(j.error || 'The scan did not work.');
+      var n = 0;
+      for (var i = 0; i < j.pages.length; i++) {
+        var pr2 = await hFetch('/page?t=' + encodeURIComponent(j.pages[i]), {}, 60000);
+        if (!pr2.ok) continue;
+        var blob = await pr2.blob();
+        busy(true, 'Finding the page edges…');
+        await addImage(blob, 'scan ' + (st.pages.length + 1));
+        busy(false); n++;
+      }
+      prShow('ready');
+      $('sc-pr-msg').dataset.keep = '1';
+      prMsg(n ? (n === 1 ? 'Page added ✓  Put the next page on the scanner and press Scan again, or press Done.' : n + ' pages added ✓') : 'Nothing came back from the scanner. Try again.', !n);
+      setTimeout(function () { $('sc-pr-msg').dataset.keep = ''; }, 8000);
+    } catch (e) {
+      busy(false); prShow('ready');
+      var m = e && e.name === 'AbortError' ? 'The scanner took too long. Check it and try again.' : (e && e.message) || 'The scan did not work.';
+      if (/Failed to fetch|NetworkError|Load failed/i.test(m)) m = 'The scanner helper stopped. Open SPrinter-Scanner again.';
+      $('sc-pr-msg').dataset.keep = '1'; prMsg(m, true); setTimeout(function () { $('sc-pr-msg').dataset.keep = ''; }, 8000);
+    }
+  }
+  function prInit() {
+    $('sc-open-pr').onclick = openPrinter;
+    $('sc-pr-x').onclick = closePrinter; $('sc-pr-done').onclick = closePrinter;
+    $('sc-pr').addEventListener('click', function (e) { if (e.target === $('sc-pr') && $('sc-pr-busy').hidden) closePrinter(); });
+    ['sc-pr-dpi', 'sc-pr-mode', 'sc-pr-src'].forEach(function (id) { [].forEach.call(document.querySelectorAll('#' + id + ' [data-v]'), function (b) { b.onclick = function () { seg2(id, b.getAttribute('data-v')); }; }); });
+    $('sc-pr-go').onclick = prScan;
+    $('sc-pr-startup').addEventListener('change', async function () {
+      var on = this.checked;
+      try { var r = await hFetch('/startup?on=' + (on ? '1' : '0'), { method: 'POST' }, 8000); var j = await r.json(); this.checked = !!j.startup; toast(j.startup ? 'The helper will start with Windows.' : 'The helper will no longer start with Windows.'); }
+      catch (e) { this.checked = !on; toast('Could not change that setting.'); }
+    });
+    // show "Connected" on the button when the helper is already running
+    if (WIN) helperStatus().then(function (j) { if (j) $('sc-pr-dot').hidden = false; });
+  }
+
   // ---------- output ----------
   var PAPER = { a4: [595.28, 841.89], letter: [612, 792] };
   // encode a page; with a size limit, quality first goes down a little, then the resolution
@@ -368,6 +459,7 @@
     $('sc-file').addEventListener('change', function (e) { addFiles(e.target.files); e.target.value = ''; });
     $('sc-capture').addEventListener('change', function (e) { addFiles(e.target.files); e.target.value = ''; });
     $('sc-open-cam').onclick = openCamera;
+    prInit();
     $('sc-shot').onclick = shoot; $('sc-cam-done').onclick = closeCamera; $('sc-cam-x').onclick = closeCamera;
     $('sc-torch').onclick = function () { if (!cam || !cam.track) return; cam.torch = !cam.torch; cam.track.applyConstraints({ advanced: [{ torch: cam.torch }] }).catch(function () {}); this.setAttribute('aria-pressed', String(cam.torch)); };
     var drop = $('sc-drop');
@@ -383,7 +475,7 @@
     $('sc-pdf').onclick = doPdf; $('sc-jpg').onclick = doJpg; $('sc-print').onclick = function () { doPrint(); };
     $('sc-clear').onclick = function () { st.pages = []; render(); $('sc-result').hidden = true; };
     cropEvents(); render();
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (cr) closeCrop(); else if (cam) closeCamera(); } });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (cr) closeCrop(); else if (cam) closeCamera(); else if (pr.open && $('sc-pr-busy').hidden) closePrinter(); } });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.SPScan = { st: st, addFiles: addFiles };

@@ -151,8 +151,9 @@
     }
     return out;
   }
-  function candidate(mask, w, h) {
-    var comp = largest(mask, w, h, false); if (comp.area < w * h * 0.08) return null;
+  function candidate(mask, w, h, minFrac) {
+    minFrac = minFrac || 0.1;
+    var comp = largest(mask, w, h, false); if (comp.area < w * h * minFrac * 0.8) return null;
     var filled = fillHoles(comp.mask, w, h), area = 0, pts = [];
     for (var y = 0; y < h; y++) {
       var l = -1, r = -1; for (var x = 0; x < w; x++) if (filled[y * w + x]) { area++; if (l < 0) l = x; r = x; }
@@ -162,7 +163,7 @@
     q = order(q);
     q = order(refine(q, filled, w, h));
     var qa = polyArea(q), frac = qa / (w * h), fit = Math.min(area, qa) / Math.max(area, qa);
-    if (frac < 0.1 || fit < 0.8) return null;
+    if (frac < minFrac || fit < 0.8) return null;
     // convex & sensible angles only
     for (var i = 0; i < 4; i++) {
       var a = q[(i + 3) % 4], b = q[i], c = q[(i + 1) % 4];
@@ -173,6 +174,61 @@
     return { q: q, frac: frac, fit: fit, score: fit * (frac > 0.97 ? 0.6 : 1) * (0.6 + 0.4 * Math.min(1, frac / 0.35)) };
   }
 
+  function onLid(px, w, h, hi) {
+    var n = w * h, i, L = new Float32Array(n), SAT = new Float32Array(n);
+    for (i = 0; i < n; i++) { var r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2]; L[i] = 0.299 * r + 0.587 * g + 0.114 * b; SAT[i] = Math.max(r, g, b) - Math.min(r, g, b); }
+    var Lb = boxBlur(L, w, h, 1), Sb = boxBlur(SAT, w, h, 1);
+    // lid brightness = median of the border
+    var bord = []; for (i = 0; i < w; i++) { bord.push(Lb[i], Lb[(h - 1) * w + i]); } for (i = 0; i < h; i++) { bord.push(Lb[i * w], Lb[i * w + w - 1]); }
+    bord.sort(function (a, b) { return a - b; }); var lidL = bord[bord.length >> 1];
+    var raw = new Uint8Array(n); for (i = 0; i < n; i++) raw[i] = (Lb[i] < lidL - 22 || Sb[i] > 38) ? 1 : 0;
+    var cands = [];
+    var closed = fillHoles(erode(dilate(raw, w, h, 2), w, h, 2), w, h);
+    var a = candidate(closed, w, h, 0.02); if (a) cands.push(a);
+    // thin outline of a white card (its shadow line on the glass)
+    var mag = new Float32Array(n);
+    for (var y = 1; y < h - 1; y++) for (var x = 1; x < w - 1; x++) { var p = y * w + x; mag[p] = Math.abs(Lb[p + 1] - Lb[p - 1]) + Math.abs(Lb[p + w] - Lb[p - w]); }
+    var e = new Uint8Array(n); for (i = 0; i < n; i++) e[i] = mag[i] > 5 ? 1 : 0;
+    var b2 = candidate(fillHoles(dilate(e, w, h, 1), w, h), w, h, 0.02); if (b2) { b2.edge = 1; cands.push(b2); }
+    if (a) a.edge = 0;
+
+    cands = cands.filter(function (c) {
+      if (c.frac > 0.85 || c.fit < 0.88) return false;                // nearly the whole glass: keep it whole
+      var sz = outSize(c.q), asp = Math.min(sz.w, sz.h) / Math.max(sz.w, sz.h);
+      if (asp < 0.22) return false;                                    // a line of text, not an object
+      // a card / photo is mostly "ink" inside; a block of text is mostly white paper
+      var inside = 0, ink = 0, q = c.q, mx = (q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4, my = (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4;
+      var side = function (k, X, Y) { var A = q[k], B = q[(k + 1) % 4]; return (B[0] - A[0]) * (Y - A[1]) - (B[1] - A[1]) * (X - A[0]); };
+      var sg = [0, 1, 2, 3].map(function (k) { return side(k, mx, my) > 0; });
+      for (var yy = 0; yy < h; yy += 2) for (var xx = 0; xx < w; xx += 2) {
+        var inq = true; for (var k = 0; k < 4 && inq; k++) { if ((side(k, xx, yy) > 0) !== sg[k]) inq = false; }
+        if (inq) { inside++; if (raw[yy * w + xx]) ink++; }
+      }
+      c.ink = inside ? ink / inside : 0;
+      if (!(c.ink > 0.4 || (c.ink > 0.12 && c.fit > 0.95 && c.frac > 0.03))) return false;
+      // a real card / photo has an unbroken edge on every side; a block of text has gaps between its lines
+      var worst = 1;
+      for (var sd = 0; sd < 4; sd++) {
+        var P = q[sd], Q = q[(sd + 1) % 4], dx = Q[0] - P[0], dy = Q[1] - P[1], LL = Math.hypot(dx, dy) || 1, nx = -dy / LL, ny = dx / LL, hit = 0, tot = 0;
+        for (var t = 0.08; t <= 0.92; t += 0.84 / 80) {
+          var px0 = P[0] + dx * t, py0 = P[1] + dy * t, got = false;
+          for (var o = -3; o <= 3 && !got; o += 0.5) {
+            var X = Math.round((px0 + nx * o) * hi.k), Y = Math.round((py0 + ny * o) * hi.k); if (X < 1 || Y < 1 || X >= hi.w - 1 || Y >= hi.h - 1) continue;
+            var pp = (Y * hi.w + X) * 4, rr = hi.px[pp], gg2 = hi.px[pp + 1], bb2 = hi.px[pp + 2], LL2 = 0.299 * rr + 0.587 * gg2 + 0.114 * bb2;
+            if (LL2 < lidL - 6 || Math.max(rr, gg2, bb2) - Math.min(rr, gg2, bb2) > 38) got = true;
+          }
+          tot++; if (got) hit++;
+        }
+        worst = Math.min(worst, tot ? hit / tot : 0);
+      }
+      c.edgeRun = worst;
+      return worst >= 0.9;
+    });
+    if (!cands.length) return null;
+    cands.sort(function (x1, x2) { return x2.score - x1.score; });
+    return cands[0];
+  }
+
   // ---------- 1) find the paper ----------
   function detect(img, maxSide, fast) {
     var d = dims(img); if (!d.w || !d.h) return null;
@@ -181,7 +237,17 @@
     var px = x.getImageData(0, 0, w, h).data, n = w * h, i;
     // a white page on a white scanner lid (or a full-page PDF): nothing to cut away
     var bs = 0, bc = 0; for (i = 0; i < w; i++) { bs += px[i * 4 + 1] + px[((h - 1) * w + i) * 4 + 1]; bc += 2; } for (i = 0; i < h; i++) { bs += px[(i * w) * 4 + 1] + px[(i * w + w - 1) * 4 + 1]; bc += 2; }
-    if (bs / bc > 222) return null;
+    var lid = bs / bc > 222;
+    if (lid) {
+      // flatbed scan: the white lid is the background — look for a card / photo / receipt lying on it
+      // a sharper copy, so gaps between lines of text are still visible for the edge check
+      var HS = Math.min(1, 1500 / Math.max(d.w, d.h)), hw = Math.round(d.w * HS), hh = Math.round(d.h * HS), hc = cnv(hw, hh), hx = hc.getContext('2d', { willReadFrequently: true });
+      hx.drawImage(img, 0, 0, hw, hh); var hp = hx.getImageData(0, 0, hw, hh).data; hc.width = hc.height = 1;
+      var r0 = onLid(px, w, h, { px: hp, w: hw, h: hh, k: hw / w }); if (!r0) return null;
+      var kk = 1 / S, qd = r0.q.map(function (p) { return [p[0] * kk, p[1] * kk]; });
+      if (!fast) { try { qd = sharpen(img, qd) || qd; } catch (er) {} }
+      return { quad: qd, how: 'lid', confidence: Math.round(r0.score * 100) };
+    }
     var g = boxBlur(grayOf(px, n), w, h, 2);
     // colour difference matters too (white paper on a beige / grey table)
     var sat = new Float32Array(n); for (i = 0; i < n; i++) { var r = px[i * 4], gg = px[i * 4 + 1], b = px[i * 4 + 2]; sat[i] = Math.max(r, gg, b) - Math.min(r, gg, b); }
