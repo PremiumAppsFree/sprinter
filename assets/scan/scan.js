@@ -216,8 +216,13 @@
     var m = $('sc-cam'); m.hidden = false; document.body.classList.add('sc-noscroll');
     $('sc-cam-n').textContent = '0'; cam = { n: 0, stop: false };
     try {
-      cam.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 4096 }, height: { ideal: 3072 } } });
+      try { cam.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 4096 }, height: { ideal: 3072 } } }); }
+      catch (e1) {
+        if (e1 && (e1.name === 'NotAllowedError' || e1.name === 'SecurityError')) throw e1;
+        cam.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: 'environment' } });   // simpler request for picky phones
+      }
     } catch (e) {
+      if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) { closeCamera(); toast('Camera permission is off. Allow the camera for this site in the browser settings, or use “Take photo”.'); return; }
       closeCamera(); toast('The camera could not be opened. Allow camera access, or use “Take photo”.'); return;
     }
     var v = $('sc-video'); v.srcObject = cam.stream; try { await v.play(); } catch (e) {}
@@ -270,13 +275,21 @@
   async function helperStatus() {
     try { var r = await hFetch('/status'); if (!r.ok) return null; var j = await r.json(); return j && j.app === 'sprinter-scan' ? j : null; } catch (e) { return null; }
   }
-  function prShow(which) { ['setup', 'nowin', 'ready', 'busy'].forEach(function (k) { $('sc-pr-' + k).hidden = k !== which; }); }
+  var NEED = '1.1';
+  function older(v, w) { var a = String(v || '0').split('.'), b = String(w).split('.'); for (var i = 0; i < Math.max(a.length, b.length); i++) { var x = +a[i] || 0, y = +b[i] || 0; if (x !== y) return x < y; } return false; }
+  function prShow(which) { ['setup', 'nowin', 'ready', 'busy', 'update'].forEach(function (k) { $('sc-pr-' + k).hidden = k !== which; }); }
   function prMsg(t, err) { var m = $('sc-pr-msg'); if (!t) { m.hidden = true; return; } m.hidden = false; m.className = 'sc-pr-msg' + (err ? ' err' : ''); m.textContent = t; }
   function prFill(j) {
     pr.st = j; $('sc-pr-dot').hidden = false;
     var sel = $('sc-pr-dev'), keep = sel.value || prefs().dev;
     sel.innerHTML = '';
-    (j.scanners || []).forEach(function (d) { var o = document.createElement('option'); o.value = d.id; o.textContent = d.name || 'Scanner'; sel.appendChild(o); });
+    // the same printer often appears twice (Windows Scan + older WIA driver): show it once
+    var seen = {};
+    (j.scanners || []).forEach(function (d) {
+      var key = String(d.name || '').toLowerCase().replace(/\(.*?\)|series|twain|usb|wia|escl/g, '').replace(/[^a-z0-9]/g, '');
+      if (key && seen[key]) return; seen[key] = 1;
+      var o = document.createElement('option'); o.value = d.id; o.textContent = (d.name || 'Scanner').replace(/\s*\((USB|WIA)\)\s*$/i, ''); sel.appendChild(o);
+    });
     if (keep && [].some.call(sel.options, function (o) { return o.value === keep; })) sel.value = keep;
     $('sc-pr-startup').checked = !!j.startup;
     var none = !(j.scanners || []).length;
@@ -290,7 +303,11 @@
     if ($('sc-pr-busy').hidden) {
       var j = await helperStatus();
       if (!pr.open) return;
-      if (j) { if ($('sc-pr-ready').hidden) prShow('ready'); prFill(j); }
+      if (j && older(j.version, NEED)) {
+        // old helper: newer ones update themselves, 1.0 has to be downloaded once more
+        if (!older(j.version, '1.1')) { if (!pr.updating) { pr.updating = true; prShow('update'); $('sc-pr-upd-txt').textContent = 'Updating the scanner helper…'; hFetch('/update', { method: 'POST' }, 30000).catch(function () {}); } }
+        else prShow('update');
+      } else if (j) { pr.updating = false; if ($('sc-pr-ready').hidden) prShow('ready'); prFill(j); }
       else { $('sc-pr-dot').hidden = true; if (WIN) prShow('setup'); else prShow('nowin'); }
     }
     pr.poll = setTimeout(prTick, pr.st ? 4000 : 1500);
@@ -308,11 +325,12 @@
   async function prScan() {
     var dev = $('sc-pr-dev').value, dpi = segVal('sc-pr-dpi') || '300', mode = segVal('sc-pr-mode') || 'color', src = segVal('sc-pr-src') || 'flatbed';
     prefs({ dev: dev, dpi: dpi, mode: mode, src: src });
-    prMsg(''); prShow('busy');
+    prMsg(''); prDetails(null); prShow('busy');
+    var t0 = Date.now(), tm = setInterval(function () { $('sc-pr-sec').textContent = Math.round((Date.now() - t0) / 1000) + ' s'; }, 1000); $('sc-pr-sec').textContent = '0 s';
     try {
       var r = await hFetch('/scan?id=' + encodeURIComponent(dev) + '&dpi=' + dpi + '&mode=' + mode + '&source=' + src, {}, 240000);
       var j = await r.json();
-      if (!r.ok || !j.ok) throw new Error(j.error || 'The scan did not work.');
+      if (!r.ok || !j.ok) { var er = new Error(j.error || 'The scan did not work.'); er.tries = j.tries; throw er; }
       var n = 0;
       for (var i = 0; i < j.pages.length; i++) {
         var pr2 = await hFetch('/page?t=' + encodeURIComponent(j.pages[i]), {}, 60000);
@@ -322,18 +340,32 @@
         await addImage(blob, 'scan ' + (st.pages.length + 1));
         busy(false); n++;
       }
-      prShow('ready');
+      clearInterval(tm); prShow('ready');
       $('sc-pr-msg').dataset.keep = '1';
       prMsg(n ? (n === 1 ? 'Page added ✓  Put the next page on the scanner and press Scan again, or press Done.' : n + ' pages added ✓') : 'Nothing came back from the scanner. Try again.', !n);
       setTimeout(function () { $('sc-pr-msg').dataset.keep = ''; }, 8000);
     } catch (e) {
-      busy(false); prShow('ready');
+      clearInterval(tm); busy(false); prShow('ready');
+      prDetails(e && e.tries);
       var m = e && e.name === 'AbortError' ? 'The scanner took too long. Check it and try again.' : (e && e.message) || 'The scan did not work.';
       if (/Failed to fetch|NetworkError|Load failed/i.test(m)) m = 'The scanner helper stopped. Open SPrinter-Scanner again.';
       $('sc-pr-msg').dataset.keep = '1'; prMsg(m, true); setTimeout(function () { $('sc-pr-msg').dataset.keep = ''; }, 8000);
     }
   }
+  // what was tried, so a problem can be seen and fixed
+  function prDetails(tries) {
+    var d = $('sc-pr-det'), fix = $('sc-pr-fix');
+    if (!tries || !tries.length) { d.hidden = true; fix.hidden = true; return; }
+    d.hidden = false;
+    $('sc-pr-det-list').innerHTML = tries.map(function (t) { return '<li class="' + (t.ok ? 'ok' : 'no') + '"><b>' + String(t.way || '').replace(/[<>&]/g, '') + '</b>' + (t.ok ? ' — worked' : ' — ' + String(t.error || '').replace(/[<>&]/g, '') + (t.code ? ' <code>' + t.code + '</code>' : '')) + '</li>'; }).join('');
+    fix.hidden = !tries.some(function (t) { return !t.ok && /offline|driver|exception|not available|did not answer/i.test(t.error || ''); });
+  }
   function prInit() {
+    $('sc-pr-cam').onclick = function () { closePrinter(); openCamera(); };
+    $('sc-pr-fix').onclick = async function () {
+      try { await hFetch('/repair', { method: 'POST' }, 15000); prMsg('Windows will ask for permission. Choose Yes, wait 10 seconds, then press Scan again.', false); $('sc-pr-msg').dataset.keep = '1'; }
+      catch (e) { prMsg('Could not start the repair.', true); }
+    };
     $('sc-open-pr').onclick = openPrinter;
     $('sc-pr-x').onclick = closePrinter; $('sc-pr-done').onclick = closePrinter;
     $('sc-pr').addEventListener('click', function (e) { if (e.target === $('sc-pr') && $('sc-pr-busy').hidden) closePrinter(); });

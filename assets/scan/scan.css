@@ -125,3 +125,12 @@ body.sc-noscroll{overflow:hidden}
 .sc-pr-anim{position:relative;width:150px;height:96px;border-radius:12px;background:linear-gradient(#f8fafc,#eef2f7);border:2px solid #cbd5e1;overflow:hidden}
 .sc-pr-anim i{position:absolute;left:0;right:0;height:10px;background:linear-gradient(transparent,#22c1ee,transparent);box-shadow:0 0 18px #22c1ee;animation:scLamp 1.8s ease-in-out infinite alternate}
 @keyframes scLamp{from{top:-6px}to{top:88px}}
+
+.sc-pr-det{margin-top:10px;font-size:13px;color:var(--ink2)}
+.sc-pr-det summary{cursor:pointer;font-weight:700}
+.sc-pr-det ul{margin:8px 0 0;padding-left:18px;display:grid;gap:4px}
+.sc-pr-det li.ok{color:#127a3c}
+.sc-pr-det code{font-size:11.5px;color:var(--muted)}
+.sc-pr-fix{margin-top:10px;width:100%;justify-content:center}
+#sc-pr-sec{font:600 14px 'SP Inter',sans-serif;color:var(--muted);margin-left:6px}
+.sc-pr-phone{margin:0;padding-left:18px;display:grid;gap:8px;color:var(--ink2)}
