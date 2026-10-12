@@ -12,7 +12,7 @@ exit /b
 #PS-BEGIN
 $ErrorActionPreference = 'Stop'
 $Port = 47321
-$Version = '1.1'
+$Version = '1.2'
 $Sites = @('https://premiumappsfree.github.io')
 $UpdateUrl = 'https://premiumappsfree.github.io/sprinter/assets/scan/SPrinter-Scanner.cmd'
 $Home2 = Join-Path $env:LOCALAPPDATA 'SPrinter'
@@ -95,7 +95,7 @@ function RT-Scan($id, $dpi, $mode, $source) {
     try { if ($src -eq $T::Feeder) { $cfg.Duplex = $false; $cfg.MaxNumberOfPages = 0 } } catch {}
   }
   $folder = Await1 ([Windows.Storage.StorageFolder]::GetFolderFromPathAsync($TempDir)) ([Windows.Storage.StorageFolder])
-  $res = Await2 ($sc.ScanFilesToFolderAsync($src, $folder)) ([Windows.Devices.Scanners.ImageScannerScanResult]) ([uint32]) 240000
+  $res = Await2 ($sc.ScanFilesToFolderAsync($src, $folder)) ([Windows.Devices.Scanners.ImageScannerScanResult]) ([uint32]) 90000
   $files = @()
   foreach ($f in $res.ScannedFiles) { $files += $f.Path }
   if (-not $files.Count) { throw 'The scanner returned no page.' }
@@ -126,9 +126,11 @@ function WIA-Message($hr) {
     0x8021000C { return 'The scanner did not answer.' }
     0x80210015 { return 'No scanner was found.' }
     0x80210016 { return 'The scanner lid or cover is open.' }
+    0x8021000E { return 'The HP scanner driver could not talk to the scanner.' }
     default { return $null }
   }
 }
+function Inner($err) { $e = $err.Exception; while ($e.InnerException) { $e = $e.InnerException }; return $e }
 function Get-HResult($err) {
   $e = $err.Exception
   while ($e) { if ($e.HResult -and (($e.HResult -band 0xFFFF0000) -eq 0x80210000)) { return $e.HResult }; $e = $e.InnerException }
@@ -198,7 +200,7 @@ function Do-Scan($want, $dpi, $mode, $source) {
   $tries = @()
   foreach ($d in $order) {
     $styles = @('rt')
-    if ($d.id -like 'wia:*') { $styles = @('simple', 'plain', 'dialog') }
+    if ($d.id -like 'wia:*') { $styles = @('simple', 'plain') }
     foreach ($st in $styles) {
       $label = $d.name + ' [' + $d.engine + $(if ($st -ne 'rt') { '/' + $st } else { '' }) + ']'
       Say ('Trying ' + $label + ' ...') 'Cyan'
@@ -210,7 +212,8 @@ function Do-Scan($want, $dpi, $mode, $source) {
         return @{ files = $files; way = $label; tries = $script:Last }
       } catch {
         $hr = Get-HResult $_; $m = WIA-Message $hr
-        $msg = $_.Exception.Message; if ($m) { $msg = $m }
+        $msg = (Inner $_).Message; if ($m) { $msg = $m }
+        if ($hr -eq 0x8021000E) { $msg = 'The HP scanner driver could not talk to the scanner.' }
         Say ('  failed: ' + $msg + ' (' + (Hex $hr) + ')') 'Yellow'
         $tries += @{ way = $label; ok = $false; error = $msg; code = (Hex $hr) }
         if ($hr -eq 0x80210003 -or $hr -eq 0x80210002 -or $hr -eq 0x80210016) { break }   # paper / lid: no use trying other ways
@@ -235,6 +238,15 @@ function Install-Startup {
 }
 function Uninstall-Startup { if ($StartupLnk -and (Test-Path $StartupLnk)) { Remove-Item $StartupLnk -Force } }
 function Wia-Service { try { return [string](Get-Service stisvc).Status } catch { return 'unknown' } }
+function Scan-Devices {
+  $o = @()
+  try {
+    foreach ($d in (Get-PnpDevice -ErrorAction SilentlyContinue | Where-Object { $_.Class -eq 'Image' -or ($_.FriendlyName -match 'HP|Smart Tank|Scan|IPP|eSCL' -and $_.Class -match 'Image|USB|Printer|SoftwareDevice|PrintQueue') })) {
+      $o += @{ name = [string]$d.FriendlyName; status = [string]$d.Status; cls = [string]$d.Class; id = [string]$d.InstanceId }
+    }
+  } catch {}
+  return ,$o
+}
 function Self-Update {
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
   $txt = (New-Object Net.WebClient).DownloadString($UpdateUrl + '?t=' + [DateTime]::UtcNow.Ticks)
@@ -335,7 +347,7 @@ function Handle($client) {
   }
   if ($path -eq '/log') {
     $l = @(); try { $l = @(Get-Content $LogFile -Tail 120) } catch {}
-    SendJson $s 200 @{ ok = $true; version = $Version; log = $l; last = $script:Last; wia = (Wia-Service); os = [string][Environment]::OSVersion.VersionString; ps = [string]$PSVersionTable.PSVersion } $okOrigin
+    SendJson $s 200 @{ ok = $true; version = $Version; log = $l; last = $script:Last; wia = (Wia-Service); devices = (Scan-Devices); os = [string][Environment]::OSVersion.VersionString; ps = [string]$PSVersionTable.PSVersion } $okOrigin
     return
   }
   if ($path -eq '/startup' -and $method -eq 'POST') {
@@ -346,8 +358,18 @@ function Handle($client) {
   if ($path -eq '/repair' -and $method -eq 'POST') {
     # restart Windows' scanner service (asks Windows for permission)
     try {
-      Start-Process -FilePath 'powershell.exe' -Verb RunAs -WindowStyle Hidden -ArgumentList '-NoProfile -Command "Set-Service stisvc -StartupType Automatic; Restart-Service stisvc -Force; Restart-Service WiaRpc -Force -ErrorAction SilentlyContinue"'
-      Say 'Restarting the Windows scanner service ...' 'Cyan'
+      $fix = @'
+$ErrorActionPreference = 'SilentlyContinue'
+Set-Service stisvc -StartupType Automatic
+Stop-Service stisvc -Force; Stop-Service WiaRpc -Force
+Get-PnpDevice | Where-Object { $_.Class -eq 'Image' -or ($_.FriendlyName -match 'HP' -and $_.Class -match 'USB|SoftwareDevice') } | ForEach-Object { pnputil /restart-device "$($_.InstanceId)" | Out-Null }
+Start-Sleep -Seconds 3
+pnputil /scan-devices | Out-Null
+Start-Service stisvc; Start-Service WiaRpc
+'@
+      $enc = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($fix))
+      Start-Process -FilePath 'powershell.exe' -Verb RunAs -WindowStyle Hidden -ArgumentList ('-NoProfile -EncodedCommand ' + $enc)
+      Say 'Repairing Windows scanning (service + scanner device restart) ...' 'Cyan'
       SendJson $s 200 @{ ok = $true } $okOrigin
     } catch { SendJson $s 500 @{ ok = $false; error = 'Permission was not given.' } $okOrigin }
     return

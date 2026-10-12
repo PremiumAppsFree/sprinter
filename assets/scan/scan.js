@@ -275,7 +275,7 @@
   async function helperStatus() {
     try { var r = await hFetch('/status'); if (!r.ok) return null; var j = await r.json(); return j && j.app === 'sprinter-scan' ? j : null; } catch (e) { return null; }
   }
-  var NEED = '1.1';
+  var NEED = '1.2';
   function older(v, w) { var a = String(v || '0').split('.'), b = String(w).split('.'); for (var i = 0; i < Math.max(a.length, b.length); i++) { var x = +a[i] || 0, y = +b[i] || 0; if (x !== y) return x < y; } return false; }
   function prShow(which) { ['setup', 'nowin', 'ready', 'busy', 'update'].forEach(function (k) { $('sc-pr-' + k).hidden = k !== which; }); }
   function prMsg(t, err) { var m = $('sc-pr-msg'); if (!t) { m.hidden = true; return; } m.hidden = false; m.className = 'sc-pr-msg' + (err ? ' err' : ''); m.textContent = t; }
@@ -347,6 +347,10 @@
     } catch (e) {
       clearInterval(tm); busy(false); prShow('ready');
       prDetails(e && e.tries);
+      var tr = (e && e.tries) || [];
+      if (tr.length && tr.every(function (t) { return !t.ok && /offline|could not talk|driver|did not answer/i.test(t.error || ''); })) {
+        e = new Error('Windows can’t talk to the scanner part of the printer right now (its HP scanner driver reports “offline / no communication”). Press “Repair Windows scanning” below and choose Yes. If it still fails: turn the printer off and on, plug the USB cable straight into the computer (another port), wait 30 seconds and press Scan again.');
+      }
       var m = e && e.name === 'AbortError' ? 'The scanner took too long. Check it and try again.' : (e && e.message) || 'The scan did not work.';
       if (/Failed to fetch|NetworkError|Load failed/i.test(m)) m = 'The scanner helper stopped. Open SPrinter-Scanner again.';
       $('sc-pr-msg').dataset.keep = '1'; prMsg(m, true); setTimeout(function () { $('sc-pr-msg').dataset.keep = ''; }, 8000);
