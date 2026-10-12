@@ -1,0 +1,62 @@
+/* S Printer — hero motion graphic: photo → auto crop → background → A4 sheet → print */
+.mg{position:relative;justify-self:center;width:min(440px,100%);aspect-ratio:1/1.2;perspective:1400px;user-select:none;-webkit-user-select:none}
+.mg-tilt{transform-style:preserve-3d}
+
+/* A4 sheet */
+.mg-sheet{position:absolute;left:18%;top:5%;width:64%;aspect-ratio:210/297;background:#fff;border-radius:3px;border:1px solid var(--line);
+  box-shadow:0 34px 60px -18px rgba(27,35,48,.28),0 2px 6px rgba(27,35,48,.06);opacity:0;padding:8% 7%;box-sizing:border-box}
+.mg-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:5%;row-gap:7px}
+.mg-slots i{aspect-ratio:35/45;border:1.5px dashed #CBD5E1;border-radius:2px}
+.mg-bar{height:7px;border-radius:2px;margin-top:11%;background:linear-gradient(90deg,var(--c) 0 25%,var(--m) 25% 50%,var(--y) 50% 75%,var(--ink) 75%);clip-path:inset(0 100% 0 0)}
+.mg-rule{height:6px;border-radius:3px;background:#E6EBF0;margin-top:9px;transform:scaleX(0);transform-origin:left}
+.mg-rule.s{width:58%}
+.mg-print{position:absolute;right:7%;bottom:6%;display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#fff;font:700 12.5px/1 'SP Inter',sans-serif;border-radius:999px;padding:8px 13px;box-shadow:inset 0 -2px 0 var(--c)}
+
+/* the phone photo */
+.mg-photo{position:absolute;left:23%;top:9%;width:54%;aspect-ratio:3/4;border-radius:16px;overflow:hidden;opacity:0;
+  box-shadow:0 30px 60px -16px rgba(27,35,48,.38),0 0 0 6px #fff,0 0 0 7px var(--line)}
+.mg-room{position:absolute;inset:0;background:linear-gradient(180deg,#D9CCB6 0%,#CDBC9F 62%,#A88F6E 62.2%,#9C8364 100%)}
+.mg-room .win{position:absolute;left:8%;top:9%;width:30%;height:38%;border-radius:4px;background:linear-gradient(160deg,#F7F1E3,#E9DEC7);box-shadow:inset 0 0 0 5px #B49B78}
+.mg-room .lamp{position:absolute;right:-10%;top:-8%;width:60%;height:60%;border-radius:50%;background:radial-gradient(circle,rgba(255,236,190,.75),transparent 65%)}
+.mg-clean{position:absolute;inset:0;background:linear-gradient(180deg,#EAF5FC,#D5EAF8);clip-path:circle(0% at 50% 42%)}
+.mg-man{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mg-scan{position:absolute;left:-10%;right:-10%;top:0;height:22%;background:linear-gradient(180deg,transparent,rgba(0,152,216,.28) 70%,rgba(0,152,216,.9) 98%,transparent);opacity:0;mix-blend-mode:multiply}
+.mg-crop{position:absolute;left:20%;top:10%;width:60%;height:57.85%;box-shadow:0 0 0 999px rgba(15,23,42,.5);opacity:0;border-radius:1px}
+.mg-crop b{position:absolute;width:18%;height:14%;border:3px solid #fff}
+.mg-crop .tl{left:-3px;top:-3px;border-right:0;border-bottom:0}.mg-crop .tr{right:-3px;top:-3px;border-left:0;border-bottom:0}
+.mg-crop .bl{left:-3px;bottom:-3px;border-right:0;border-top:0}.mg-crop .br{right:-3px;bottom:-3px;border-left:0;border-top:0}
+.mg-size{position:absolute;left:50%;bottom:-36px;transform:translateX(-50%);white-space:nowrap;background:#fff;color:var(--ink);font:700 12.5px/1 'SP Inter',sans-serif;border-radius:999px;padding:7px 11px;box-shadow:0 8px 18px rgba(0,0,0,.25);opacity:0}
+
+/* copies flying to the sheet */
+.mg-tiles{position:absolute;inset:0;pointer-events:none}
+.mg-tile{position:absolute;left:0;top:0;overflow:hidden;border-radius:2px;background:linear-gradient(180deg,#EAF5FC,#D5EAF8);box-shadow:0 6px 14px rgba(27,35,48,.18);opacity:0;will-change:transform}
+.mg-tile svg{position:absolute;left:-33.33%;top:-17.29%;width:166.67%;height:172.86%}
+
+/* pointer + finish */
+.mg-cursor{position:absolute;left:0;top:0;width:26px;height:26px;opacity:0;z-index:5;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
+.mg-cursor .ring{position:absolute;left:-14px;top:-14px;width:30px;height:30px;border-radius:50%;border:2px solid var(--c);opacity:0}
+.mg-badge{position:absolute;right:-2%;top:1%;z-index:4;display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);font:700 13px/1 'SP Inter',sans-serif;border:1px solid var(--line);border-radius:12px;padding:9px 12px;box-shadow:0 14px 30px rgba(27,35,48,.16);opacity:0}
+
+/* story steps under the film */
+.mg-steps{position:absolute;left:-30px;right:-30px;bottom:0;display:flex;justify-content:center;gap:0;margin:0;padding:0;list-style:none;counter-reset:st}
+.mg-steps li{position:relative;counter-increment:st;font:600 12px/1 'SP Inter',sans-serif;color:var(--muted);padding:7px 7px 10px;white-space:nowrap;transition:color .3s}
+.mg-steps li::before{content:counter(st);display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;margin-right:5px;background:var(--desk);color:var(--muted);font-size:10.5px;transition:background .3s,color .3s}
+.mg-steps li::after{content:"";position:absolute;left:9px;right:9px;bottom:2px;height:2.5px;border-radius:2px;background:linear-gradient(90deg,var(--c),var(--m));transform:scaleX(0);transform-origin:left}
+.mg-steps li.on{color:var(--ink)}
+.mg-steps li.on::before{background:var(--ink);color:#fff}
+.mg-steps li.on::after{animation:mgStep var(--d,1.2s) linear forwards}
+.mg-steps li.done{color:var(--ink2)}
+.mg-steps li.done::before{background:#16A34A;color:#fff}
+@keyframes mgStep{to{transform:scaleX(1)}}
+
+@media (max-width:900px){
+  .mg{width:min(400px,100%);margin-top:8px}
+}
+@media (max-width:560px){
+  .mg-steps li{font-size:0;padding:7px 4px 10px}
+  .mg-steps li::before{font-size:10.5px;margin:0}
+  .mg-steps li.on{font-size:11.5px}
+  .mg-steps li.on::before{margin-right:5px}
+}
+@media (max-width:900px){.hero .ambient .dot{display:none}}
+.mg{cursor:pointer}
