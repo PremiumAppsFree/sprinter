@@ -780,7 +780,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
   '@keyframes spPaLed{50%{opacity:.25}}' +
   '@keyframes spPaRoll{to{transform:rotate(360deg)}}' +
   '@keyframes spPaBar{to{transform:scaleX(1)}}' +
-  '#sp-saved{position:fixed;left:50%;bottom:24px;z-index:2147483500;display:flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:14px;background:#1B2330;color:#fff;font:600 14px/1.3 "SP Inter",Inter,system-ui,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.28);transform:translate(-50%,20px);opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s;max-width:calc(100% - 32px)}' +
+  '#sp-saved{position:fixed;left:50%;bottom:24px;z-index:2147483500;display:flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:14px;background:#1B2330;color:#fff;font:600 14px/1.3 "SP Inter",Inter,system-ui,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.28);transform:translate(-50%,20px);opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s;max-width:calc(100% - 32px);pointer-events:none}' +
   '#sp-saved.on{transform:translate(-50%,0);opacity:1}' +
   '#sp-saved svg{width:30px;height:30px;flex-shrink:0}' +
   '#sp-saved .ck{stroke-dasharray:24;stroke-dashoffset:24;animation:spCk .45s .15s ease-out forwards}' +
@@ -1155,7 +1155,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
 (function () {
   'use strict';
   if (!/\/(service|tool)\//.test(location.pathname)) return;
-  var OWN = /\/(cv-resume-maker|marriage-card-creator|pro-id-maker|pro-poster-maker|job-application-maker|shop-promotion|payment-qr|portal-services|govt-jobs|multi-doc|size-changer|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)(\.html)?$/;
+  var OWN = /\/(cv-resume-maker|marriage-card-creator|pro-id-maker|pro-poster-maker|job-application-maker|shop-promotion|payment-qr|portal-services|govt-jobs|multi-doc|size-changer|scan-document|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)(\.html)?$/;
   if (OWN.test(location.pathname)) return;
   var files = [], btn = null;
   var BASE = (function () { var s = document.querySelector('script[src*="assets/sprinter/sprinter.js"]'); return s ? s.src.replace(/assets\/sprinter\/sprinter\.js.*$/, '') : '../'; })();
