@@ -433,6 +433,21 @@
       return fonts.entries().every(function (e) { var f = fonts.lookup(e[0]); var sub = f && f.get(window.PDFLib.PDFName.of('Subtype')); return !sub || !/Type0/.test(sub.toString()); });
     } catch (e) { return false; }
   }
+  // make the text of a content stream bold: fill + stroke (Tr 2) with a hairline in the text's own colour
+  function bolden(src) {
+    if (!src || !/\bTj\b|\bTJ\b|'|"/.test(src) || /SP-BOLD/.test(src)) return src;
+    if (/(^|\s)[1-7]\s+Tr\b/.test(src)) return src;              // already outlined / special text
+    var tf = src.match(/(-?[\d.]+)\s+Tf\b/), sz = tf ? Math.abs(+tf[1]) || 8 : 8;
+    var tm = src.match(/(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+Tm\b/);
+    if (tm) { var k = Math.sqrt(Math.abs(+tm[1] * +tm[4] - +tm[2] * +tm[3])); if (k > 0 && isFinite(k)) sz *= k; }
+    var col = '0 G', m;
+    if ((m = src.match(/(?:^|\s)(-?[\d.]+\s+-?[\d.]+\s+-?[\d.]+\s+-?[\d.]+)\s+k\b/))) col = m[1] + ' K';
+    else if ((m = src.match(/(?:^|\s)(-?[\d.]+\s+-?[\d.]+\s+-?[\d.]+)\s+rg\b/))) col = m[1] + ' RG';
+    else if ((m = src.match(/(?:^|\s)(-?[\d.]+)\s+g\b/))) col = m[1] + ' G';
+    var w = Math.min(Math.max(sz * 0.05, 0.08), 3);
+    // Tr 0 inside the stream would switch it back off, so make those Tr 2 as well
+    return '% SP-BOLD\nq ' + col + ' ' + w.toFixed(3) + ' w 1 j 1 J 2 Tr\n' + src.replace(/(^|\s)0(\s+)Tr\b/g, '$12$2Tr') + '\nQ\n';
+  }
   async function adobeLook(bytes, sigList) {
     var PL = window.PDFLib, d = await PL.PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: false });
     var ctx = d.context, N = function (k) { return PL.PDFName.of(k); }, done = 0, helv = null;
@@ -496,6 +511,23 @@
             if (t[0]) setXo(t[0], t[1], ns); else if (nref instanceof PL.PDFRef) { ctx.assign(nref, ns); apN = ns; }
           });
         }
+        // clear, bold signer text: the glyphs are filled and outlined in their own colour (the way bold is
+        // drawn on a printer), so the name, date and reason stay sharp and readable when zoomed or printed
+        (function () {
+          var bres = apN.dict.lookup(N('Resources')), bxo = bres && bres.lookup(N('XObject')), bfrm = bxo && bxo.lookup(N('FRM'));
+          var bfres = bfrm && bfrm.dict && bfrm.dict.lookup(N('Resources')), blx = bfres && bfres.lookup(N('XObject'));
+          var list = [];
+          if (blx && blx.get(N('n2'))) { list.push([blx, 'n2']); if (blx.get(N('n4'))) list.push([blx, 'n4']); }
+          else if (bfrm && bfrm.dict) list.push([bxo, 'FRM']);
+          else list.push([null, 'AP']);
+          list.forEach(function (t) {
+            var st0 = t[0] ? t[0].lookup(N(t[1])) : apN; if (!st0 || !st0.dict) return;
+            var c2 = text(st0), c3 = bolden(c2); if (!c3 || c3 === c2) return;
+            var ns = ctx.stream(c3, {});
+            st0.dict.entries().forEach(function (e) { var k = e[0].toString(); if (!/^\/(Filter|Length|DecodeParms)$/.test(k)) ns.dict.set(e[0], e[1]); });
+            if (t[0]) setXo(t[0], t[1], ns); else if (nref instanceof PL.PDFRef) { ctx.assign(nref, ns); apN = ns; }
+          });
+        })();
         // draw the box into the page (like printing from Adobe) and drop the field itself
         if (!(flags & 2)) {
           var rect = arr(a.get(N('Rect'))), bbox = arr(apN.dict.get(N('BBox'))) || [0, 0, 1, 1], mtx = arr(apN.dict.get(N('Matrix'))) || [1, 0, 0, 1, 0, 0];

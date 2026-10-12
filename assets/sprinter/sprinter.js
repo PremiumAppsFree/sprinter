@@ -520,6 +520,23 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
     doc.getPage = function () { return gp.apply(null, arguments).then(function (pg) { return wrapPage(pg, doc); }); };
     doc.__spCap = true; return doc;
   }
+  // Original fonts: PDFs that name a font without carrying it (Helvetica, Times, Arial, Courier …) and
+  // CJK / Indic CMaps are drawn with the real metric-matched faces — the same ones Adobe and Chrome use —
+  // instead of whatever the browser has, so text keeps its shape, width and weight.
+  var FONT_BASE = (function () { try { var s = document.currentScript && document.currentScript.src; return s ? new URL('../vendor/pdfjs/', s).href : new URL('/assets/vendor/pdfjs/', location.href).href; } catch (e) { return ''; } })();
+  function withFonts(a) {
+    if (!FONT_BASE || a == null) return a;
+    var o;
+    if (typeof a === 'string' || (typeof URL === 'function' && a instanceof URL)) o = { url: a };
+    else if (a instanceof ArrayBuffer || ArrayBuffer.isView(a)) o = { data: a };
+    else if (typeof a === 'object' && !a.getRange && (('data' in a) || ('url' in a) || ('range' in a))) o = Object.assign({}, a);
+    else return a;
+    if (!o.standardFontDataUrl) o.standardFontDataUrl = FONT_BASE + 'standard_fonts/';
+    if (!o.cMapUrl) { o.cMapUrl = FONT_BASE + 'cmaps/'; o.cMapPacked = true; }
+    if (o.useSystemFonts == null) o.useSystemFonts = false;   // real metric-matched faces on every device, not the phone's default font
+    if (o.disableFontFace == null) o.disableFontFace = false;
+    return o;
+  }
   function wrapGetDocument(gd) {
     return function () {
       var check = null;
@@ -529,7 +546,8 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
           check = Promise.all([got, loadSigLibs()]).then(function (r) { return r[0] && window.SPSig ? window.SPSig.verify(r[0]) : null; }).catch(function () { return null; });
         } catch (e) { check = null; }
       }
-      var task = gd.apply(this, arguments);
+      var args = [].slice.call(arguments); args[0] = withFonts(args[0]);
+      var task = gd.apply(this, args);
       // remember the password the tool hands to pdf.js, so the signature date of a protected file can be read
       var given = arguments[0] && typeof arguments[0] === 'object' && arguments[0].password ? arguments[0].password : '';
       if (given && window.SPPw) window.SPPw.add(given);
@@ -1309,7 +1327,19 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
  * Works in desktop Chrome, Edge and Firefox through their built-in PDF viewer; phones fall back. */
 (function () {
   'use strict';
-  window.SPPrintPdf = function (bytes) {
+  // Print settings inside the PDF, like Adobe's defaults: actual size (no shrink-to-fit resampling),
+  // paper chosen by page size. Chrome, Edge and Adobe Reader all read these.
+  window.SPPrintReady = async function (bytes) {
+    try {
+      var PL = window.PDFLib || (window.SPPdfLib && await window.SPPdfLib()); if (!PL || !bytes) return bytes;
+      var d = await PL.PDFDocument.load(bytes, { updateMetadata: false });
+      var vp = d.catalog.getOrCreateViewerPreferences();
+      vp.setPrintScaling(PL.PrintScaling.None); vp.setPickTrayByPDFSize(true);
+      return await d.save({ useObjectStreams: false });
+    } catch (e) { return bytes; }
+  };
+  window.SPPrintPdf = async function (bytes) {
+    bytes = await window.SPPrintReady(bytes);
     return new Promise(function (resolve) {
       var ua = navigator.userAgent, okBrowser = /Chrome\/|Chromium\/|Edg\/|Firefox\//.test(ua) && !/HeadlessChrome/.test(ua);
       if (window.SPIsMobile || !bytes || !okBrowser || navigator.pdfViewerEnabled === false) { resolve(false); return; }
@@ -1348,6 +1378,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
     try { saved = localStorage.getItem(PREF); } catch (e) {}
     var savePdf = async function () {
       var bytes = await makePdf(); if (!bytes) { quickPrint(); return; }
+      if (window.SPPrintReady) bytes = await window.SPPrintReady(bytes);
       var file = new File([bytes], (name || 'SPrinter') + '.pdf', { type: 'application/pdf' });
       if (!pc && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: file.name }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
       var u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
@@ -1355,22 +1386,23 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
       if (pc) tip('PDF saved. Open it (Adobe Reader) and press Ctrl+P — your HP printer’s own window opens; in Properties choose Quality: Best.', saved === 'adobe');
     };
     if (pc && saved === 'adobe') { savePdf().catch(function () { quickPrint(); }); return; }
-    if (pc && saved === 'browser') { quickPrint(); tip('Printing from the browser (your saved choice).', true); return; }
+    if (pc && saved === 'browser') { quickPrint(); tip('Printing the original PDF (your saved choice).', true); return; }
     var css = '#sp-mp{position:fixed;inset:0;z-index:2147483300;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px;font:15px/1.45 "SP Inter",Inter,system-ui,sans-serif}@media(min-width:640px){#sp-mp{align-items:center}}' +
       '#sp-mp .b{background:#fff;border-radius:18px;max-width:460px;width:100%;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}#sp-mp h3{margin:0 0 4px;font:800 18px/1.25 "SP Lexend",system-ui,sans-serif;color:#1B2330}' +
       '#sp-mp p{margin:0 0 12px;color:#5B6676;font-size:13.5px}#sp-mp button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;border:1.5px solid #d5dce6;background:#fff;margin-top:8px;font:inherit;color:#1B2330;cursor:pointer}' +
-      '#sp-mp button b{display:block;font:700 15px/1.25 "SP Lexend",system-ui,sans-serif}#sp-mp button small{display:block;color:#5B6676;font-size:12.5px;margin-top:2px}#sp-mp .best{border-color:#a5b4fc;background:linear-gradient(120deg,#f5f8ff,#faf5ff)}' +
+      '#sp-mp button b{display:block;font:700 15px/1.25 "SP Lexend",system-ui,sans-serif}#sp-mp button small{display:block;color:#5B6676;font-size:12.5px;margin-top:2px}#sp-mp .hi{border-color:#a5b4fc;background:linear-gradient(120deg,#f5f8ff,#faf5ff)}' +
       '#sp-mp svg{width:30px;height:30px;flex:none}#sp-mp .x{border:0;background:none;justify-content:center;color:#5B6676;font-weight:600}#sp-mp label{display:flex;gap:8px;align-items:center;font-size:13px;color:#5B6676;margin-top:10px}' +
       '#sp-tip{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483400;background:#1B2330;color:#fff;padding:12px 16px;border-radius:12px;font:600 14px/1.45 system-ui,sans-serif;max-width:min(92vw,560px);box-shadow:0 14px 34px rgba(0,0,0,.3)}';
     if (!document.getElementById('sp-mp-css')) { var st = document.createElement('style'); st.id = 'sp-mp-css'; st.textContent = css; document.head.appendChild(st); }
     var ov = document.createElement('div'); ov.id = 'sp-mp';
-    var bestTxt = pc ? '<b>Best quality — print from Adobe / your printer’s own window</b><small>Saves the PDF. Open it in Adobe Reader and press Ctrl+P: the HP / Canon / Epson printer window opens with its Properties (Quality: Best), exactly like your Adobe prints.</small>'
+    var bestTxt = pc ? '<b>Print from Adobe Reader</b><small>Saves the same PDF. Open it in Adobe Reader and press Ctrl+P — your HP / Canon / Epson printer window opens with its Properties (Quality: Best).</small>'
                      : '<b>Best quality — print the PDF</b><small>Saves the PDF; open it, then tap ⋮ (menu) and Print. Sharp text, original photos.</small>';
-    var quickTxt = pc ? '<b>Print from the browser</b><small>Sends the same PDF to Chrome’s print window. Tip: press Ctrl+Shift+P there (or “Print using system dialog”) to get your printer’s own window too.</small>'
+    var quickTxt = pc ? '<b>Print now — original quality</b><small>Prints the original PDF itself (vector text, original fonts and photos, actual size) — the same file Adobe prints. Tip: “Print using system dialog” (Ctrl+Shift+P) opens your printer’s own window for Quality: Best.</small>'
                       : '<b>Quick print</b><small>Prints straight from this page (high-resolution picture).</small>';
-    ov.innerHTML = '<div class="b" role="dialog" aria-modal="true"><h3>Print</h3><p>' + (pc ? 'Choose how to print. Both use the original PDF — no quality is lost.' : 'On a phone the sharpest print comes from the PDF itself — exactly like printing from Adobe.') + '</p>' +
-      '<button type="button" class="best"><svg viewBox="0 0 24 24"><path d="M6 2.5h8l5 5V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4A1.5 1.5 0 0 1 6 2.5z" fill="url(#spIcoG)"/><path d="M14 2.5V7a.6.6 0 0 0 .6.6H19" fill="#fff" opacity=".55"/><path d="M8.5 15.5l2.2 2.2 4.8-5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>' + bestTxt + '</span></button>' +
-      '<button type="button" class="q"><svg viewBox="0 0 24 24" fill="none" stroke="url(#spIcoG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg><span>' + quickTxt + '</span></button>' +
+    var bestBtn = '<button type="button" class="best' + (pc ? '' : ' hi') + '"><svg viewBox="0 0 24 24"><path d="M6 2.5h8l5 5V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4A1.5 1.5 0 0 1 6 2.5z" fill="url(#spIcoG)"/><path d="M14 2.5V7a.6.6 0 0 0 .6.6H19" fill="#fff" opacity=".55"/><path d="M8.5 15.5l2.2 2.2 4.8-5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>' + bestTxt + '</span></button>';
+    var quickBtn = '<button type="button" class="q' + (pc ? ' hi' : '') + '"><svg viewBox="0 0 24 24" fill="none" stroke="url(#spIcoG)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></svg><span>' + quickTxt + '</span></button>';
+    ov.innerHTML = '<div class="b" role="dialog" aria-modal="true"><h3>Print</h3><p>' + (pc ? 'Both print the original PDF — no quality is lost.' : 'On a phone the sharpest print comes from the PDF itself — exactly like printing from Adobe.') + '</p>' +
+      (pc ? quickBtn + bestBtn : bestBtn + quickBtn) +
       (pc ? '<label><input type="checkbox" class="rem"> Remember my choice on this computer</label>' : '') +
       '<button type="button" class="x">Cancel</button></div>';
     document.body.appendChild(ov);
