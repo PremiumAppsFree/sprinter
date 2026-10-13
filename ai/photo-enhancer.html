@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Photo Enhancer — Sharpen, Restore Faces &amp; Upscale to 4K | S Printer</title>
+<meta name="description" content="Make blurry, old, small or noisy photos sharp: AI upscaling to 4K (Real-ESRGAN) and face restoration (GFPGAN), free and right in your browser. Nothing is uploaded.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<script src="coi-serviceworker.min.js"></script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=24">
+<script src="../assets/sprinter/sprinter.js?v=34"></script>
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=27">
+<link rel="stylesheet" href="../assets/sizer/sizer.css?v=2">
+<link rel="stylesheet" href="../assets/enhance/enhance.css?v=1">
+</head>
+<body class="sz-body" data-sp-nofloat>
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../ai/photo-enhancer.html" aria-current="page">AI Enhance</a>
+      <a href="../service/scan-document.html">Scan</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+
+<main class="cp-wrap">
+  <div class="sz-hero">
+    <svg class="sz-hero-ic" viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+        <linearGradient id="enh1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22c1ee"/><stop offset="1" stop-color="#4f46e5"/></linearGradient>
+        <linearGradient id="enh2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd84d"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+      </defs>
+      <rect x="6" y="10" width="44" height="44" rx="9" fill="url(#enh1)"/>
+      <circle cx="21" cy="25" r="5" fill="#fff"/>
+      <path d="M10 48l12-13 8 7 8-9 12 13v2H10z" fill="#fff" opacity=".92"/>
+      <path d="M50 4l3 7.5L60.5 14 53 17l-3 7.5L47 17l-7.5-3L47 11z" fill="url(#enh2)"/>
+    </svg>
+    <div>
+      <h1>AI photo enhancer</h1>
+      <p>Make blurry, old, small or noisy photos sharp. The picture is enlarged up to 4K and faces are restored, using free AI models that run on this device. Nothing is uploaded.</p>
+    </div>
+  </div>
+
+  <div class="cp-grid">
+    <div class="cp-col">
+      <section class="cp-card" aria-labelledby="en-s1">
+        <h2 id="en-s1"><span class="cp-step">1</span>Add a photo</h2>
+        <label class="cp-drop" id="en-drop">
+          <input type="file" id="en-file" accept="image/*">
+          <span class="cp-drop-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></span>
+          <b>Choose a photo</b>
+          <small>JPG, PNG or WebP · or drop / paste it here</small>
+        </label>
+        <div class="en-orig" id="en-orig" hidden><img id="en-orig-img" alt="Your photo"><span id="en-orig-info"></span></div>
+      </section>
+    </div>
+    <div class="cp-col">
+      <section class="cp-card" aria-labelledby="en-s2">
+        <h2 id="en-s2"><span class="cp-step">2</span>How to enhance</h2>
+        <div class="en-label">Picture</div>
+        <div class="en-seg" id="en-model" role="group" aria-label="Picture model">
+          <button type="button" data-v="balanced" aria-pressed="true">Auto<small>most photos</small></button>
+          <button type="button" data-v="sharp" aria-pressed="false">Extra sharp<small>clean photos</small></button>
+          <button type="button" data-v="clean" aria-pressed="false">Remove noise<small>grainy, old, phone</small></button>
+          <button type="button" data-v="max" aria-pressed="false">Best detail<small>slower, good PC</small></button>
+        </div>
+        <div class="en-label">Size</div>
+        <div class="sz-seg en-seg3" id="en-size" role="group" aria-label="Output size">
+          <button type="button" data-v="4k" aria-pressed="true">4K<small>3840 px long side</small></button>
+          <button type="button" data-v="2" aria-pressed="false">2× bigger<small>double size</small></button>
+          <button type="button" data-v="4" aria-pressed="false">4× bigger<small>largest</small></button>
+        </div>
+        <div class="en-label">Faces</div>
+        <label class="cp-switch"><input type="checkbox" id="en-face" checked><span></span>Restore faces (eyes, skin, hair)</label>
+        <label class="en-range" id="en-strength-row">Strength <input type="range" id="en-strength" min="20" max="100" value="80"><b id="en-strength-v">80%</b></label>
+        <p class="sz-note" id="en-face-note">The face model is a one-time download of 170 MB; after that it is kept on this device.</p>
+        <button type="button" class="cp-btn cp-btn-main en-go" id="en-go" disabled><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 2l2.4 6.1L20.5 10l-6.1 2.4L12 18.5l-2.4-6.1L3.5 10l6.1-1.9z" fill="currentColor"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" fill="currentColor" opacity=".7"/></svg>Enhance photo</button>
+        <p class="en-engine" id="en-engine"></p>
+      </section>
+    </div>
+  </div>
+
+  <section class="en-work" id="en-work" hidden aria-live="polite">
+    <div class="en-prog"><div class="en-bar"><i id="en-bar"></i></div><b id="en-stage">Starting…</b><span id="en-detail"></span></div>
+  </section>
+
+  <section class="en-result" id="en-result" hidden aria-labelledby="en-s3">
+    <div class="en-res-head">
+      <h2 id="en-s3"><span class="cp-step">3</span>Result</h2>
+      <span class="en-res-info" id="en-res-info"></span>
+    </div>
+    <div class="en-compare" id="en-compare">
+      <img id="en-after" alt="Enhanced photo">
+      <div class="en-before" id="en-before-wrap"><img id="en-before" alt="Original photo"></div>
+      <div class="en-handle" id="en-handle" role="slider" aria-label="Compare before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"><i></i></div>
+      <span class="en-tag l">Before</span><span class="en-tag r">After</span>
+    </div>
+    <div class="en-zoomrow"><label class="cp-switch"><input type="checkbox" id="en-zoom"><span></span>Zoom 100% (see real pixels)</label></div>
+    <div class="en-actions">
+      <button type="button" class="cp-btn cp-btn-main" id="en-png"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download PNG (best)</button>
+      <button type="button" class="cp-btn" id="en-jpg"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="url(#spIcoG)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download JPG (smaller)</button>
+      <button type="button" class="cp-btn" id="en-again"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="url(#spIcoG)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Try other settings</button>
+    </div>
+  </section>
+
+  <section class="en-about cp-card">
+    <h2>About the AI</h2>
+    <p>The picture is enlarged with <b>Real-ESRGAN</b>, and faces are restored with <b>GFPGAN v1.4</b>. Both are free, open-source models from Tencent ARC Lab and the same tools many “4K” enhancers use. They run inside your browser, on the graphics card when it can (WebGPU) or on the processor. Your photo never leaves this device.</p>
+    <p class="sz-note">Tip: big photos are first brought to a size this device can handle, so very large pictures can take a minute on the processor.</p>
+  </section>
+</main>
+<div class="cp-toast" id="en-toast" role="status" aria-live="polite" hidden></div>
+
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/remove-background.html">Remove background</a>
+      <a href="../service/size-changer.html">Size changer</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/ort/ort.webgpu.min.js"></script>
+<script src="../assets/enhance/engine.js?v=4"></script>
+<script src="../assets/enhance/enhance.js?v=2"></script>
+</body>
+</html>

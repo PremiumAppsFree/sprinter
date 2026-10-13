@@ -1,0 +1,50 @@
+/* S Printer — AI photo enhancer */
+.en-label{font:700 13px/1 'SP Inter',sans-serif;color:var(--ink2);margin:16px 0 8px}
+.en-label:first-of-type{margin-top:4px}
+.en-seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.en-seg button{display:flex;flex-direction:column;align-items:center;gap:3px;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:11px 4px;font:700 13.5px/1.2 'SP Inter',sans-serif;color:var(--ink);cursor:pointer;transition:all .2s}
+.en-seg button small{font-weight:500;font-size:11px;color:var(--muted);text-align:center}
+.en-seg button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 -3px 0 var(--c),0 6px 16px rgba(0,0,0,.08)}
+.en-seg3{grid-template-columns:repeat(3,1fr)}
+.en-range{display:flex;align-items:center;gap:10px;margin-top:12px;font-weight:600;color:var(--ink2)}
+.en-range input{flex:1;accent-color:var(--c)}
+.en-range[hidden]{display:none}
+.en-go{width:100%;justify-content:center;margin-top:18px;height:52px;font-size:16px}
+.en-engine{margin:10px 0 0;font-size:12.5px;color:var(--muted);text-align:center}
+.en-orig{display:flex;align-items:center;gap:12px;margin-top:14px;background:#F6F8FA;border-radius:12px;padding:10px}
+.en-orig img{width:72px;height:72px;object-fit:cover;border-radius:8px}
+.en-orig span{font-weight:600;color:var(--ink2);font-size:14px}
+.en-work{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}
+.en-prog{display:grid;gap:8px}
+.en-bar{height:10px;border-radius:999px;background:#EEF1F4;overflow:hidden}
+.en-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--c),#4f46e5,var(--m));transition:width .3s;background-size:200% 100%;animation:enRun 2s linear infinite}
+@keyframes enRun{from{background-position:0 0}to{background-position:-200% 0}}
+.en-prog b{font:700 16px 'SP Lexend',sans-serif}
+.en-prog span{color:var(--muted);font-size:13.5px}
+.en-result{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.en-res-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.en-res-head h2{margin:0;display:flex;align-items:center;gap:10px;font:700 18px/1.2 'SP Lexend',sans-serif}
+.en-res-info{font-weight:600;color:var(--ink2);font-size:14px}
+.en-compare{position:relative;overflow:hidden;border-radius:12px;background:repeating-conic-gradient(#e9edf2 0 25%,#f6f8fa 0 50%) 0 0/18px 18px;touch-action:none;cursor:ew-resize;max-height:72vh;display:grid;place-items:center}
+.en-compare img{display:block;max-width:100%;max-height:72vh;width:auto;height:auto;user-select:none;-webkit-user-drag:none;image-rendering:auto}
+.en-before{position:absolute;inset:0;display:grid;place-items:center}
+.en-before img{width:100%;height:100%;object-fit:contain;max-height:none}
+.en-compare #en-after{width:100%;height:auto;object-fit:contain}
+.en-handle{position:absolute;top:0;bottom:0;left:50%;width:0;z-index:2}
+.en-handle::before{content:"";position:absolute;top:0;bottom:0;left:-1px;width:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+.en-handle i{position:absolute;top:50%;left:-19px;width:38px;height:38px;margin-top:-19px;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.3);display:block}
+.en-handle i::before{content:"‹ ›";position:absolute;inset:0;display:grid;place-items:center;font:800 16px/1 system-ui;color:var(--ink)}
+.en-handle:focus-visible i{outline:3px solid var(--c)}
+.en-tag{position:absolute;top:10px;z-index:3;background:rgba(27,35,48,.75);color:#fff;font:700 12px/1 'SP Inter',sans-serif;border-radius:999px;padding:6px 10px;pointer-events:none}
+.en-tag.l{left:10px}.en-tag.r{right:10px}
+.en-compare.zoom{overflow:auto;place-items:start;cursor:ew-resize}
+.en-compare.zoom img,.en-compare.zoom #en-after{max-width:none;max-height:none;width:auto}
+.en-compare.zoom .en-before{inset:0 auto auto 0}
+.en-compare.zoom .en-before img{width:auto;height:auto;object-fit:none}
+.en-zoomrow{margin-top:10px}
+.en-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.en-actions .cp-btn{flex:1;min-width:160px;justify-content:center}
+.en-about{margin-top:18px}
+.en-about h2{margin:0 0 8px;font:700 17px 'SP Lexend',sans-serif}
+.en-about p{margin:0 0 8px;color:var(--ink2)}
+@media (max-width:640px){.en-seg{grid-template-columns:repeat(2,minmax(0,1fr))}}

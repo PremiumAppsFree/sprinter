@@ -7,7 +7,7 @@ const files = [
   'assets/sprinter/sprinter.js', 'assets/sprinter/home.js', 'assets/cardprint/cardprint.js',
   'assets/sigverify/sigverify.js', 'assets/bgremove/bgremove.js', 'assets/passport/passport.js',
   'assets/sheet/sheet.js', 'assets/sizer/sizer.js', 'assets/payqr/payqr.js',
-  'assets/studio/studio.js', 'assets/studio/studio-id.js', 'assets/scan/engine.js', 'assets/scan/scan.js'
+  'assets/studio/studio.js', 'assets/studio/studio-id.js', 'assets/scan/engine.js', 'assets/scan/scan.js', 'assets/enhance/engine.js', 'assets/enhance/enhance.js'
 ];
 const opts = {
   compact: true, simplify: true, target: 'browser',
