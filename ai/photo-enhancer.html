@@ -13,7 +13,7 @@
 <script src="../assets/sprinter/sprinter.js?v=34"></script>
 <link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=27">
 <link rel="stylesheet" href="../assets/sizer/sizer.css?v=2">
-<link rel="stylesheet" href="../assets/enhance/enhance.css?v=2">
+<link rel="stylesheet" href="../assets/enhance/enhance.css?v=4">
 </head>
 <body class="sz-body" data-sp-nofloat>
 <header class="sp-header" id="sp-header">
@@ -81,6 +81,10 @@
         </div>
         <div class="en-label">Finish</div>
         <label class="cp-switch"><input type="checkbox" id="en-face" checked><span></span>Restore faces (eyes, skin, hair)</label>
+        <div class="sz-seg en-fstyle" id="en-fstyle" role="group" aria-label="Face style">
+          <button type="button" data-v="clear" aria-pressed="true">Ultra clear<small>sharpest eyes, hair &amp; skin</small></button>
+          <button type="button" data-v="natural" aria-pressed="false">Natural<small>smoother, softer look</small></button>
+        </div>
         <label class="en-range" id="en-strength-row">Face strength <input type="range" id="en-strength" min="30" max="100" value="90"><b id="en-strength-v">90%</b></label>
         <label class="cp-switch en-sw2"><input type="checkbox" id="en-finish" checked><span></span>HD finish (crisp detail &amp; clarity)</label>
         <button type="button" class="cp-btn cp-btn-main en-go" id="en-go" disabled><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 2l2.4 6.1L20.5 10l-6.1 2.4L12 18.5l-2.4-6.1L3.5 10l6.1-1.9z" fill="currentColor"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" fill="currentColor" opacity=".7"/></svg>Enhance photo</button>
@@ -118,7 +122,7 @@
 
   <section class="en-about cp-card">
     <h2>About the AI</h2>
-    <p>The picture is enlarged with <b>Real-ESRGAN</b>, and faces are restored with <b>GFPGAN v1.4</b>. Both are free, open-source models from Tencent ARC Lab and the same tools many “4K” enhancers use. They run inside your browser, on the graphics card when it can (WebGPU) or on the processor. Your photo never leaves this device.</p>
+    <p>The picture is enlarged with <b>Real-ESRGAN</b>, and faces are restored with <b>RestoreFormer++</b> (Ultra clear) or <b>GFPGAN v1.4</b> (Natural). All are free, open-source research models, the same kind many “4K” enhancer apps use. They run inside your browser, on the graphics card when it can (WebGPU) or on the processor. Your photo never leaves this device.</p>
     <p class="sz-note">The AI is prepared in the background as soon as this page opens, and each photo is sized so it finishes in about a minute even without a graphics card.</p>
   </section>
 </main>
@@ -140,7 +144,7 @@
   </div>
 </footer>
 <script src="../assets/vendor/ort/ort.webgpu.min.js"></script>
-<script src="../assets/enhance/engine.js?v=8"></script>
-<script src="../assets/enhance/enhance.js?v=6"></script>
+<script src="../assets/enhance/engine.js?v=11"></script>
+<script src="../assets/enhance/enhance.js?v=8"></script>
 </body>
 </html>

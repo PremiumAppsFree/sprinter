@@ -92,6 +92,8 @@
     clean: { file: 'photo-clean.onnx', mb: 5 }, max: { file: 'photo-max.onnx', mb: 34 }
   };
   var FACE_FILES = ['face.onnx.part0', 'face.onnx.part1'], FACE_MB = 170;
+  // face models: RestoreFormer++ (ultra clear, Apache-2.0) and GFPGAN v1.4 (natural, Apache-2.0)
+  var FACES = { clear: ['face-rf.onnx.part0', 'face-rf.onnx.part1'], natural: FACE_FILES };
 
   function canvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
   function ctx2(c) { return c.getContext('2d', { willReadFrequently: true }); }
@@ -198,8 +200,9 @@
 
   // ---------- 3) restore each face and paste it back ----------
   // faces are cut from the ORIGINAL photo (full detail, like the official GFPGAN pipeline) and pasted into the big one
-  async function restoreFaces(big, faces, scale, strength, onFace, orig, origScale) {
-    var s = await session('face', FACE_FILES);
+  async function restoreFaces(big, faces, scale, strength, onFace, orig, origScale, style) {
+    style = FACES[style] ? style : 'clear';
+    var s = await session('face-' + style, FACES[style]);
     var mask = faceMask();
     for (var fi = 0; fi < faces.length; fi++) {
       var pts = faces[fi].pts.map(function (p) { return [p[0] * scale, p[1] * scale]; });
@@ -271,7 +274,7 @@
 
   window.SPEnhance = {
     speed: speed, finish: finish,
-    pickBackend: pickBackend, backend: function () { return backend; }, isCached: isCached, SR: SR, FACE_FILES: FACE_FILES, FACE_MB: FACE_MB,
+    pickBackend: pickBackend, backend: function () { return backend; }, isCached: isCached, SR: SR, FACE_FILES: FACE_FILES, FACE_MB: FACE_MB, FACES: FACES,
     load: function (key, files, onProgress) { return session(key, files, onProgress); },
     upscale: upscale, findFaces: findFaces, restoreFaces: restoreFaces, resize: resize, canvas: canvas
   };

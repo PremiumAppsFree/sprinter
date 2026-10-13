@@ -5,7 +5,7 @@
   var E = window.SPEnhance, $ = function (id) { return document.getElementById(id); };
   var SMALL = !!window.SPIsMobile || (navigator.deviceMemory && navigator.deviceMemory < 4);
   var SAVE = !!(navigator.connection && navigator.connection.saveData);
-  var st = { file: null, src: null, model: 'auto', size: '4k', face: true, strength: 0.9, finish: true, out: null, busy: false };
+  var st = { file: null, src: null, model: 'auto', size: '4k', face: true, faceStyle: 'clear', strength: 0.9, finish: true, out: null, busy: false };
   var prep = null;   // background preparation of the AI
 
   function toast(m) { var t = $('en-toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 4500); }
@@ -30,7 +30,7 @@
       await E.load('sr-' + srKey(be), [E.SR[srKey(be)].file]);
       await E.speed(srKey(E.backend()));          // warms up the graphics card / processor in advance
       await E.load('det', ['face-detect.onnx']);
-      if (!SAVE || await E.isCached(E.FACE_FILES)) await E.load('face', E.FACE_FILES);
+      if (!SAVE || await E.isCached(E.FACES[st.faceStyle])) await E.load('face-' + st.faceStyle, E.FACES[st.faceStyle]);
       $('en-engine').textContent = 'AI ready · ' + (E.backend() === 'webgpu' ? 'using the graphics card' : 'using the processor');
       return true;
     })().catch(function (e) { prep = null; throw e; });
@@ -44,7 +44,7 @@
     var k = Math.min(maxW / src.width, maxH / src.height, 1.6), dpr = Math.min(2, window.devicePixelRatio || 1);
     var w = Math.round(src.width * k), h = Math.round(src.height * k);
     ['en-base', 'en-sharp'].forEach(function (id) { var c = $(id); c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.width = w + 'px'; c.style.height = h + 'px'; });
-    box.style.width = w + 'px'; box.style.height = h + 'px';
+    box.style.width = (w + 6) + 'px'; box.style.height = (h + 6) + 'px';
     var bx = $('en-base').getContext('2d'); bx.imageSmoothingQuality = 'high'; bx.drawImage(src, 0, 0, $('en-base').width, $('en-base').height);
     $('en-sharp').getContext('2d').clearRect(0, 0, $('en-sharp').width, $('en-sharp').height);
     view.k = $('en-base').width / src.width; view.css = k;
@@ -65,7 +65,8 @@
     var f = $('en-faces'); f.innerHTML = '';
     faces.forEach(function (fc, i) {
       var r = document.createElement('i'), k = view.css / inScale, b = fc.box, pad = 0.18 * (b[2] - b[0]);
-      r.style.left = ((b[0] - pad) * k) + 'px'; r.style.top = ((b[1] - pad) * k) + 'px';
+      r.style.left = (3 + (b[0] - pad) * k) + 'px'; r.style.top = (3 + (b[1] - pad) * k) + 'px';
+      r.style.setProperty('--h', Math.max(10, (b[3] - b[1] + 2 * pad) * k * 0.86) + 'px');
       r.style.width = ((b[2] - b[0] + 2 * pad) * k) + 'px'; r.style.height = ((b[3] - b[1] + 2 * pad) * k) + 'px';
       r.style.animationDelay = (i * 0.12) + 's'; f.appendChild(r);
     });
@@ -131,14 +132,14 @@
       if (faces.length) {
         progress('Restoring faces…', 0.72);
         box.classList.add('faces');
-        await E.load('face', E.FACE_FILES, function (l, t) { progress('Getting the face AI ready…', 0.7 + 0.04 * l / t, ''); });
+        await E.load('face-' + st.faceStyle, E.FACES[st.faceStyle], function (l, t) { progress('Getting the face AI ready…', 0.7 + 0.04 * l / t, ''); });
         var tf = performance.now(), faceBudget = Math.max(gpu ? 20000 : 15000, 58000 - (tf - t0)), done = 0;   // whatever is left of about a minute
         await E.restoreFaces(big, faces, 4, st.strength, function (n, tot, fc) {
           paintFace(big, fc, k, n - 1); done = n;
           progress('Restoring faces…', 0.72 + 0.2 * n / tot, tot > 1 ? n + ' of ' + tot : '');
           var per = (performance.now() - tf) / n;
           return n < 2 || (performance.now() - tf) + per <= faceBudget;   // the two largest always; more while time allows
-        }, src, 1 / k);
+        }, src, 1 / k, st.faceStyle);
         faces = faces.slice(0, done);
         box.classList.remove('faces');
       }
@@ -199,8 +200,9 @@
     ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
     drop.addEventListener('drop', function (e) { loadFile(e.dataTransfer.files[0]); });
     document.addEventListener('paste', function (e) { var f = (e.clipboardData && e.clipboardData.files || [])[0]; if (f) loadFile(f); });
-    seg('en-model', 'model'); seg('en-size', 'size');
-    $('en-face').addEventListener('change', function () { st.face = this.checked; $('en-strength-row').hidden = !st.face; });
+    seg('en-model', 'model'); seg('en-size', 'size'); seg('en-fstyle', 'faceStyle');
+    [].forEach.call(document.querySelectorAll('#en-fstyle [data-v]'), function (b) { b.addEventListener('click', function () { if (prep) prep.then(function () { E.load('face-' + st.faceStyle, E.FACES[st.faceStyle]).catch(function () {}); }); }); });
+    $('en-face').addEventListener('change', function () { st.face = this.checked; $('en-strength-row').hidden = !st.face; $('en-fstyle').hidden = !st.face; });
     $('en-finish').addEventListener('change', function () { st.finish = this.checked; });
     $('en-strength').addEventListener('input', function () { st.strength = this.value / 100; $('en-strength-v').textContent = this.value + '%'; });
     $('en-go').onclick = run;
