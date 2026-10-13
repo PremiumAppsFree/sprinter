@@ -62,7 +62,7 @@
     var opts = { executionProviders: be === 'webgpu' ? ['webgpu', 'wasm'] : ['wasm'], graphOptimizationLevel: 'all' };
     // the very first start: if the multi-core engine does not come up, reload once in single-core mode
     var first = !started; started = true;
-    if (first && ort().env.wasm.numThreads > 1) {
+    if (first && be !== 'webgpu' && ort().env.wasm.numThreads > 1) {
       try { await withTimeout(ort().InferenceSession.create(bytes, opts).then(function (s0) { sessions[key] = s0; }), 25000); }
       catch (e) {
         if (String(e && e.message) === 'timeout') { try { localStorage.setItem('sp-ort-1t', '1'); } catch (_) {} if (window.SPEnhanceOnReload) window.SPEnhanceOnReload(); location.reload(); return new Promise(function () {}); }
@@ -239,11 +239,13 @@
   }
 
   // how long this device needs per picture pixel (ms), measured on a small test piece
+  var speeds = {};
   async function speed(key) {
+    if (speeds[key]) return speeds[key];
     var s = await session('sr-' + key, [SR[key].file]), N = 96, x = new (ort().Tensor)('float32', new Float32Array(3 * N * N), [1, 3, N, N]);
     await s.run({ input: x });
     var t = performance.now(); var r = await s.run({ input: x }); try { r.output.getData && await r.output.getData(); } catch (e) {}
-    return (performance.now() - t) / (N * N);
+    return (speeds[key] = (performance.now() - t) / (N * N));
   }
   // studio finish: fine detail (small-radius sharpening) + clarity (gentle local contrast). Colours unchanged.
   function finish(c, amount) {

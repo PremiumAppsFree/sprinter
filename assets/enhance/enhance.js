@@ -28,6 +28,7 @@
     prep = (async function () {
       var be = await E.pickBackend();
       await E.load('sr-' + srKey(be), [E.SR[srKey(be)].file]);
+      await E.speed(srKey(E.backend()));          // warms up the graphics card / processor in advance
       await E.load('det', ['face-detect.onnx']);
       if (!SAVE || await E.isCached(E.FACE_FILES)) await E.load('face', E.FACE_FILES);
       $('en-engine').textContent = 'AI ready · ' + (E.backend() === 'webgpu' ? 'using the graphics card' : 'using the processor');
