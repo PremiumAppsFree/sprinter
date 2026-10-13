@@ -8,7 +8,7 @@
 <meta name="description" content="Make blurry, old, small or noisy photos sharp: AI upscaling to 4K (Real-ESRGAN) and face restoration (GFPGAN), free and right in your browser. Nothing is uploaded.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-<script src="coi-serviceworker.min.js"></script>
+<script>try{navigator.serviceWorker&&navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){if(/\/ai\/$/.test(x.scope))x.unregister()})})}catch(e){}</script>
 <link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=24">
 <script src="../assets/sprinter/sprinter.js?v=34"></script>
 <link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=27">
@@ -140,7 +140,7 @@
   </div>
 </footer>
 <script src="../assets/vendor/ort/ort.webgpu.min.js"></script>
-<script src="../assets/enhance/engine.js?v=7"></script>
+<script src="../assets/enhance/engine.js?v=8"></script>
 <script src="../assets/enhance/enhance.js?v=6"></script>
 </body>
 </html>

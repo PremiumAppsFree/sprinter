@@ -14,8 +14,8 @@
     if (backend) return backend;
     var O = ort();
     O.env.wasm.wasmPaths = BASE.replace(/enhance\/$/, 'vendor/ort/');
-    var noThreads = false; try { noThreads = localStorage.getItem('sp-ort-1t') === '1' || /[?&]safe\b/.test(location.search); } catch (e) {}
-    O.env.wasm.numThreads = (self.crossOriginIsolated && !noThreads ? Math.min(8, navigator.hardwareConcurrency || 4) : 1);
+    // multi-core WASM hangs in this engine build on several browsers, so it stays off (the graphics card does the heavy work)
+    O.env.wasm.numThreads = 1;
     O.env.wasm.simd = true;
     backend = 'wasm';
     try {
