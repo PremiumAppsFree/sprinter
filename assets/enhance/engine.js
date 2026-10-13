@@ -93,7 +93,7 @@
   };
   var FACE_FILES = ['face.onnx.part0', 'face.onnx.part1'], FACE_MB = 170;
   // face models: RestoreFormer++ (ultra clear, Apache-2.0) and GFPGAN v1.4 (natural, Apache-2.0)
-  var FACES = { clear: ['face-rf.onnx.part0', 'face-rf.onnx.part1'], natural: FACE_FILES };
+  var FACES = { clear: ['face-rf.onnx.part0', 'face-rf.onnx.part1'], original: FACE_FILES, natural: FACE_FILES };
 
   function canvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
   function ctx2(c) { return c.getContext('2d', { willReadFrequently: true }); }
@@ -201,8 +201,9 @@
   // ---------- 3) restore each face and paste it back ----------
   // faces are cut from the ORIGINAL photo (full detail, like the official GFPGAN pipeline) and pasted into the big one
   async function restoreFaces(big, faces, scale, strength, onFace, orig, origScale, style) {
-    style = FACES[style] ? style : 'clear';
-    var s = await session('face-' + style, FACES[style]);
+    style = FACES[style] ? style : 'original';
+    var fileKey = style === 'clear' ? 'clear' : 'original';
+    var s = await session('face-' + fileKey, FACES[fileKey]);
     var mask = faceMask();
     for (var fi = 0; fi < faces.length; fi++) {
       var pts = faces[fi].pts.map(function (p) { return [p[0] * scale, p[1] * scale]; });
@@ -218,9 +219,24 @@
       var r = await s.run({ input: new (ort().Tensor)('float32', inp, [1, 3, 512, 512]) });
       var o = r.output.data instanceof Float32Array ? r.output.data : await r.output.getData();
       var w = strength, iw = 1 - w;
-      for (i = 0; i < plane; i++) {
-        var R = (Math.max(-1, Math.min(1, o[i])) + 1) * 127.5, G = (Math.max(-1, Math.min(1, o[plane + i])) + 1) * 127.5, B = (Math.max(-1, Math.min(1, o[2 * plane + i])) + 1) * 127.5;
-        d[i * 4] = R * w + d[i * 4] * iw; d[i * 4 + 1] = G * w + d[i * 4 + 1] * iw; d[i * 4 + 2] = B * w + d[i * 4 + 2] * iw; d[i * 4 + 3] = 255;
+      if (style === 'clear') {
+        for (i = 0; i < plane; i++) {
+          var R = (Math.max(-1, Math.min(1, o[i])) + 1) * 127.5, G = (Math.max(-1, Math.min(1, o[plane + i])) + 1) * 127.5, B = (Math.max(-1, Math.min(1, o[2 * plane + i])) + 1) * 127.5;
+          d[i * 4] = R * w + d[i * 4] * iw; d[i * 4 + 1] = G * w + d[i * 4 + 1] * iw; d[i * 4 + 2] = B * w + d[i * 4 + 2] * iw; d[i * 4 + 3] = 255;
+        }
+      } else {
+        // keep the person's own face: shape, colour and expression come from the photo (low frequencies),
+        // only the fine detail (eyes, lashes, hair, teeth, skin) comes from the AI (high frequencies)
+        for (var chn = 0; chn < 3; chn++) {
+          var Cc = new Float32Array(plane), Rc = new Float32Array(plane);
+          for (i = 0; i < plane; i++) { Cc[i] = d[i * 4 + chn]; Rc[i] = (Math.max(-1, Math.min(1, o[chn * plane + i])) + 1) * 127.5; }
+          var Cl = blur3(Cc, 512, 512, 4), Rl = blur3(Rc, 512, 512, 4);
+          for (i = 0; i < plane; i++) {
+            var v = Cl[i] + 0.35 * w * (Rl[i] - Cl[i]) + w * (Rc[i] - Rl[i]) + iw * (Cc[i] - Cl[i]);
+            d[i * 4 + chn] = v < 0 ? 0 : v > 255 ? 255 : v;
+          }
+        }
+        for (i = 0; i < plane; i++) d[i * 4 + 3] = 255;
       }
       cx.putImageData(px, 0, 0);
       // soft edge, then back into the picture with the inverse transform
@@ -231,6 +247,17 @@
       if (onFace && onFace(fi + 1, faces.length, faces[fi]) === false) break;
       await tick();
     }
+  }
+  // three box blurs ≈ a gaussian blur
+  function blur3(a, W, H, r) {
+    var t = new Float32Array(W * H), x, y, k = 2 * r + 1, src = a, out;
+    for (var pass = 0; pass < 3; pass++) {
+      out = new Float32Array(W * H);
+      for (y = 0; y < H; y++) { var row = y * W, sum = 0; for (x = -r; x <= r; x++) sum += src[row + Math.min(W - 1, Math.max(0, x))]; for (x = 0; x < W; x++) { t[row + x] = sum / k; sum += src[row + Math.min(W - 1, x + r + 1)] - src[row + Math.max(0, x - r)]; } }
+      for (x = 0; x < W; x++) { var sum2 = 0; for (y = -r; y <= r; y++) sum2 += t[Math.min(H - 1, Math.max(0, y)) * W + x]; for (y = 0; y < H; y++) { out[y * W + x] = sum2 / k; sum2 += t[Math.min(H - 1, y + r + 1) * W + x] - t[Math.max(0, y - r) * W + x]; } }
+      src = out;
+    }
+    return out;
   }
   function faceMask() {
     var m = canvas(512, 512), x = m.getContext('2d'), a = x.createImageData(512, 512), d = a.data, edge = 28, inset = 10;
