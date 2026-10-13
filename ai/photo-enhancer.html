@@ -13,7 +13,7 @@
 <script src="../assets/sprinter/sprinter.js?v=34"></script>
 <link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=27">
 <link rel="stylesheet" href="../assets/sizer/sizer.css?v=2">
-<link rel="stylesheet" href="../assets/enhance/enhance.css?v=1">
+<link rel="stylesheet" href="../assets/enhance/enhance.css?v=2">
 </head>
 <body class="sz-body" data-sp-nofloat>
 <header class="sp-header" id="sp-header">
@@ -67,12 +67,11 @@
     <div class="cp-col">
       <section class="cp-card" aria-labelledby="en-s2">
         <h2 id="en-s2"><span class="cp-step">2</span>How to enhance</h2>
-        <div class="en-label">Picture</div>
-        <div class="en-seg" id="en-model" role="group" aria-label="Picture model">
-          <button type="button" data-v="balanced" aria-pressed="true">Auto<small>most photos</small></button>
-          <button type="button" data-v="sharp" aria-pressed="false">Extra sharp<small>clean photos</small></button>
-          <button type="button" data-v="clean" aria-pressed="false">Remove noise<small>grainy, old, phone</small></button>
-          <button type="button" data-v="max" aria-pressed="false">Best detail<small>slower, good PC</small></button>
+        <div class="en-label">Photo type</div>
+        <div class="en-seg en-seg3" id="en-model" role="group" aria-label="Photo type">
+          <button type="button" data-v="auto" aria-pressed="true">Auto<small>best for most photos</small></button>
+          <button type="button" data-v="clean" aria-pressed="false">Old / grainy<small>removes noise &amp; spots</small></button>
+          <button type="button" data-v="sharp" aria-pressed="false">Extra sharp<small>clean, new photos</small></button>
         </div>
         <div class="en-label">Size</div>
         <div class="sz-seg en-seg3" id="en-size" role="group" aria-label="Output size">
@@ -80,18 +79,22 @@
           <button type="button" data-v="2" aria-pressed="false">2× bigger<small>double size</small></button>
           <button type="button" data-v="4" aria-pressed="false">4× bigger<small>largest</small></button>
         </div>
-        <div class="en-label">Faces</div>
+        <div class="en-label">Finish</div>
         <label class="cp-switch"><input type="checkbox" id="en-face" checked><span></span>Restore faces (eyes, skin, hair)</label>
-        <label class="en-range" id="en-strength-row">Strength <input type="range" id="en-strength" min="20" max="100" value="80"><b id="en-strength-v">80%</b></label>
-        <p class="sz-note" id="en-face-note">The face model is a one-time download of 170 MB; after that it is kept on this device.</p>
+        <label class="en-range" id="en-strength-row">Face strength <input type="range" id="en-strength" min="30" max="100" value="90"><b id="en-strength-v">90%</b></label>
+        <label class="cp-switch en-sw2"><input type="checkbox" id="en-finish" checked><span></span>HD finish (crisp detail &amp; clarity)</label>
         <button type="button" class="cp-btn cp-btn-main en-go" id="en-go" disabled><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 2l2.4 6.1L20.5 10l-6.1 2.4L12 18.5l-2.4-6.1L3.5 10l6.1-1.9z" fill="currentColor"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" fill="currentColor" opacity=".7"/></svg>Enhance photo</button>
         <p class="en-engine" id="en-engine"></p>
       </section>
     </div>
   </div>
 
-  <section class="en-work" id="en-work" hidden aria-live="polite">
-    <div class="en-prog"><div class="en-bar"><i id="en-bar"></i></div><b id="en-stage">Starting…</b><span id="en-detail"></span></div>
+  <section class="en-studio" id="en-studio" hidden aria-live="polite">
+    <div class="en-stage" id="en-stage-box">
+      <canvas id="en-base"></canvas><canvas id="en-sharp"></canvas>
+      <div class="en-fx" aria-hidden="true"><i class="en-beam"></i><i class="en-glow"></i><div class="en-spark" id="en-spark"></div><div class="en-faces" id="en-faces"></div><i class="en-shine"></i></div>
+      <div class="en-pill" id="en-pill"><span class="en-ring"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" class="t"/><circle cx="18" cy="18" r="15.5" class="p" id="en-ringp"/></svg><b id="en-pct">0%</b></span><span><b id="en-stage">Getting ready…</b><small id="en-detail"></small></span></div>
+    </div>
   </section>
 
   <section class="en-result" id="en-result" hidden aria-labelledby="en-s3">
@@ -116,7 +119,7 @@
   <section class="en-about cp-card">
     <h2>About the AI</h2>
     <p>The picture is enlarged with <b>Real-ESRGAN</b>, and faces are restored with <b>GFPGAN v1.4</b>. Both are free, open-source models from Tencent ARC Lab and the same tools many “4K” enhancers use. They run inside your browser, on the graphics card when it can (WebGPU) or on the processor. Your photo never leaves this device.</p>
-    <p class="sz-note">Tip: big photos are first brought to a size this device can handle, so very large pictures can take a minute on the processor.</p>
+    <p class="sz-note">The AI is prepared in the background as soon as this page opens, and each photo is sized so it finishes in about a minute even without a graphics card.</p>
   </section>
 </main>
 <div class="cp-toast" id="en-toast" role="status" aria-live="polite" hidden></div>
@@ -137,7 +140,7 @@
   </div>
 </footer>
 <script src="../assets/vendor/ort/ort.webgpu.min.js"></script>
-<script src="../assets/enhance/engine.js?v=4"></script>
-<script src="../assets/enhance/enhance.js?v=2"></script>
+<script src="../assets/enhance/engine.js?v=6"></script>
+<script src="../assets/enhance/enhance.js?v=5"></script>
 </body>
 </html>

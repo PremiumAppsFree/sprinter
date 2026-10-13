@@ -130,7 +130,17 @@
         }
       }
       try { o.dispose && o.dispose(); } catch (e) {}
-      n++; if (onTile) onTile(n, total); await tick();
+      n++;
+      if (onTile) {
+        var tc = null;
+        if (onTile.length > 2) {   // the page wants to show this part as it is finished
+          tc = canvas(cw, chh); var tim = new ImageData(cw, chh), td = tim.data;
+          for (var r2 = 0; r2 < chh; r2++) td.set(out.subarray(((y0 * 4 + r2) * OW + x0 * 4) * 4, ((y0 * 4 + r2) * OW + x0 * 4 + cw) * 4), r2 * cw * 4);
+          tc.getContext('2d').putImageData(tim, 0, 0);
+        }
+        onTile(n, total, tc, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+      }
+      await tick();
     }
     var c = canvas(OW, OH); c.getContext('2d').putImageData(new ImageData(out, OW, OH), 0, 0); return c;
   }
@@ -187,16 +197,19 @@
   var TEMPLATE = [[192.98138, 239.94708], [318.90277, 240.1936], [256.63416, 314.01935], [201.26117, 371.41043], [313.08905, 371.15118]];
 
   // ---------- 3) restore each face and paste it back ----------
-  async function restoreFaces(big, faces, scale, strength, onFace) {
+  // faces are cut from the ORIGINAL photo (full detail, like the official GFPGAN pipeline) and pasted into the big one
+  async function restoreFaces(big, faces, scale, strength, onFace, orig, origScale) {
     var s = await session('face', FACE_FILES);
     var mask = faceMask();
     for (var fi = 0; fi < faces.length; fi++) {
       var pts = faces[fi].pts.map(function (p) { return [p[0] * scale, p[1] * scale]; });
       var M = similarity(pts, TEMPLATE);
+      var from = big, C = M;
+      if (orig && origScale) { from = orig; C = similarity(faces[fi].pts.map(function (p) { return [p[0] * origScale, p[1] * origScale]; }), TEMPLATE); }
       // crop + align to 512 × 512
       var crop = canvas(512, 512), cx = ctx2(crop);
       cx.fillStyle = 'rgb(135,133,132)'; cx.fillRect(0, 0, 512, 512);
-      cx.setTransform(M.a, M.b, -M.b, M.a, M.e, M.f); cx.imageSmoothingQuality = 'high'; cx.drawImage(big, 0, 0); cx.setTransform(1, 0, 0, 1, 0, 0);
+      cx.setTransform(C.a, C.b, -C.b, C.a, C.e, C.f); cx.imageSmoothingQuality = 'high'; cx.drawImage(from, 0, 0); cx.setTransform(1, 0, 0, 1, 0, 0);
       var px = cx.getImageData(0, 0, 512, 512), d = px.data, plane = 512 * 512, inp = new Float32Array(3 * plane);
       for (var i = 0; i < plane; i++) { inp[i] = d[i * 4] / 127.5 - 1; inp[plane + i] = d[i * 4 + 1] / 127.5 - 1; inp[2 * plane + i] = d[i * 4 + 2] / 127.5 - 1; }
       var r = await s.run({ input: new (ort().Tensor)('float32', inp, [1, 3, 512, 512]) });
@@ -212,7 +225,8 @@
       var det = M.a * M.a + M.b * M.b, ia = M.a / det, ib = -M.b / det;
       var ie = -(ia * M.e - ib * M.f), iff = -(ib * M.e + ia * M.f);
       var bx = big.getContext('2d'); bx.save(); bx.setTransform(ia, ib, -ib, ia, ie, iff); bx.imageSmoothingQuality = 'high'; bx.drawImage(crop, 0, 0); bx.restore();
-      if (onFace) onFace(fi + 1, faces.length); await tick();
+      if (onFace && onFace(fi + 1, faces.length, faces[fi]) === false) break;
+      await tick();
     }
   }
   function faceMask() {
@@ -224,7 +238,37 @@
     x.putImageData(a, 0, 0); return m;
   }
 
+  // how long this device needs per picture pixel (ms), measured on a small test piece
+  async function speed(key) {
+    var s = await session('sr-' + key, [SR[key].file]), N = 96, x = new (ort().Tensor)('float32', new Float32Array(3 * N * N), [1, 3, N, N]);
+    await s.run({ input: x });
+    var t = performance.now(); var r = await s.run({ input: x }); try { r.output.getData && await r.output.getData(); } catch (e) {}
+    return (performance.now() - t) / (N * N);
+  }
+  // studio finish: fine detail (small-radius sharpening) + clarity (gentle local contrast). Colours unchanged.
+  function finish(c, amount) {
+    if (!amount) return c;
+    var W = c.width, H = c.height, x = c.getContext('2d', { willReadFrequently: true });
+    var blur = function (px) {
+      var b = canvas(W, H), bx = b.getContext('2d');
+      if ('filter' in bx) { bx.filter = 'blur(' + px + 'px)'; bx.drawImage(c, 0, 0); bx.filter = 'none'; }
+      else { var sm = canvas(Math.max(1, W / (px * 2)), Math.max(1, H / (px * 2))); sm.getContext('2d').drawImage(c, 0, 0, sm.width, sm.height); bx.imageSmoothingQuality = 'high'; bx.drawImage(sm, 0, 0, W, H); }
+      return bx.getImageData(0, 0, W, H).data;
+    };
+    var img = x.getImageData(0, 0, W, H), d = img.data, fine = blur(Math.max(0.8, W / 3200)), wide = blur(Math.max(12, W / 140));
+    var a1 = 0.55 * amount, a2 = 0.16 * amount;
+    for (var i = 0; i < d.length; i += 4) {
+      for (var ch = 0; ch < 3; ch++) {
+        var v = d[i + ch], f = v - fine[i + ch], w = v - wide[i + ch];
+        if (f > 18) f = 18; else if (f < -18) f = -18;          // no halos around strong edges
+        d[i + ch] = v + a1 * f + a2 * w;
+      }
+    }
+    x.putImageData(img, 0, 0); return c;
+  }
+
   window.SPEnhance = {
+    speed: speed, finish: finish,
     pickBackend: pickBackend, backend: function () { return backend; }, isCached: isCached, SR: SR, FACE_FILES: FACE_FILES, FACE_MB: FACE_MB,
     load: function (key, files, onProgress) { return session(key, files, onProgress); },
     upscale: upscale, findFaces: findFaces, restoreFaces: restoreFaces, resize: resize, canvas: canvas
