@@ -189,3 +189,45 @@ section.group{margin-bottom:46px;scroll-margin-top:140px}
 .tool .ic{width:62px;height:62px;border-radius:16px}
 .tool .ic .i{width:48px;height:48px}
 @media (max-width:600px){.tool .ic{width:56px;height:56px}.tool .ic .i{width:44px;height:44px}}
+
+/* ---- animated realistic icons ---- */
+.tool .i{--ip:paused}
+.tool.live .i,.tool:hover .i,.tool:focus-visible .i{--ip:running}
+.an{transform-box:fill-box;transform-origin:center;animation-duration:2.8s;animation-iteration-count:infinite;animation-timing-function:ease-in-out;animation-play-state:var(--ip,running)}
+.an[style*="transform-origin"]{transform-box:view-box}
+.a-bob{animation-name:aBob}.a-popin{animation-name:aPopIn;animation-duration:3.6s}.a-wig{animation-name:aWig}.a-slide{animation-name:aSlide}
+.a-stamp{animation-name:aStamp;animation-duration:2.4s}.a-wand{animation-name:aWand;animation-duration:1.8s}.a-tw{animation-name:aTw;animation-duration:2.2s}
+.a-crop{animation-name:aCrop;animation-duration:2.2s}.a-drop{animation-name:aDrop;animation-duration:1.6s}.a-pulse{animation-name:aPulse;animation-duration:2s}
+.a-slider{animation-name:aSlider;animation-duration:3.4s}.a-scan{animation-name:aScan;animation-duration:2.2s}.a-blink{animation-name:aBlink;animation-duration:1.4s}
+.a-shine{animation-name:aShine;animation-duration:3.6s;animation-timing-function:cubic-bezier(.4,0,.2,1)}.a-holo{animation-name:aSpin;animation-duration:4s;animation-timing-function:linear}
+.a-fanR{animation-name:aFanR}.a-fanL{animation-name:aFanL}.a-fanL2{animation-name:aFanL2}.a-pop{animation-name:aPop;animation-duration:2.6s}
+.a-qrscan{animation-name:aQr;animation-duration:2.4s}.a-grow{animation-name:aGrow;animation-duration:3s}.a-ringL{animation-name:aRingL}.a-ringR{animation-name:aRingR}
+.a-swing{animation-name:aSwing;animation-duration:3.2s}.a-spin{animation-name:aSpin;animation-duration:7s;animation-timing-function:linear}.a-letter{animation-name:aLetter;animation-duration:3s}
+.a-awn{animation-name:aAwn;animation-duration:2.4s}.a-flag{animation-name:aFlag;animation-duration:1.4s}.a-nudge{animation-name:aNudge;animation-duration:1.4s}.a-lid{animation-name:aLid;animation-duration:2.4s}
+@keyframes aBob{50%{transform:translateY(-2.5px)}}
+@keyframes aPopIn{0%{transform:scale(.3);opacity:0}16%{transform:scale(1.08);opacity:1}24%,100%{transform:scale(1);opacity:1}}
+@keyframes aWig{50%{transform:rotate(-6deg)}}
+@keyframes aSlide{50%{transform:translateX(2.5px)}}
+@keyframes aStamp{0%,60%,100%{transform:scale(1);opacity:1}72%{transform:scale(.78);opacity:.7}82%{transform:scale(1.08)}}
+@keyframes aWand{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(12deg)}}
+@keyframes aTw{0%,100%{transform:scale(1) rotate(0);opacity:1}50%{transform:scale(.35) rotate(60deg);opacity:.35}}
+@keyframes aCrop{50%{transform:scale(.9)}}
+@keyframes aDrop{50%{transform:translateY(3px)}}
+@keyframes aPulse{50%{transform:scale(1.14)}}
+@keyframes aSlider{0%,100%{transform:translateX(-11px)}50%{transform:translateX(11px)}}
+@keyframes aScan{0%,100%{transform:translateX(0)}50%{transform:translateX(32px)}}
+@keyframes aBlink{50%{opacity:.15}}
+@keyframes aShine{0%{transform:translateX(0)}55%,100%{transform:translateX(90px)}}
+@keyframes aSpin{to{transform:rotate(360deg)}}
+@keyframes aFanR{50%{transform:rotate(6deg)}}@keyframes aFanL{50%{transform:rotate(-6deg)}}@keyframes aFanL2{50%{transform:rotate(-3deg)}}
+@keyframes aPop{0%,55%,100%{transform:scale(1)}68%{transform:scale(1.22)}80%{transform:scale(.95)}}
+@keyframes aQr{0%,100%{transform:translateY(0)}50%{transform:translateY(19px)}}
+@keyframes aGrow{0%,100%{transform:scaleX(.35)}45%,80%{transform:scaleX(1)}}
+@keyframes aRingL{50%{transform:translateX(1.6px)}}@keyframes aRingR{50%{transform:translateX(-1.6px)}}
+@keyframes aSwing{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes aLetter{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes aAwn{50%{transform:skewX(-4deg)}}
+@keyframes aFlag{50%{transform:skewY(-10deg) scaleX(.9)}}
+@keyframes aNudge{50%{transform:translateX(3px)}}
+@keyframes aLid{0%,60%,100%{transform:rotate(0)}75%{transform:rotate(-28deg)}}
+@media (prefers-reduced-motion:reduce){.an{animation:none!important}}

@@ -196,3 +196,41 @@ button:disabled svg[stroke="currentColor"],button:disabled svg [stroke="currentC
 @keyframes spIcoWiggle{0%,100%{transform:none}25%{transform:rotate(-10deg) scale(1.1)}50%{transform:rotate(8deg) scale(1.12)}75%{transform:rotate(-4deg) scale(1.06)}}
 @keyframes spIcoPop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
 @keyframes spIcoShine{0%,70%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+
+/* ---- animated icons (emoji replacements) ---- */
+@media (prefers-reduced-motion:no-preference){
+  .sp-gi[data-a] svg{transform-origin:50% 50%}
+  .sp-gi[data-a=spark] svg{animation:spgTw 2.4s ease-in-out infinite}
+  .sp-gi[data-a=warn] svg{animation:spgWarn 2s ease-in-out infinite}
+  .sp-gi[data-a=check] svg{animation:spgPopIn .55s cubic-bezier(.34,1.56,.64,1) both}
+  .sp-gi[data-a=float] svg{animation:spgFloat 3.2s ease-in-out infinite}
+  .sp-gi[data-a=launch] svg{animation:spgLaunch 2.6s ease-in-out infinite}
+  .sp-gi[data-a=pin] svg{animation:spgPin 2.8s ease-in-out infinite}
+  .sp-gi[data-a=blink] svg{animation:spgBlink 3.6s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=rot] svg{animation:spgRot .7s cubic-bezier(.4,0,.2,1)}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=rotl] svg{animation:spgRotL .7s cubic-bezier(.4,0,.2,1)}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=down] svg{animation:spgDown .8s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=up] svg{animation:spgUp .8s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=right] svg{animation:spgRight .8s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=left] svg{animation:spgLeft .8s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=out] svg{animation:spgOut .8s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=swap] svg{animation:spgSwap .9s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=vswap] svg{animation:spgVSwap .9s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=shake] svg{animation:spgShake .5s ease-in-out}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=snip] svg{animation:spgSnip .6s ease-in-out infinite}
+  :is(button,a,label,[role=button]):hover .sp-gi[data-a=check] svg{animation:spgPopIn .5s cubic-bezier(.34,1.56,.64,1)}
+}
+@keyframes spgTw{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(.8) rotate(25deg);opacity:.75}}
+@keyframes spgWarn{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes spgPopIn{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes spgFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+@keyframes spgLaunch{0%,100%{transform:translate(0,0)}50%{transform:translate(1.5px,-1.5px)}}
+@keyframes spgPin{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
+@keyframes spgBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes spgRot{to{transform:rotate(360deg)}}@keyframes spgRotL{to{transform:rotate(-360deg)}}
+@keyframes spgDown{50%{transform:translateY(2.5px)}}@keyframes spgUp{50%{transform:translateY(-2.5px)}}
+@keyframes spgRight{50%{transform:translateX(2.5px)}}@keyframes spgLeft{50%{transform:translateX(-2.5px)}}
+@keyframes spgOut{50%{transform:translate(2px,-2px)}}
+@keyframes spgSwap{50%{transform:scaleX(-1)}}@keyframes spgVSwap{50%{transform:scaleY(-1)}}
+@keyframes spgShake{20%,60%{transform:rotate(-12deg)}40%,80%{transform:rotate(12deg)}}
+@keyframes spgSnip{50%{transform:scaleY(.82)}}

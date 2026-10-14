@@ -725,6 +725,10 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
     '🔓': F(G('spgU', '#c7d2fe', '#94a3b8') + '<path d="M8 10.5V7.8a4 4 0 0 1 7.6-1.7" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round"/><rect x="5" y="10.5" width="14" height="10.5" rx="2.6" fill="url(#spgU)"/><circle cx="12" cy="15.2" r="1.6" fill="#334155"/>'),
     '🚀': F(G('spgR', '#ff9a5a', '#d6247a') + '<path d="M13.5 3.5c3.6-1.2 6.4-.6 7 0 .6.6 1.2 3.4 0 7l-6.2 6.2-6.9-6.9z" fill="url(#spgR)"/><circle cx="15.4" cy="8.6" r="1.8" fill="#fff"/><path d="M7.4 9.8 4 10.3l-1.5 3 4.2.4M14.2 16.6l-.5 3.4-3 1.5-.4-4.2" fill="#f59e0b"/><path d="M6.3 15.6c-1.5 1-2 3-2.2 4.1 1.1-.2 3.1-.7 4.1-2.2" fill="#ffd43b"/>')
   };
+  // how each icon moves (professional micro-animations; see sprinter.css)
+  var ANI = { '↻': 'rot', '↷': 'rot', '↶': 'rotl', '↓': 'down', '⤓': 'down', '↑': 'up', '⤒': 'up', '→': 'right', '➡': 'right', '↗': 'out', '⇄': 'swap', '↔': 'swap', '↕': 'vswap',
+    '✓': 'check', '✔': 'check', '✅': 'check', '❌': 'shake', '✕': 'shake', '⚠': 'warn', '✦': 'spark', '✨': 'spark', '🚀': 'launch', '✂': 'snip', '📌': 'pin', '🔒': 'shake', '🔓': 'pin', '👁': 'blink',
+    '📄': 'float', '📃': 'float', '🖼': 'float', '📷': 'float', '📂': 'float', '📁': 'float', '▣': 'float', '▤': 'float', '☰': 'none', '⇤': 'left', '←': 'left', '⇥': 'right', '▾': 'down' };
   var keys = Object.keys(MAP).sort(function (a, b) { return b.length - a.length; });
   var RE = new RegExp('(' + keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')\\uFE0F?', 'g');
   var TEST = new RegExp(RE.source);
@@ -737,7 +741,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
     RE.lastIndex = 0;
     while ((m = RE.exec(s))) {
       if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index)));
-      var span = document.createElement('span'); span.className = 'sp-gi'; span.setAttribute('aria-hidden', 'true');
+      var span = document.createElement('span'); span.className = 'sp-gi'; span.setAttribute('aria-hidden', 'true'); var an = ANI[m[1]]; if (an) span.setAttribute('data-a', an);
       span.innerHTML = MAP[m[1]]; frag.appendChild(span); last = RE.lastIndex;
     }
     if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
