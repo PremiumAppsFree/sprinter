@@ -184,3 +184,8 @@ section.group{margin-bottom:46px;scroll-margin-top:140px}
 .group[data-g=card] .tool .ic{background:linear-gradient(145deg,#fff5fa,#fbe4ef)}
 .group[data-g=pdf] .tool .ic{background:linear-gradient(145deg,#fffbea,#fbf1cc)}
 .tool .ic{width:54px;height:54px;border-radius:14px}
+
+/* realistic tool icons */
+.tool .ic{width:62px;height:62px;border-radius:16px}
+.tool .ic .i{width:48px;height:48px}
+@media (max-width:600px){.tool .ic{width:56px;height:56px}.tool .ic .i{width:44px;height:44px}}

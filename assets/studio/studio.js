@@ -251,6 +251,7 @@
     else im.clipPath = null;
   }
   ST.applyShape = applyShape;
+  try { if (F.Canvas2dFilterBackend) F.filterBackend = new F.Canvas2dFilterBackend(); } catch (e) {}
 
   // build a whole design {w,h,mm,pages:[{bg, objects}]} into page JSONs that fabric can load
   function buildPages(design, vals) {
@@ -994,7 +995,7 @@
     // build thumbnails two at a time so the page stays smooth
     var tq = [], tRun = 0;
     function thumbQ(job) { return new Promise(function (res, rej) { tq.push([job, res, rej]); pump(); }); }
-    function pump() { while (tRun < 2 && tq.length) { var j = tq.shift(); tRun++; j[0]().then(j[1], j[2]).then(function () { tRun--; setTimeout(pump, 0); }); } }
+    function pump() { while (tRun < 2 && tq.length) { var j = tq.shift(), pr; tRun++; try { pr = Promise.resolve(j[0]()); } catch (e) { pr = Promise.reject(e); } pr.then(j[1], j[2]).then(function () { tRun--; setTimeout(pump, 0); }); } }
     function thumbOf(t, sz) {
       var key = t.id + '@' + sz.k; if (thumbCache[key]) return thumbCache[key];
       var tv = withSample(t); thumbCache[key] = thumbQ(function () { return buildPages(designOf(t, sz), tv).then(function (pages) { return renderJSON(pages[0], sz.w, sz.h, 300 / Math.max(sz.w, sz.h), tv); }).then(function (c) { return c.toDataURL('image/jpeg', 0.82); }); });
@@ -1137,7 +1138,7 @@
       function setBg(v) { cv.setBackgroundColor(v, function () { cv.requestRenderAll(); record(); }); }
       function resizeTo(w, h, mm) {
         var keep = panel.querySelector('[data-k=keep]').checked, k = Math.min(w / doc.w, h / doc.h), dx = (w - doc.w * k) / 2, dy = (h - doc.h * k) / 2;
-        saveCur();
+        saveCur(); touched = true;
         var jobs = doc.pages.map(function (j) {
           return new Promise(function (r) {
             var sc = new F.StaticCanvas(null, { width: doc.w, height: doc.h }); sc.loadFromJSON(j, function () {
@@ -1171,7 +1172,7 @@
     function tabLayers() {
       var objs = cv.getObjects().slice().reverse(), a = cv.getActiveObject();
       var name = function (o) { return o.nm || (o.text ? o.text.slice(0, 30) : o.ph ? o.ph.toLowerCase() : o.type); };
-      panel.innerHTML = '<h3>Layers</h3><p class="st-note">Top of the list is in front. Tap to select.</p>' + objs.map(function (o, i) { return '<div class="st-layer' + (o === a ? ' sel' : '') + '" data-i="' + (objs.length - 1 - i) + '"><em>' + esc(name(o)) + '</em><button data-l="vis" title="Show / hide">' + (o.visible === false ? '◌' : '●') + '</button><button data-l="lock" title="Lock">' + (o.stLock ? '🔒' : '🔓') + '</button><button data-l="up">↑</button><button data-l="down">↓</button></div>'; }).join('');
+      panel.innerHTML = '<h3>Layers</h3><p class="st-note">Top of the list is in front. Tap to select.</p>' + objs.map(function (o, i) { return '<div class="st-layer' + (o === a ? ' sel' : '') + '" data-i="' + (objs.length - 1 - i) + '"><em>' + esc(name(o)) + '</em><button data-l="vis" title="Show / hide">' + (o.visible === false ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3 3.8M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 4.4-1"/></svg>' : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>') + '</button><button data-l="lock" title="Lock">' + (o.stLock ? '🔒' : '🔓') + '</button><button data-l="up">↑</button><button data-l="down">↓</button></div>'; }).join('');
       panel.onclick = function (e) {
         var row = e.target.closest('[data-i]'); if (!row) return; var o = cv.getObjects()[+row.dataset.i], b = e.target.closest('[data-l]');
         if (!b) { if (o.visible !== false) { cv.setActiveObject(o); cv.requestRenderAll(); } renderTab(); return; }

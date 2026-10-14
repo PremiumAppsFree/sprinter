@@ -714,6 +714,15 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
     '▣': F(G('spgCard', '#2fd0f5', '#0077c8') + '<rect x="2.5" y="5.5" width="19" height="13" rx="2.4" fill="url(#spgCard)"/><rect x="5" y="8.5" width="5" height="6.5" rx="1" fill="#fff"/><path d="M12.5 9.5h6M12.5 12h5M12.5 14.5h3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>'),
     '▤': DOC,
     '📄': DOC, '📃': DOC, '🖼': PHOTO, '📷': PHOTO, '📂': FOLDER, '📁': FOLDER,
+    '↔': S('<path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/>'), '↕': S('<path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/>'),
+    '⇤': S('<path d="M4 5v14M20 12H8M13 7l-5 5 5 5"/>'), '⇥': S('<path d="M20 5v14M4 12h12M11 7l5 5-5 5"/>'),
+    '⤒': S('<path d="M5 4h14M12 20V8M7 13l5-5 5 5"/>'), '⤓': S('<path d="M5 20h14M12 4v12M7 11l5 5 5-5"/>'),
+    '▾': S('<path d="M7 10l5 5 5-5"/>'), '✕': S('<path d="M6 6l12 12M18 6 6 18"/>'),
+    '●': F('<circle cx="12" cy="12" r="5.5" fill="currentColor"/>'), '◌': S('<circle cx="12" cy="12" r="6" stroke-dasharray="2 3"/>'),
+    '👁': S('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+    '📌': F(G('spgPin', '#ff7aa8', '#d6247a') + '<path d="M15 2.8l6.2 6.2-2.4.6-3.3 3.3.4 4.6-1.6 1.6-3.9-3.9L6 19.6 4.4 18l4.4-4.4-3.9-3.9 1.6-1.6 4.6.4 3.3-3.3z" fill="url(#spgPin)"/>'),
+    '🔒': F(G('spgL', '#ffd84d', '#f59e0b') + '<path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" fill="none" stroke="#64748b" stroke-width="2.2"/><rect x="5" y="10.5" width="14" height="10.5" rx="2.6" fill="url(#spgL)"/><circle cx="12" cy="15.2" r="1.6" fill="#7c4a03"/><path d="M12 16v2" stroke="#7c4a03" stroke-width="1.6" stroke-linecap="round"/>'),
+    '🔓': F(G('spgU', '#c7d2fe', '#94a3b8') + '<path d="M8 10.5V7.8a4 4 0 0 1 7.6-1.7" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round"/><rect x="5" y="10.5" width="14" height="10.5" rx="2.6" fill="url(#spgU)"/><circle cx="12" cy="15.2" r="1.6" fill="#334155"/>'),
     '🚀': F(G('spgR', '#ff9a5a', '#d6247a') + '<path d="M13.5 3.5c3.6-1.2 6.4-.6 7 0 .6.6 1.2 3.4 0 7l-6.2 6.2-6.9-6.9z" fill="url(#spgR)"/><circle cx="15.4" cy="8.6" r="1.8" fill="#fff"/><path d="M7.4 9.8 4 10.3l-1.5 3 4.2.4M14.2 16.6l-.5 3.4-3 1.5-.4-4.2" fill="#f59e0b"/><path d="M6.3 15.6c-1.5 1-2 3-2.2 4.1 1.1-.2 3.1-.7 4.1-2.2" fill="#ffd43b"/>')
   };
   var keys = Object.keys(MAP).sort(function (a, b) { return b.length - a.length; });
