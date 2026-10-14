@@ -186,7 +186,37 @@
   add('rings', { name: 'Wedding rings', cat: 'Wedding', w: 320, h: 220, cols: ['#d4a017', '#f5d76e'], svg: function (c) { return svg(320, 220, '<circle cx="120" cy="125" r="80" fill="none" stroke="' + c[0] + '" stroke-width="16"/><circle cx="200" cy="125" r="80" fill="none" stroke="' + c[1] + '" stroke-width="16"/><path d="M200 45 L215 20 L230 45 L215 60Z" fill="#bfdbfe" stroke="#93c5fd" stroke-width="3"/>'); } });
   add('toran', { name: 'Toran', cat: 'Wedding', w: 800, h: 180, cols: ['#f59e0b', '#16a34a', '#dc2626'], svg: function (c) { var o = '<path d="M0 20 Q 400 60 800 20" stroke="' + c[2] + '" stroke-width="8" fill="none"/>'; for (var i = 0; i < 16; i++) { var x = 25 + i * 50, y = 20 + Math.sin(i / 15 * Math.PI) * 40 * 0.5; o += at(x, y, 180, 1, leaf(70 + (i % 2) * 30, 18, i % 2 ? c[1] : mix(c[1], '#fff', 0.2))); if (i % 2 === 0) o += at(x + 25, y + 60, 0, 1, marigold(16, c[0], mix(c[0], c[2], 0.4))); } return svg(800, 180, o); } });
 
-  ART.CATS = ['Flowers', 'Leaves', 'Cute', 'Doodles', 'Shapes', 'Frames', 'School', 'Wedding'];
+  // ---------- ID card parts ----------
+  function ico(id, name, glyph) {   // round-square icon: c[0] tile, c[1] glyph
+    add(id, { name: name, cat: 'Icons', w: 100, h: 100, cols: ['#e0edff', '#1d4ed8'], svg: function (c) { return svg(100, 100, '<rect x="2" y="2" width="96" height="96" rx="28" fill="' + c[0] + '"/>' + glyph.replace(/FG/g, c[1])); } });
+  }
+  ico('ic-phone', 'Phone icon', '<path d="M36 26c3-3 7-3 9 0l5 7c2 3 1 6-1 8l-4 3c3 7 8 12 15 15l3-4c2-2 5-3 8-1l7 5c3 2 3 6 0 9l-5 5c-4 4-11 4-18 1-12-6-22-16-28-28-3-7-3-14 1-18z" fill="FG"/>');
+  ico('ic-drop', 'Blood icon', '<path d="M50 18c11 15 22 27 22 40a22 22 0 0 1-44 0c0-13 11-25 22-40z" fill="FG"/><path d="M40 60a10 10 0 0 0 10 10" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/>');
+  ico('ic-cake', 'Birthday icon', '<rect x="24" y="50" width="52" height="28" rx="6" fill="FG"/><path d="M24 60c6 5 11 5 17 0s11-5 17 0 12 5 18 0" stroke="#fff" stroke-width="4" fill="none" opacity=".7"/><rect x="47" y="34" width="6" height="16" rx="2" fill="FG"/><path d="M50 20c4 5 4 9 0 11-4-2-4-6 0-11z" fill="#f59e0b"/>');
+  ico('ic-user', 'Person icon', '<circle cx="50" cy="38" r="14" fill="FG"/><path d="M24 78c2-15 13-22 26-22s24 7 26 22z" fill="FG"/>');
+  ico('ic-home', 'Address icon', '<path d="M50 22 20 48h8v28h16V60h12v16h16V48h8z" fill="FG"/>');
+  ico('ic-id', 'ID icon', '<rect x="20" y="30" width="60" height="42" rx="7" fill="FG"/><circle cx="37" cy="47" r="7" fill="#fff"/><path d="M27 64c2-6 6-8 10-8s8 2 10 8z" fill="#fff"/><rect x="53" y="42" width="20" height="5" rx="2.5" fill="#fff"/><rect x="53" y="53" width="14" height="5" rx="2.5" fill="#fff" opacity=".7"/>');
+  ico('ic-book', 'Class icon', '<path d="M20 30c10-4 20-4 30 2v44c-10-6-20-6-30-2z" fill="FG"/><path d="M80 30c-10-4-20-4-30 2v44c10-6 20-6 30-2z" fill="FG" opacity=".75"/>');
+  ico('ic-cal', 'Date icon', '<rect x="22" y="28" width="56" height="48" rx="8" fill="FG"/><rect x="22" y="28" width="56" height="13" rx="6" fill="FG"/><rect x="28" y="46" width="44" height="24" rx="3" fill="#fff" opacity=".9"/><path d="M36 22v12M64 22v12" stroke="FG" stroke-width="6" stroke-linecap="round"/><rect x="33" y="51" width="8" height="6" rx="1.5" fill="FG"/><rect x="46" y="51" width="8" height="6" rx="1.5" fill="FG" opacity=".6"/>');
+  ico('ic-mail', 'Mail icon', '<rect x="20" y="30" width="60" height="42" rx="7" fill="FG"/><path d="M22 34l28 20 28-20" stroke="#fff" stroke-width="5" fill="none" stroke-linejoin="round"/>');
+  ico('ic-globe', 'Web icon', '<circle cx="50" cy="50" r="27" fill="FG"/><path d="M23 50h54M50 23c-10 10-10 44 0 54M50 23c10 10 10 44 0 54" stroke="#fff" stroke-width="4" fill="none" opacity=".8"/>');
+  ico('ic-alert', 'Emergency icon', '<path d="M50 20 82 76H18z" fill="FG"/><path d="M50 40v18M50 66v1" stroke="#fff" stroke-width="7" stroke-linecap="round"/>');
+  add('guilloche', { name: 'Security pattern', cat: 'ID card', w: 600, h: 400, cols: ['#2563eb'], svg: function (c) {
+    var o = '';
+    for (var k = 0; k < 16; k++) { var d = 'M0 ' + (200 + Math.sin(k) * 10); for (var x = 0; x <= 600; x += 10) { var y = 200 + Math.sin(x / 38 + k * 0.42) * (60 + k * 6) * Math.cos(x / 170 + k * 0.2); d += ' L' + x + ' ' + n(y); } o += '<path d="' + d + '" fill="none" stroke="' + c[0] + '" stroke-width="1.1" opacity=".55"/>'; }
+    return svg(600, 400, o);
+  } });
+  add('rosette', { name: 'Security rosette', cat: 'ID card', w: 300, h: 300, cols: ['#2563eb'], svg: function (c) {
+    var o = ''; for (var k = 0; k < 36; k++) o += '<ellipse cx="150" cy="150" rx="140" ry="46" fill="none" stroke="' + c[0] + '" stroke-width=".9" opacity=".5" transform="rotate(' + k * 5 + ' 150 150)"/>';
+    return svg(300, 300, o);
+  } });
+  add('holo', { name: 'Hologram', cat: 'ID card', w: 120, h: 120, cols: ['#ffffff'], svg: function () {
+    return svg(120, 120, '<defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset=".25" stop-color="#a5f3fc"/><stop offset=".5" stop-color="#f0abfc"/><stop offset=".75" stop-color="#bbf7d0"/><stop offset="1" stop-color="#c7d2fe"/></linearGradient></defs><circle cx="60" cy="60" r="56" fill="url(#hg)"/><circle cx="60" cy="60" r="56" fill="none" stroke="#fff" stroke-width="3" opacity=".8"/>' + at(60, 60, 0, 1, sparkle(30, '#ffffff')) + '<circle cx="60" cy="60" r="44" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 4" opacity=".8"/>');
+  } });
+  add('chip', { name: 'Card chip', cat: 'ID card', w: 120, h: 90, cols: ['#e6c35c'], svg: function (c) {
+    return svg(120, 90, '<defs>' + lg('cg', mix(c[0], '#ffffff', 0.45), mix(c[0], '#000000', 0.15), 1, 1) + '</defs><rect x="4" y="4" width="112" height="82" rx="14" fill="url(#cg)" stroke="' + mix(c[0], '#000', 0.3) + '" stroke-width="2"/><path d="M4 32h36v26H4M116 32H80v26h36M40 4v24h40V4M40 86V62h40v24M40 32h40v26H40z" fill="none" stroke="' + mix(c[0], '#000', 0.3) + '" stroke-width="2.4"/>');
+  } });
+  ART.CATS = ['Flowers', 'Leaves', 'Cute', 'Doodles', 'Shapes', 'Frames', 'School', 'Wedding', 'Icons', 'ID card'];
   var cache = {};
   ST.artURL = function (id, cols) {
     var a = ART[id]; if (!a) return '';
