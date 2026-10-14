@@ -302,7 +302,7 @@
     var S = this; S.cfg = cfg;
     var sizes = cfg.sizes, size = sizes[0], vals = {}, pinned = {};
     var doc = { tool: cfg.tool, w: size.w, h: size.h, mm: size.mm || [size.w * 25.4 / 96, size.h * 25.4 / 96], pages: [], tplId: null, name: cfg.title };
-    var cur = 0, zoom = 1, cv = null, hist = [], fut = [], muted = 0, dirty = false, sampleOf = {};
+    var cur = 0, zoom = 1, cv = null, hist = [], fut = [], muted = 0, dirty = false, sampleOf = {}, touched = false, inApply = 0;
     try { vals = JSON.parse(localStorage.getItem('st-vals-' + cfg.tool) || '{}') || {}; } catch (e) {}
     (cfg.fields || []).forEach(function (f) { if (vals[f.k] == null) vals[f.k] = f.def || ''; });
     S.vals = vals;
@@ -389,7 +389,7 @@
 
     // ---------- history ----------
     function snap() { return JSON.stringify(cv.toJSON(PROPS)); }
-    function record() { if (muted) return; var sn = snap(); if (hist[hist.length - 1] === sn) return; hist.push(sn); if (hist.length > 50) hist.shift(); fut = []; dirty = true; syncUndo(); autosave(); }
+    function record() { if (muted) return; if (!inApply) touched = true; var sn = snap(); if (hist[hist.length - 1] === sn) return; hist.push(sn); if (hist.length > 50) hist.shift(); fut = []; dirty = true; syncUndo(); autosave(); }
     function syncUndo() { top.querySelector('[data-a=undo]').disabled = hist.length < 2; top.querySelector('[data-a=redo]').disabled = !fut.length; }
     function restore(json) { muted++; return new Promise(function (r) { var j = JSON.parse(json); fontsFor(j.objects).then(function () { cv.loadFromJSON(j, function () { lockAll(); cv.renderAll(); muted--; r(); }); }); }); }
     cv.on('object:modified', record); cv.on('object:added', function () { if (!muted) record(); }); cv.on('object:removed', function () { if (!muted) record(); });
@@ -428,14 +428,14 @@
     function sizeById(k) { return sizes.find(function (s) { return s.k === k; }) || sizes[0]; }
     function designOf(t, sz) { ST.curVals = withSample(t); var d = t.build(sz.w, sz.h, t.pal || {}, sz); d.w = sz.w; d.h = sz.h; return d; }
     function useDesign(design, meta) {
-      busy(true, 'Opening design…');
+      var quiet = meta && meta.quiet; if (!quiet) busy(true, 'Opening design…');
       return buildPages(design, valsFull()).then(function (pages) {
         doc.pages = pages; doc.w = design.w; doc.h = design.h; doc.mm = design.mm || (meta && meta.mm) || [design.w * 25.4 / 96, design.h * 25.4 / 96];
         doc.pageNames = design.pageNames || null; doc.tplId = meta && meta.id || null; cur = 0;
         doc.pages[0] && (cur = 0); muted++;
         return new Promise(function (r) {
           var j = doc.pages[0]; fontsFor(j.objects).then(function () {
-            cv.loadFromJSON(j, function () { lockAll(); fit(); muted--; hist = [snap()]; fut = []; syncUndo(); renderPagesBar(); applyVals(true).then(function () { busy(false); autosave(); r(); }); });
+            cv.loadFromJSON(j, function () { lockAll(); if (!quiet) fit(); muted--; hist = [snap()]; fut = []; touched = false; syncUndo(); renderPagesBar(); applyVals(true).then(function () { if (!quiet) busy(false); autosave(); r(); }); });
           });
         });
       }).catch(function (e) { busy(false); toast('Could not open this design.'); console.error(e); });
@@ -457,9 +457,16 @@
     function applyVals(quiet) {
       var objs = cv.getObjects();
       objs.forEach(function (o) { if (o.tpl != null && /\{\{/.test(o.tpl) && o.text !== undefined) { var t = fillTags(o.tpl, vals); if (t !== o.text) { o.set('text', t); o.initDimensions && o.initDimensions(); } } });
-      return refreshCodes(cv, vals).then(function () { cv.requestRenderAll(); if (!quiet) { record(); } });
+      inApply++;
+      return refreshCodes(cv, vals).then(function () { cv.requestRenderAll(); if (!quiet) { record(); } inApply--; }, function (e) { inApply--; throw e; });
     }
     S.applyVals = applyVals;
+    // while the design is still the untouched template, typed details re-flow the whole layout (long titles, names…)
+    function reflow() {
+      if (!doc.tplId || touched || !tplById(doc.tplId)) return applyVals();
+      var keep = cur, ld = doc.pages.length;
+      return useDesign(designOf(tplById(doc.tplId), size), { id: doc.tplId, mm: doc.mm, quiet: true }).then(function () { if (keep && keep < doc.pages.length && doc.pages.length === ld) return loadPage(keep).then(renderPagesBar); });
+    }
     function saveVals() { try { localStorage.setItem('st-vals-' + cfg.tool, JSON.stringify(pickSaved())); } catch (e) {} }
     function pickSaved() { var o = {}; Object.keys(vals).forEach(function (k) { if (k[0] !== '@' || String(vals[k]).length < 400000) o[k] = vals[k]; }); return o; }
     S.setVals = function (v) { Object.assign(vals, v); return applyVals(true); };
@@ -886,7 +893,7 @@
       h += '<div class="st-row" style="margin-top:8px"><button class="st-btn" data-x="clear">' + I.del + 'Clear all</button><button class="st-btn" data-x="demo">Fill sample details</button></div>';
       panel.innerHTML = h;
       var t = null;
-      panel.oninput = function (e) { var k = e.target.dataset.k; if (!k) return; vals[k] = e.target.value; clearTimeout(t); t = setTimeout(function () { saveVals(); applyVals(); }, 250); };
+      panel.oninput = function (e) { var k = e.target.dataset.k; if (!k) return; vals[k] = e.target.value; clearTimeout(t); t = setTimeout(function () { saveVals(); reflow(); }, 450); };
       panel.onclick = function (e) {
         var b = e.target.closest('[data-ph]');
         if (b) { var k = b.dataset.ph; pickFile('image/*').then(function (fs) { if (!fs[0]) return; fileToURL(fs[0]).then(function (u) { return runPhotoSteps(u, { sign: k === 'SIGN', ratio: k === 'SIGN' ? 3 : 0.8 }); }).then(function (r) { if (!r) return; vals['@' + k] = r; saveVals(); applyVals().then(renderTab); }); }); return; }
@@ -894,7 +901,7 @@
         var x = e.target.closest('[data-x]'); if (!x) return;
         if (x.dataset.x === 'clear') { if (!confirm('Clear all details?')) return; f.forEach(function (q) { vals[q.k] = ''; }); }
         else f.forEach(function (q) { if (q.def != null) vals[q.k] = q.def; });
-        saveVals(); applyVals(); renderTab();
+        saveVals(); reflow(); renderTab();
       };
     }
     function addObj(o, select) { cv.add(o); if (select !== false) { cv.setActiveObject(o); } cv.requestRenderAll(); if (mobile()) panel.hidden = true; }

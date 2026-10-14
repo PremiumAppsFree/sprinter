@@ -34,6 +34,7 @@
     ];
     return K.stack(x, w, o.top0 || m + H * 0.1, H - m - H * 0.06, items);
   }
+  K.invite = invite; K.mgScale = sc;
   var INV = ['a4p', 'sq', 'story', 'a4l'];
   var layouts = [
     { id: 'royal', name: 'Royal Maroon', cat: 'Hindu', sizes: INV, pals: ['maroon', 'purple', 'emerald'], build: function (W, H, p) {

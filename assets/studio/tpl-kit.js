@@ -73,13 +73,18 @@
     return out;
   };
 
+  // the text a stack item will really show (typed details), else its estimate
+  K.realText = function (it) {
+    var ST = window.SPStudio, real = ST.curVals && ST.fillTags && it.text ? ST.fillTags(it.text, ST.curVals) : '';
+    return (real && real.trim() ? real : (it.est || it.text)) || ' ';
+  };
   // centred column of text lines that always fits between top and bottom (any page size)
   // items: {text,size,font,color,bold,italic,lh,ls,gap,align,stroke,sw,shadow} | {div:col,w} | {space:px}
   K.stack = function (x, w, top, bottom, items, o) {
     o = o || {};
     var mc = (K._mc = K._mc || document.createElement('canvas').getContext('2d'));
     function lines(it) {
-      var txt = it.est || (window.SPStudio.curVals && window.SPStudio.fillTags ? window.SPStudio.fillTags(it.text, window.SPStudio.curVals) : it.text) || ' ';
+      var txt = K.realText(it);
       mc.font = (it.bold ? (it.bold === true ? 700 : it.bold) : 400) + ' ' + it.size + 'px "' + (it.font || 'Poppins') + '", Poppins, sans-serif';
       var extra = (it.ls || 0) / 1000 * it.size, lim = w * 0.97;
       return String(txt).split('\n').reduce(function (n, para) {
@@ -89,9 +94,19 @@
       }, 0);
     }
     function hOf(it, k) { if (it.space) return it.space * k; if (it.div) return 14 * k + (it.gap || 10) * k; return it.size * k * (it.lh || 1.2) * lines({ text: it.text, est: it.est, size: it.size * k, font: it.font, bold: it.bold, ls: it.ls }) * 1.04 + (it.gap == null ? 10 : it.gap) * k; }
+    // the widest single word must fit too (a long word cannot wrap)
+    function wordsFit(k) {
+      return items.every(function (it) {
+        if (it.space || it.div || !it.text) return true;
+        var txt = K.realText(it), sz = it.size * k;
+        mc.font = (it.bold ? (it.bold === true ? 700 : it.bold) : 400) + ' ' + sz + 'px "' + (it.font || 'Poppins') + '", Poppins, sans-serif';
+        var extra = (it.ls || 0) / 1000 * sz;
+        return String(txt).split(/\s+/).every(function (wd) { return mc.measureText(wd).width + wd.length * extra <= w * 0.86; });
+      });
+    }
     var k = 1, total = items.reduce(function (a, it) { return a + hOf(it, 1); }, 0);
     k = Math.min(o.maxK || 1.3, (bottom - top) / Math.max(1, total));
-    for (var tries = 0; tries < 14; tries++) { total = items.reduce(function (a, it) { return a + hOf(it, k); }, 0); if (total <= bottom - top) break; k *= 0.92; }
+    for (var tries = 0; tries < 24; tries++) { total = items.reduce(function (a, it) { return a + hOf(it, k); }, 0); if (total <= bottom - top && wordsFit(k)) break; k *= 0.94; }
     var y = top + (o.valign === 'top' ? 0 : Math.max(0, (bottom - top - total) / 2)), out = [];
     items.forEach(function (it) {
       if (it.space) { y += it.space * k; return; }
