@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Certificate Maker — free school, sports &amp; award certificates — S Printer</title>
-<meta name="description" content="Free certificate maker: merit, participation, appreciation, sports and kids certificates. 48 professional designs, add logo and signature, print or download PDF.">
+<meta name="description" content="Free certificate maker: merit, participation, appreciation, sports and kids certificates. 60 professional designs, add logo and signature, print or download PDF.">
 <meta name="theme-color" content="#1B2330">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=24">
 <script src="../assets/sprinter/sprinter.js?v=35"></script>
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
-<link rel="stylesheet" href="../assets/studio/studio.css?v=2">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
 </head>
@@ -56,13 +56,15 @@
 <script src="../assets/vendor/studio/fabric.min.js"></script>
 <script src="../assets/vendor/studio/qrcode.js"></script>
 <script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
-<script src="../assets/studio/studio.js?v=3"></script>
+<script src="../assets/studio/art.js?v=1"></script>
+<script src="../assets/studio/studio.js?v=4"></script>
 
 <script src="../assets/studio/tpl-kit.js?v=3"></script>
-<script src="../assets/studio/tpl-cert.js?v=1"></script>
+<script src="../assets/studio/tpl-cert.js?v=2"></script>
+<script src="../assets/studio/tpl-cert-aes.js?v=1"></script>
 <script>
   (function () {
-    var K = SPStudio.K, cfg = {"tool": "certificate", "title": "Certificate", "file": "Certificate", "sizes": ["a4l", "a4p"], "cats": ["Classic", "Modern", "Corporate", "Kids", "Sports & Medal"], "photoFields": ["LOGO", "SIGN"], "dataTitle": "Certificate details", "fields": [{"k": "ORG", "label": "School / organisation", "group": "Organisation", "def": "Sunrise Public School"}, {"k": "ORG_TAG", "label": "Affiliation / place", "def": "Affiliated to CBSE · Jaipur"}, {"k": "LOGO", "label": "Logo", "type": "photo"}, {"k": "CERT_TITLE", "label": "Certificate title (e.g. Certificate of Merit / Participation)", "group": "Certificate", "def": "Certificate of Achievement"}, {"k": "CERT_SUB", "label": "Line before the name", "def": "This certificate is proudly presented to"}, {"k": "NAME", "label": "Name", "def": "Aarav Sharma"}, {"k": "REASON", "label": "For / reason", "type": "textarea", "rows": 3, "def": "for securing First Position in the Annual Science Exhibition held on 15 November 2026. We appreciate the hard work and wish a bright future."}, {"k": "DATE", "label": "Date", "def": "15 November 2026"}, {"k": "PLACE", "label": "Place", "def": "Jaipur"}, {"k": "SIGN1_NAME", "label": "Left signature — name", "group": "Signatures", "def": "Mrs. Neha Verma"}, {"k": "SIGN1_ROLE", "label": "Left signature — post", "def": "Class Teacher"}, {"k": "SIGN2_NAME", "label": "Right signature — name", "def": "Dr. R. K. Sharma"}, {"k": "SIGN2_ROLE", "label": "Right signature — post", "def": "Principal"}, {"k": "SIGN", "label": "Signature image (right)", "type": "photo"}], "aiHint": "e.g. Certificate of Merit for class 5 student, kids style with stars, blue and yellow"};
+    var K = SPStudio.K, cfg = {"tool": "certificate", "title": "Certificate", "file": "Certificate", "sizes": ["a4l", "a4p"], "cats": ["Pastel & Floral", "Classic", "Modern", "Corporate", "Kids", "Sports & Medal"], "photoFields": ["LOGO", "SIGN"], "dataTitle": "Certificate details", "fields": [{"k": "ORG", "label": "School / organisation", "group": "Organisation", "def": "Sunrise Public School"}, {"k": "ORG_TAG", "label": "Affiliation / place", "def": "Affiliated to CBSE · Jaipur"}, {"k": "LOGO", "label": "Logo", "type": "photo"}, {"k": "CERT_TITLE", "label": "Certificate title (e.g. Certificate of Merit / Participation)", "group": "Certificate", "def": "Certificate of Achievement"}, {"k": "CERT_SUB", "label": "Line before the name", "def": "This certificate is proudly presented to"}, {"k": "NAME", "label": "Name", "def": "Aarav Sharma"}, {"k": "REASON", "label": "For / reason", "type": "textarea", "rows": 3, "def": "for securing First Position in the Annual Science Exhibition held on 15 November 2026. We appreciate the hard work and wish a bright future."}, {"k": "DATE", "label": "Date", "def": "15 November 2026"}, {"k": "PLACE", "label": "Place", "def": "Jaipur"}, {"k": "SIGN1_NAME", "label": "Left signature — name", "group": "Signatures", "def": "Mrs. Neha Verma"}, {"k": "SIGN1_ROLE", "label": "Left signature — post", "def": "Class Teacher"}, {"k": "SIGN2_NAME", "label": "Right signature — name", "def": "Dr. R. K. Sharma"}, {"k": "SIGN2_ROLE", "label": "Right signature — post", "def": "Principal"}, {"k": "SIGN", "label": "Signature image (right)", "type": "photo"}], "aiHint": "e.g. Certificate of Merit for class 5 student, kids style with stars, blue and yellow"};
     cfg.sizes = cfg.sizes.map(function (k) { return K.SIZES[k]; });
     window.__studio = new SPStudio.Studio(document.getElementById('studio'), cfg);
     __studio.init();

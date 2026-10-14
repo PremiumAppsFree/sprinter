@@ -13,6 +13,7 @@
   K.B = function (x, y, w, h, data, o) { return ex({ t: 'barcode', x: x, y: y, w: w, h: h, data: data }, o); };
   K.POLY = function (pts, fill, o) { return ex({ t: 'poly', pts: pts, fill: fill }, o); };
   K.PATH = function (d, fill, o) { return ex({ t: 'path', d: d, fill: fill }, o); };
+  K.A = function (id, x, y, w, h, o) { var A = (window.SPStudio.ART || {})[id], hh = h; if (A && hh == null) hh = w * A.h / A.w; return ex({ t: 'art', art: id, x: x, y: y, w: w, h: hh }, o); };   // illustration / sticker
   K.G = function (angle) { return { angle: angle, stops: [].slice.call(arguments, 1) }; };
 
   // a wave across the page: fills above (top) or below (bottom) the wave line

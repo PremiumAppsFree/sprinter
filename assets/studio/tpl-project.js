@@ -77,6 +77,7 @@
 
   // ---------- inner pages (certificate, acknowledgement, index) ----------
   function frameFor(st, W, H, p) {
+    if (typeof st === 'function') return st(W, H, p);
     var o = [], box = { x: 90, w: W - 180, top: 90, bot: H - 90 };
     if (st === 'border') { o = K.frame(W, H, 28, p.b, p.d, true); box = { x: 100, w: W - 200, top: 96, bot: H - 100 }; }
     else if (st === 'band') { o = [R(0, 0, W, 112, K.G(0, p.a, p.b)), R(0, 112, W, 6, p.acc), R(0, H - 40, W, 40, p.a)]; box = { x: 80, w: W - 160, top: 140, bot: H - 70, onBand: true }; }
@@ -102,7 +103,7 @@
   function certPage(st, W, H, p) {
     var f = frameFor(st, W, H, p), b = f.box, o = f.o.concat(headSmall(b, p));
     o = o.concat(K.stack(b.x, b.w, b.top + 176, b.bot - 230, [
-      { text: 'CERTIFICATE', size: 54, font: 'Cinzel', bold: 700, color: p.a, ls: 200, gap: 6 },
+      { text: p.hs ? 'Certificate' : 'CERTIFICATE', size: p.hs ? 76 : 54, font: p.hf || 'Cinzel', bold: 700, color: p.a, ls: p.hs ? 0 : 200, gap: 6 },
       { div: p.d, w: 260, gap: 26 },
       { text: CERT, size: 19, lh: 1.8, color: '#1f2937', align: 'justify-left', gap: 0, font: 'Poppins' }
     ], { maxK: 1.1 }));
@@ -116,7 +117,7 @@
   function ackPage(st, W, H, p) {
     var f = frameFor(st, W, H, p), b = f.box, o = f.o;
     o = o.concat(K.stack(b.x, b.w, b.top + 20, b.bot - 20, [
-      { text: 'ACKNOWLEDGEMENT', size: 46, font: 'Cinzel', bold: 700, color: p.a, ls: 120, gap: 6 },
+      { text: p.hs ? 'Acknowledgement' : 'ACKNOWLEDGEMENT', size: p.hs ? 66 : 46, font: p.hf || 'Cinzel', bold: 700, color: p.a, ls: p.hs ? 0 : 120, gap: 6 },
       { div: p.d, w: 260, gap: 34 },
       { text: '{{ACK}}', size: 19, lh: 1.85, color: '#1f2937', align: 'justify-left', gap: 46, est: EST_ACK },
       { text: '{{NAME}}', size: 24, bold: 700, color: p.a, align: 'right', gap: 4, font: 'Playfair Display' },
@@ -126,7 +127,7 @@
   }
   function indexPage(st, W, H, p) {
     var f = frameFor(st, W, H, p), b = f.box, o = f.o;
-    o.push(T(b.x, b.top + 10, b.w, 'INDEX', 50, { font: 'Cinzel', bold: 700, color: p.a, align: 'center', ls: 300 }));
+    o.push(T(b.x, b.top + (p.hs ? 0 : 10), b.w, p.hs ? 'Index' : 'INDEX', p.hs ? 70 : 50, { font: p.hf || 'Cinzel', bold: 700, color: p.a, align: 'center', ls: p.hs ? 0 : 300 }));
     o = o.concat(K.divider(b.x + b.w / 2, b.top + 86, 220, p.d));
     var ty = b.top + 120, hh = 50, rp = 50, n = Math.min(14, Math.floor((b.bot - ty - hh - 10) / rp)), c1 = 76, c3 = 92, c4 = 96, x = b.x, w = b.w, tw = w - c1 - c3 - c4;
     o.push(R(x, ty, w, hh, p.a, { r: 6 }));
@@ -375,4 +376,5 @@
     });
   });
   ST.register(out);
+  K.pp = { certPage: certPage, ackPage: ackPage, indexPage: indexPage, scale: scale, school: school, title: title, byTo: byTo, byCol: byCol, photo: photo, logo: logo, PN: PN };
 })();
