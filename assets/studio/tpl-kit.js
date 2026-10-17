@@ -138,6 +138,8 @@
     sq: { k: 'sq', label: 'Square post (1080 × 1080)', w: 1080, h: 1080, mm: [152.4, 152.4] },
     story: { k: 'story', label: 'Story / Reel (1080 × 1920)', w: 1080, h: 1920, mm: [101.6, 180.6] },
     hd: { k: 'hd', label: 'HD banner (1920 × 1080)', w: 1920, h: 1080, mm: [508, 285.75] },
+    card: { k: 'card', label: 'Card sticker / skin (85.6 × 54 mm)', w: 1012, h: 638, mm: [85.6, 54] },
+    cardp: { k: 'cardp', label: 'Card sticker vertical (54 × 85.6 mm)', w: 638, h: 1012, mm: [54, 85.6] },
     idl: { k: 'idl', label: 'ID card landscape (85.6 × 54 mm)', w: 1012, h: 638, mm: [85.6, 54] },
     idp: { k: 'idp', label: 'ID card portrait (54 × 85.6 mm)', w: 638, h: 1012, mm: [54, 85.6] },
     a5p: { k: 'a5p', label: 'A5 portrait (148 × 210 mm)', w: 559, h: 794, mm: [148, 210] }

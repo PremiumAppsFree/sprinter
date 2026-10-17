@@ -1168,7 +1168,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
 (function () {
   'use strict';
   if (!/\/(service|tool)\//.test(location.pathname)) return;
-  var OWN = /\/(cv-resume-maker|marriage-card-creator|pro-id-maker|project-paper-maker|certificate-maker|pro-poster-maker|job-application-maker|shop-promotion|payment-qr|portal-services|govt-jobs|multi-doc|size-changer|scan-document|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)(\.html)?$/;
+  var OWN = /\/(cv-resume-maker|marriage-card-creator|pro-id-maker|project-paper-maker|certificate-maker|card-sticker-maker|pro-poster-maker|job-application-maker|shop-promotion|payment-qr|portal-services|govt-jobs|multi-doc|size-changer|scan-document|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)(\.html)?$/;
   if (OWN.test(location.pathname)) return;
   var files = [], btn = null;
   var BASE = (function () { var s = document.querySelector('script[src*="assets/sprinter/sprinter.js"]'); return s ? s.src.replace(/assets\/sprinter\/sprinter\.js.*$/, '') : '../'; })();

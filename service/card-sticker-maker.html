@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Premium Card Sticker Maker — metal look debit / credit card skins at exact size — S Printer</title>
+<meta name="description" content="Free premium card sticker maker: platinum, gold, black metal, carbon, marble and gradient card skins. Type your name, edit every word, print at exact 85.6 × 54 mm, 10 per A4 sheet with cut lines.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=25">
+<script src="../assets/sprinter/sprinter.js?v=38"></script>
+<link rel="stylesheet" href="../assets/vendor/cropper.min.css">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
+</head>
+<body class="st-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+<main class="st-wrap">
+  <div class="st-head"><svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="sti" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f5f7"/><stop offset=".5" stop-color="#b9bec7"/><stop offset="1" stop-color="#6b7078"/></linearGradient><linearGradient id="stc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#b7791f"/></linearGradient></defs><circle cx="26" cy="26" r="25" fill="#fff" stroke="#e5e7eb"/><rect x="8" y="14" width="36" height="24" rx="3.5" fill="url(#sti)" stroke="#9ca3af" stroke-width=".8"/><rect x="12" y="21" width="7" height="5.5" rx="1.2" fill="url(#stc)"/><rect x="12" y="31" width="16" height="2" rx="1" fill="#374151"/><path d="M36 22a5 5 0 0 1 0 7M38.5 20a8 8 0 0 1 0 11" stroke="#374151" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg><div><h1>Premium Card Sticker Maker</h1><p>Metal-look stickers for your own debit / credit / ATM card. Type your name, change any word, then print at exact card size — 10 on one A4 sheet with cut lines.</p></div></div>
+  <div id="studio"></div>
+</main>
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/cropper.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/vendor/studio/fabric.min.js"></script>
+<script src="../assets/vendor/studio/qrcode.js"></script>
+<script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
+<script src="../assets/studio/art.js?v=3"></script>
+<script src="../assets/studio/studio.js?v=7"></script>
+
+<script src="../assets/studio/tpl-kit.js?v=4"></script>
+<script src="../assets/studio/tpl-cardskin.js?v=1"></script>
+<script>
+  (function () {
+    var K = SPStudio.K, cfg = {"tool": "cardskin", "title": "Card sticker", "file": "Card-sticker", "sizes": ["card", "cardp"], "sheet": {"radius": 3.18}, "cats": ["Metal classic", "Metal modern", "Special", "Gradient", "Vertical"], "photoFields": ["PHOTO"], "dataTitle": "Card details", "dataNote": "Every word on the card is editable — type here, or double-tap any text on the card. Prints at exact debit / credit card size (85.6 × 54 mm).", "fields": [{"k": "NAME", "label": "Name on the card", "def": "YOUR NAME HERE"}, {"k": "BRAND", "label": "Top title (your brand / shop / any text)", "def": "PREMIUM CARD"}, {"k": "TIER", "label": "Card type (Platinum, Gold, Black…)", "def": "Platinum"}, {"k": "SINCE", "label": "Member since", "def": "09"}, {"k": "PHOTO", "label": "Your photo (for the photo design)", "type": "photo"}, {"k": "BACK_NOTE", "label": "Back side text", "type": "textarea", "rows": 3, "def": "Personal design sticker. Stick it on your own card — keep the chip uncovered."}], "aiHint": "e.g. Matte black card sticker with gold text and my name RAHUL SHARMA"};
+    cfg.sizes = cfg.sizes.map(function (k) { return K.SIZES[k]; });
+    window.__studio = new SPStudio.Studio(document.getElementById('studio'), cfg);
+    __studio.init();
+  })();
+</script>
+</body>
+</html>

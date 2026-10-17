@@ -216,7 +216,55 @@
   add('chip', { name: 'Card chip', cat: 'ID card', w: 120, h: 90, cols: ['#e6c35c'], svg: function (c) {
     return svg(120, 90, '<defs>' + lg('cg', mix(c[0], '#ffffff', 0.45), mix(c[0], '#000000', 0.15), 1, 1) + '</defs><rect x="4" y="4" width="112" height="82" rx="14" fill="url(#cg)" stroke="' + mix(c[0], '#000', 0.3) + '" stroke-width="2"/><path d="M4 32h36v26H4M116 32H80v26h36M40 4v24h40V4M40 86V62h40v24M40 32h40v26H40z" fill="none" stroke="' + mix(c[0], '#000', 0.3) + '" stroke-width="2.4"/>');
   } });
-  ART.CATS = ['Flowers', 'Leaves', 'Cute', 'Doodles', 'Shapes', 'Frames', 'School', 'Wedding', 'Icons', 'ID card'];
+  // ---------- premium card skins ----------
+  function rnd(i) { var x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
+  add('metal', { name: 'Brushed metal', cat: 'Card', w: 1012, h: 638, cols: ['#f4f5f7', '#b9bec7', '#ffffff'], svg: function (c) {
+    var o = '<defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c[1] + '"/><stop offset=".28" stop-color="' + c[0] + '"/><stop offset=".5" stop-color="' + mix(c[1], c[0], 0.4) + '"/><stop offset=".72" stop-color="' + c[0] + '"/><stop offset="1" stop-color="' + c[1] + '"/></linearGradient>' +
+      '<linearGradient id="ms" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="' + c[2] + '" stop-opacity="0"/><stop offset=".5" stop-color="' + c[2] + '" stop-opacity=".55"/><stop offset="1" stop-color="' + c[2] + '" stop-opacity="0"/></linearGradient></defs><rect width="1012" height="638" fill="url(#mg)"/>';
+    for (var i = 0; i < 320; i++) { var y = n(rnd(i) * 638), op = (0.04 + rnd(i + 7) * 0.12).toFixed(3); o += '<rect x="0" y="' + y + '" width="1012" height="' + (rnd(i + 3) > 0.7 ? 1.4 : 0.7) + '" fill="' + (i % 2 ? '#ffffff' : '#000000') + '" opacity="' + op + '"/>'; }
+    return svg(1012, 638, o + '<path d="M260 0 L520 0 L300 638 L40 638Z" fill="url(#ms)" opacity=".7"/>');
+  } });
+  add('carbon', { name: 'Carbon fibre', cat: 'Card', w: 1012, h: 638, cols: ['#1a1a1a', '#2c2c2c'], svg: function (c) {
+    var o = '<defs><pattern id="cf" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="' + c[0] + '"/><rect width="8" height="8" fill="' + c[1] + '"/><rect x="8" y="8" width="8" height="8" fill="' + c[1] + '"/><rect width="8" height="2" fill="#ffffff" opacity=".05"/><rect x="8" y="8" width="8" height="2" fill="#ffffff" opacity=".05"/></pattern>' +
+      '<linearGradient id="cs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/></linearGradient></defs>';
+    return svg(1012, 638, o + '<rect width="1012" height="638" fill="url(#cf)"/><rect width="1012" height="638" fill="url(#cs)"/>');
+  } });
+  add('marble', { name: 'Marble', cat: 'Card', w: 1012, h: 638, cols: ['#fbfaf7', '#c9c4b8', '#d4af37'], svg: function (c) {
+    var o = '<rect width="1012" height="638" fill="' + c[0] + '"/>';
+    for (var i = 0; i < 26; i++) { var y = rnd(i) * 638, d = 'M-20 ' + n(y); for (var x = 0; x <= 1040; x += 52) d += ' Q ' + (x + 26) + ' ' + n(y + (rnd(i * 31 + x) - 0.5) * 90) + ' ' + (x + 52) + ' ' + n(y + (rnd(i * 7 + x) - 0.5) * 60 + (x / 1040) * (rnd(i + 2) - 0.5) * 300); o += '<path d="' + d + '" fill="none" stroke="' + (i % 6 === 0 ? c[2] : c[1]) + '" stroke-width="' + n(0.6 + rnd(i + 9) * 2.2) + '" opacity="' + (i % 6 === 0 ? 0.75 : 0.35) + '"/>'; }
+    return svg(1012, 638, o);
+  } });
+  add('ornate', { name: 'Engraved border', cat: 'Card', w: 1012, h: 638, cols: ['#1f2937'], svg: function (c) {
+    var o = '<rect x="22" y="22" width="968" height="594" rx="18" fill="none" stroke="' + c[0] + '" stroke-width="3"/><rect x="34" y="34" width="944" height="570" rx="12" fill="none" stroke="' + c[0] + '" stroke-width="1.2"/>';
+    var row = ''; for (var x = 50; x < 962; x += 18) row += '<path d="M' + x + ' 28 l6 -4 l6 4 l-6 4z" fill="' + c[0] + '"/>';
+    o += row + row.replace(/M(\d+) 28/g, function (m, x) { return 'M' + x + ' 610'; });
+    for (var y = 50; y < 590; y += 18) o += '<path d="M28 ' + y + ' l4 6 l-4 6 l-4 -6z" fill="' + c[0] + '"/><path d="M984 ' + y + ' l4 6 l-4 6 l-4 -6z" fill="' + c[0] + '"/>';
+    function cor() { return '<path d="M0 0 C 30 0 46 10 52 34 C 40 22 26 18 0 22 Z M0 0 C 0 30 10 46 34 52 C 22 40 18 26 22 0 Z" fill="' + c[0] + '"/><circle cx="30" cy="30" r="7" fill="none" stroke="' + c[0] + '" stroke-width="2.4"/><circle cx="30" cy="30" r="2.6" fill="' + c[0] + '"/>'; }
+    return svg(1012, 638, o + at(20, 20, 0, 1, cor()) + at(992, 20, 90, 1, cor()) + at(992, 618, 180, 1, cor()) + at(20, 618, 270, 1, cor()));
+  } });
+  add('medallion', { name: 'Engraved medallion', cat: 'Card', w: 300, h: 380, cols: ['#1f2937', '#f4f5f7'], svg: function (c) {
+    var o = '<defs><clipPath id="ov"><ellipse cx="150" cy="190" rx="132" ry="172"/></clipPath></defs><ellipse cx="150" cy="190" rx="146" ry="186" fill="' + c[1] + '" stroke="' + c[0] + '" stroke-width="5"/><ellipse cx="150" cy="190" rx="136" ry="176" fill="none" stroke="' + c[0] + '" stroke-width="1.5"/><g clip-path="url(#ov)">';
+    for (var y = 20; y < 370; y += 7) o += '<path d="M10 ' + y + ' Q150 ' + (y - 14) + ' 290 ' + y + '" stroke="' + c[0] + '" stroke-width="1.6" fill="none" opacity=".55"/>';
+    // laurel wreath + crown + star (engraved look)
+    o += '</g>';
+    for (var i = 0; i < 9; i++) { var t = i / 8, ax = 150 - 70 - Math.sin(t * Math.PI) * 18, ay = 300 - t * 160; o += at(ax, ay, -30 - t * 40, 1, '<ellipse cx="0" cy="-12" rx="7" ry="16" fill="' + c[0] + '"/>') + at(300 - ax, ay, 30 + t * 40, 1, '<ellipse cx="0" cy="-12" rx="7" ry="16" fill="' + c[0] + '"/>'); }
+    o += '<path d="M80 306 Q150 340 220 306" stroke="' + c[0] + '" stroke-width="5" fill="none"/>';
+    o += '<path d="M100 150 L118 108 L134 138 L150 96 L166 138 L182 108 L200 150 Z" fill="' + c[0] + '"/><rect x="100" y="152" width="100" height="14" rx="3" fill="' + c[0] + '"/><circle cx="150" cy="92" r="7" fill="' + c[0] + '"/>';
+    o += at(150, 230, 0, 1, star5(42, c[0], 0.42)) + at(150, 232, 0, 1, star5(22, c[1], 0.42));
+    return svg(300, 380, o);
+  } });
+  add('chipreal', { name: 'Gold chip', cat: 'Card', w: 150, h: 115, cols: ['#e8c766'], svg: function (c) {
+    var hi = mix(c[0], '#ffffff', 0.5), lo = mix(c[0], '#7a5a00', 0.45);
+    return svg(150, 115, '<defs><linearGradient id="cg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + hi + '"/><stop offset=".45" stop-color="' + c[0] + '"/><stop offset="1" stop-color="' + lo + '"/></linearGradient></defs><rect x="3" y="3" width="144" height="109" rx="18" fill="url(#cg2)" stroke="' + lo + '" stroke-width="2"/>' +
+      '<g fill="none" stroke="' + lo + '" stroke-width="2.6" stroke-linecap="round"><path d="M3 40h44c6 0 10 4 10 10v15c0 6-4 10-10 10H3M147 40h-44c-6 0-10 4-10 10v15c0 6 4 10 10 10h44M57 3v30M93 3v30M57 112V82M93 112V82M57 57h36"/></g>');
+  } });
+  add('contactless', { name: 'Contactless', cat: 'Card', w: 100, h: 120, cols: ['#1f2937'], svg: function (c) {
+    var o = ''; [22, 42, 62, 82].forEach(function (r, i) { o += '<path d="M' + (10 + i * 18) + ' ' + (60 - r * 0.62) + ' A' + r + ' ' + r + ' 0 0 1 ' + (10 + i * 18) + ' ' + (60 + r * 0.62) + '" fill="none" stroke="' + c[0] + '" stroke-width="7" stroke-linecap="round"/>'; });
+    return svg(100, 120, o);
+  } });
+  add('magstripe', { name: 'Back stripe', cat: 'Card', w: 1012, h: 120, cols: ['#111111'], svg: function (c) { return svg(1012, 120, '<defs><linearGradient id="mgs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + mix(c[0], '#ffffff', 0.18) + '"/><stop offset=".5" stop-color="' + c[0] + '"/><stop offset="1" stop-color="' + mix(c[0], '#ffffff', 0.1) + '"/></linearGradient></defs><rect width="1012" height="120" fill="url(#mgs)"/>'); } });
+  add('signpanel', { name: 'Signature panel', cat: 'Card', w: 600, h: 90, cols: ['#ffffff', '#d6dbe3'], svg: function (c) { var o = '<rect width="600" height="90" fill="' + c[0] + '"/>'; for (var x = -90; x < 600; x += 14) o += '<path d="M' + x + ' 90 L' + (x + 90) + ' 0" stroke="' + c[1] + '" stroke-width="5"/>'; return svg(600, 90, o); } });
+  ART.CATS = ['Flowers', 'Leaves', 'Cute', 'Doodles', 'Shapes', 'Frames', 'School', 'Wedding', 'Icons', 'ID card', 'Card'];
   var cache = {};
   ST.artURL = function (id, cols) {
     var a = ART[id]; if (!a) return '';

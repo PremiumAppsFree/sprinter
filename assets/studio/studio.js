@@ -66,7 +66,7 @@
     ["Script & calligraphy", [["Great Vibes", ""], ["Dancing Script", "400;600;700"], ["Pacifico", ""], ["Sacramento", ""], ["Parisienne", ""], ["Allura", ""], ["Alex Brush", ""], ["Satisfy", ""], ["Tangerine", "400;700"], ["Pinyon Script", ""], ["Italianno", ""], ["Playball", ""], ["Cookie", ""], ["Kaushan Script", ""], ["Lobster", ""], ["Lobster Two", "400;700"], ["Courgette", ""], ["Yellowtail", ""], ["Marck Script", ""], ["Rouge Script", ""], ["Mrs Saint Delafield", ""], ["Herr Von Muellerhoff", ""], ["Monsieur La Doulaise", ""], ["Petit Formal Script", ""], ["Ms Madi", ""], ["Corinthia", "400;700"], ["Birthstone", ""], ["Imperial Script", ""], ["Meow Script", ""], ["Style Script", ""], ["Bad Script", ""], ["Euphoria Script", ""], ["Sofia", ""], ["Arizonia", ""], ["Qwigley", ""], ["Lavishly Yours", ""], ["Water Brush", ""], ["Island Moments", ""], ["Send Flowers", ""], ["Bonheur Royale", ""]]],
     ["Handwriting & cute", [["Caveat", "400;600;700"], ["Caveat Brush", ""], ["Patrick Hand", ""], ["Indie Flower", ""], ["Shadows Into Light", ""], ["Gloria Hallelujah", ""], ["Amatic SC", "400;700"], ["Architects Daughter", ""], ["Kalam", "400;700"], ["Gochi Hand", ""], ["Coming Soon", ""], ["Handlee", ""], ["Nanum Pen Script", ""], ["Reenie Beanie", ""], ["Permanent Marker", ""], ["Covered By Your Grace", ""], ["Sue Ellen Francisco", ""], ["Delius", ""], ["Short Stack", ""], ["Itim", ""], ["Mali", "400;600;700"], ["Sniglet", "400;800"], ["Chewy", ""], ["Fredoka", "400;600;700"], ["Comfortaa", "400;600;700"], ["Quicksand", "400;600;700"], ["Varela Round", ""], ["Grandstander", "400;600;700;800"], ["Gaegu", "400;700"], ["Schoolbell", ""], ["Mynerve", ""], ["Annie Use Your Telescope", ""], ["Rock Salt", ""], ["Just Another Hand", ""], ["Pangolin", ""], ["Playpen Sans", "400;600;700;800"]]],
     ["Elegant serif", [["Playfair Display", "400;600;700;800"], ["Cormorant Garamond", "400;600;700"], ["Cinzel", "400;600;700;800"], ["Cinzel Decorative", "400;700"], ["Libre Baskerville", "400;600;700"], ["Merriweather", "400;600;700;800"], ["Lora", "400;600;700"], ["EB Garamond", "400;600;700;800"], ["Marcellus", ""], ["Prata", ""], ["Bodoni Moda", "400;600;700;800"], ["Italiana", ""], ["DM Serif Display", ""], ["Yeseva One", ""], ["Abril Fatface", ""], ["Josefin Slab", "400;600;700"], ["Cormorant Upright", "400;600;700"], ["Gilda Display", ""], ["Bellefair", ""], ["Forum", ""], ["Cardo", "400;700"], ["Crimson Text", "400;600;700"], ["Noto Serif Display", "400;600;700;800"], ["Fraunces", "400;600;700;800"], ["Young Serif", ""], ["Gloock", ""]]],
-    ["Modern sans", [["Poppins", "400;600;700;800"], ["Montserrat", "400;600;700;800"], ["Roboto", "400;600;700;800"], ["Open Sans", "400;600;700;800"], ["Lato", "400;700"], ["Nunito", "400;600;700;800"], ["Raleway", "400;600;700;800"], ["Josefin Sans", "400;600;700"], ["Rubik", "400;600;700;800"], ["Inter", "400;600;700;800"], ["Work Sans", "400;600;700;800"], ["DM Sans", "400;600;700;800"], ["Manrope", "400;600;700;800"], ["Outfit", "400;600;700;800"], ["Urbanist", "400;600;700;800"], ["Lexend", "400;600;700;800"], ["Kumbh Sans", "400;600;700;800"], ["League Spartan", "400;600;700;800"], ["Jost", "400;600;700;800"], ["Mulish", "400;600;700;800"], ["Karla", "400;600;700;800"], ["Barlow", "400;600;700;800"], ["Oswald", "400;600;700"], ["Archivo", "400;600;700;800"], ["Plus Jakarta Sans", "400;600;700;800"], ["Sora", "400;600;700;800"], ["Space Grotesk", "400;600;700"], ["Figtree", "400;600;700;800"]]],
+    ["Modern sans", [["Roboto Mono", "400;500;700"], ["Space Mono", "400;700"], ["Poppins", "400;600;700;800"], ["Montserrat", "400;600;700;800"], ["Roboto", "400;600;700;800"], ["Open Sans", "400;600;700;800"], ["Lato", "400;700"], ["Nunito", "400;600;700;800"], ["Raleway", "400;600;700;800"], ["Josefin Sans", "400;600;700"], ["Rubik", "400;600;700;800"], ["Inter", "400;600;700;800"], ["Work Sans", "400;600;700;800"], ["DM Sans", "400;600;700;800"], ["Manrope", "400;600;700;800"], ["Outfit", "400;600;700;800"], ["Urbanist", "400;600;700;800"], ["Lexend", "400;600;700;800"], ["Kumbh Sans", "400;600;700;800"], ["League Spartan", "400;600;700;800"], ["Jost", "400;600;700;800"], ["Mulish", "400;600;700;800"], ["Karla", "400;600;700;800"], ["Barlow", "400;600;700;800"], ["Oswald", "400;600;700"], ["Archivo", "400;600;700;800"], ["Plus Jakarta Sans", "400;600;700;800"], ["Sora", "400;600;700;800"], ["Space Grotesk", "400;600;700"], ["Figtree", "400;600;700;800"]]],
     ["Bold display", [["Anton", ""], ["Bebas Neue", ""], ["Teko", "400;600;700"], ["Archivo Black", ""], ["Righteous", ""], ["Bungee", ""], ["Alfa Slab One", ""], ["Shrikhand", ""], ["Luckiest Guy", ""], ["Bangers", ""], ["Titan One", ""], ["Lilita One", ""], ["Paytone One", ""], ["Concert One", ""], ["Fredericka the Great", ""], ["Monoton", ""], ["Bowlby One", ""], ["Black Ops One", ""], ["Rammetto One", ""], ["Bagel Fat One", ""], ["Rubik Bubbles", ""], ["Rubik Mono One", ""], ["Passion One", "400;700"], ["Ultra", ""], ["Baloo 2", "400;600;700;800"], ["Chango", ""], ["Bungee Shade", ""], ["Modak", ""], ["Coiny", ""], ["Gluten", "400;600;700;800"], ["Climate Crisis", ""], ["Dela Gothic One", ""]]],
     ["বাংলা", [["Hind Siliguri", "400;600;700"], ["Noto Sans Bengali", "400;600;700;800"], ["Noto Serif Bengali", "400;600;700;800"], ["Baloo Da 2", "400;600;700;800"], ["Tiro Bangla", ""], ["Galada", ""], ["Atma", "400;600;700"], ["Mina", "400;700"], ["Anek Bangla", "400;600;700;800"]]],
     ['हिन्दी / मराठी', [['Noto Sans Devanagari', '400;700'], ['Hind', '400;700'], ['Mukta', '400;700;800'], ['Yantramanav', '400;700'], ['Martel', '400;700'], ['Khand', '400;700'], ['Rajdhani', '400;700'], ['Palanquin', '400;700'], ['Karma', '400;700'], ['Sura', '400;700'], ['Biryani', '400;700'], ['Sarpanch', '400;700'], ['Eczar', '400;700'], ['Laila', '400;700'], ['Kalam', '400;700'], ['Amita', '400;700'], ['Rozha One', ''], ['Yatra One', ''], ['Kurale', ''], ['Baloo 2', '400;700'], ['Tiro Devanagari Hindi', '']]],
@@ -217,7 +217,7 @@
   function artObj(id, cols, o) {
     var A = ST.ART && ST.ART[id]; if (!A) return Promise.reject(new Error('art'));
     cols = (cols || A.cols).slice();
-    return imgObj(ST.artURL(id, cols), { x: o.x, y: o.y, w: o.w, h: o.h, fit: 'contain', angle: o.angle }).then(function (im) {
+    return imgObj(ST.artURL(id, cols), { x: o.x, y: o.y, w: o.w, h: o.h, fit: 'contain', stretch: o.fit === 'stretch', angle: o.angle }).then(function (im) {
       im.art = { id: id, cols: cols }; im.nm = o.nm || A.name; im.srcOrig = null;
       im.set({ opacity: o.op == null ? 1 : o.op, flipX: !!o.flipX, flipY: !!o.flipY });
       if (o.lock) im.stLock = true;
@@ -339,6 +339,7 @@
       '<button class="st-tb" data-a="png">' + I.jpg + '<span>PNG</span></button>' +
       '<button class="st-tb" data-a="pdf">' + I.pdf + '<span>PDF</span></button>' +
       '<button class="st-tb" data-a="share">' + I.share + '<span>Share</span></button>' +
+      (cfg.sheet ? '<button class="st-tb" data-a="sheetpdf">' + I.pdf + '<span>A4 sheet PDF</span></button><button class="st-tb st-main" data-a="sheetprint">' + I.print + '<span>Print A4 sheet</span></button>' : '') +
       '<button class="st-tb st-main" data-a="print">' + I.print + '<span>Print</span></button>';
     app.appendChild(top);
     var side = el('aside', 'st-side'), tabs = el('div', 'st-tabs'), panel = el('div', 'st-panel');
@@ -564,7 +565,41 @@
       }
     }
     S.printImages = printImages;
+    // many copies of a small design (card stickers) on A4, exact size, with rounded cut lines;
+    // the back sheet is mirrored left↔right so it lines up when printed on both sides
+    function sheetPlan() {
+      var w = doc.mm[0], h = doc.mm[1], g = 3, m = 5, cols = Math.max(1, Math.floor((210 - 2 * m + g) / (w + g))), rows = Math.max(1, Math.floor((297 - 2 * m + g) / (h + g)));
+      var x0 = (210 - cols * w - (cols - 1) * g) / 2, y0 = (297 - rows * h - (rows - 1) * g) / 2, slots = [];
+      for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++) slots.push({ x: x0 + c * (w + g), y: y0 + r * (h + g), xm: 210 - (x0 + c * (w + g)) - w });
+      return { w: w, h: h, slots: slots, rad: cfg.sheet.radius == null ? 3.18 : cfg.sheet.radius };
+    }
+    function sheetPDF(list) {
+      var J = window.jspdf.jsPDF, pdf = new J({ orientation: 'p', unit: 'mm', format: 'a4', compress: true }), pl = sheetPlan();
+      list.forEach(function (p, i) {
+        if (i) pdf.addPage('a4', 'p');
+        var url = p.c.toDataURL('image/jpeg', 0.97);
+        pl.slots.forEach(function (sl) { var x = i % 2 ? sl.xm : sl.x; pdf.addImage(url, 'JPEG', x, sl.y, pl.w, pl.h, 'pg' + i, 'FAST'); pdf.setDrawColor(170, 170, 170); pdf.setLineWidth(0.12); pdf.roundedRect(x, sl.y, pl.w, pl.h, pl.rad, pl.rad, 'S'); });
+      });
+      return pdf;
+    }
+    function sheetPrint(list) {
+      var pl = sheetPlan(); printRoot.innerHTML = '';
+      var css = document.getElementById('st-page-css') || document.head.appendChild(el('style')); css.id = 'st-page-css';
+      css.textContent = '@media print{@page{size:210mm 297mm;margin:0}#st-print-root .sp-sheet{position:relative;width:210mm;height:297mm;page-break-after:always;break-after:page;overflow:hidden}#st-print-root .sp-sheet:last-child{page-break-after:auto;break-after:auto}#st-print-root .sp-slot{position:absolute;width:' + pl.w + 'mm;height:' + pl.h + 'mm}#st-print-root .sp-slot img{width:100%;height:100%;display:block;object-fit:fill}#st-print-root .sp-slot i{position:absolute;inset:0;border:0.12mm solid #aaa;border-radius:' + pl.rad + 'mm}}';
+      var left = 0;
+      list.forEach(function (p, i) {
+        var sh = el('div', 'sp-sheet'), url = p.c.toDataURL('image/jpeg', 0.97);
+        pl.slots.forEach(function (sl) { var d = el('div', 'sp-slot', '<img alt=""><i></i>'); d.style.left = (i % 2 ? sl.xm : sl.x) + 'mm'; d.style.top = sl.y + 'mm'; var im = d.querySelector('img'); left++; im.onload = im.onerror = function () { if (--left === 0) go(); }; im.src = url; sh.appendChild(d); });
+        printRoot.appendChild(sh);
+      });
+      function go() { document.body.classList.add('st-printing'); var off = function () { document.body.classList.remove('st-printing'); window.removeEventListener('afterprint', off); }; window.addEventListener('afterprint', off); setTimeout(function () { window.print(); setTimeout(off, 1500); }, 60); }
+    }
     function doExport(a) {
+      if (a === 'sheetpdf' || a === 'sheetprint') return exportPages('jpg', 'print').then(function (list) {
+        var n = sheetPlan().slots.length;
+        if (a === 'sheetpdf') { sheetPDF(list).save(fname('pdf').replace('.pdf', '-A4-sheet.pdf')); toast(n + ' copies per A4 page, exact ' + doc.mm[0] + ' × ' + doc.mm[1] + ' mm. Print at 100% / Actual size.'); }
+        else { sheetPrint(list); toast('Print at 100% / Actual size so each card is exactly ' + doc.mm[0] + ' × ' + doc.mm[1] + ' mm.'); }
+      });
       if (a === 'jpg' || a === 'png') return exportPages(a, 'file').then(function (list) { list.forEach(function (p, i) { setTimeout(function () { saveURL(fname(a, i), p.c.toDataURL(a === 'png' ? 'image/png' : 'image/jpeg', 0.98)); }, i * 400); }); toast('Saved ' + list.length + (list.length > 1 ? ' images.' : ' image.')); });
       if (a === 'pdf') return exportPages('jpg', 'print').then(function (list) { var pdf = toPDF(list, doc.mm[0], doc.mm[1]); pdf.save(fname('pdf')); toast('PDF saved.'); });
       if (a === 'print') return exportPages('jpg', 'print').then(function (list) { printImages(list.map(function (p) { return p.c.toDataURL('image/jpeg', 0.98); }), doc.mm[0], doc.mm[1]); });
