@@ -982,10 +982,10 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
     [/^(\+ ?)?(add|new)\b|add (another|a page|page)|\+ ?page/, 'plus'],
     [/next|continue|forward/, 'next'],
     [/back|previous|prev\b/, 'back'],
-    [/done|apply|confirm|ok\b|generate|create|make|finish|unlock|open/, 'check'],
+    [/done|apply|confirm|\bok\b|generate|create|make|finish|unlock|open/, 'check'],
     [/cancel|close/, 'close']
   ];
-  var SKIP_IN = '[role=tab],[role=tablist],nav,header,footer,.tool,.sh-bar,.sh-ctx,.sh-tpls,.sh-zoom,.cp-docs,.cp-size,.cp-stepper,.cp-pager,.cp-tools,.pp-crop-tools,.sh-croptools,.sz-chip,.sz-seg,.pp-swatches,.sp-swrow,.pp-person,.cp-src,.cp-qi,.sz-acts,.sp-dsig,.cp-sigitem,.chips,.track,.sp-pa,select,option';
+  var SKIP_IN = '[role=tab],[role=tablist],nav,header,footer,.tool,.sh-bar,.sh-ctx,.sh-tpls,.sh-zoom,.cp-docs,.cp-size,.cp-stepper,.cp-pager,.cp-tools,.pp-crop-tools,.sh-croptools,.sz-chip,.sz-seg,.pp-swatches,.sp-swrow,.pp-person,.cp-src,.cp-qi,.sz-acts,.sp-dsig,.cp-sigitem,.chips,.track,.sp-pa,.st-start,.st-sz,.st-thumb,select,option';
   function bad(b) {
     if (b.dataset.spAi || b.closest(SKIP_IN)) return true;
     if (b.querySelector('svg,img,i[class*="fa"],.sp-gi,.sp-ai,canvas,video')) return true;
@@ -1168,7 +1168,7 @@ try { if (window.top !== window.self) { var spSame = false; try { spSame = windo
 (function () {
   'use strict';
   if (!/\/(service|tool)\//.test(location.pathname)) return;
-  var OWN = /\/(cv-resume-maker|marriage-card-creator|pro-id-maker|project-paper-maker|certificate-maker|card-sticker-maker|pro-poster-maker|job-application-maker|shop-promotion|payment-qr|portal-services|govt-jobs|multi-doc|size-changer|scan-document|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)(\.html)?$/;
+  var OWN = /\/(editing-tool-s|cv-resume-maker|marriage-card-creator|pro-id-maker|project-paper-maker|certificate-maker|card-sticker-maker|pro-poster-maker|job-application-maker|shop-promotion|payment-qr|portal-services|govt-jobs|multi-doc|size-changer|scan-document|passport-photo|aadhaar-print|pan-card-print|voter-id-print|ayushman-print|card-print|signature-verify|merge-pdf|delete-pdf-pages)(\.html)?$/;
   if (OWN.test(location.pathname)) return;
   var files = [], btn = null;
   var BASE = (function () { var s = document.querySelector('script[src*="assets/sprinter/sprinter.js"]'); return s ? s.src.replace(/assets\/sprinter\/sprinter\.js.*$/, '') : '../'; })();
