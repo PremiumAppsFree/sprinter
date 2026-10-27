@@ -11,7 +11,8 @@
 <link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=25">
 <script src="../assets/sprinter/sprinter.js?v=39"></script>
 <link rel="stylesheet" href="../assets/vendor/cropper.min.css">
-<link rel="stylesheet" href="../assets/studio/studio.css?v=4">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=5">
+<link rel="stylesheet" href="../assets/studio/studio-pro.css?v=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
 </head>
@@ -37,7 +38,6 @@
   <div class="st-head"><svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="ets" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#ec4899"/></linearGradient></defs><rect x="1" y="1" width="50" height="50" rx="14" fill="url(#ets)"/><rect x="11" y="12" width="22" height="28" rx="3" fill="#fff" opacity=".95"/><path d="M15 19h14M15 23h10" stroke="#8b5cf6" stroke-width="2.2" stroke-linecap="round"/><circle cx="20" cy="32" r="4" fill="#f9a8d4"/><path d="M36 14l5 5-12 12-6 1 1-6z" fill="#fde047" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg><div><h1>Editing Tool S</h1><p>Design anything — social posts, stories, thumbnails, posters, flyers, cards and documents. Pick a size or a template, then edit every text, photo, sticker, font and colour freely.</p></div></div>
   <div id="studio"></div>
 </main>
-</main>
 <footer class="sp-footer">
   <div class="sp-wrap sp-foot">
     <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
@@ -59,8 +59,11 @@
 <script src="../assets/vendor/studio/qrcode.js"></script>
 <script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
 <script src="../assets/studio/art.js?v=3"></script>
-<script src="../assets/studio/studio.js?v=8"></script>
+<script src="../assets/studio/studio.js?v=9"></script>
+<script src="../assets/vendor/studio/gifenc.js"></script>
+<script src="../assets/studio/studio-pro.js?v=1"></script>
 <script src="../assets/studio/tpl-kit.js?v=5"></script>
+<script src="../assets/studio/tpl-more.js?v=1"></script>
 <script src="../assets/studio/tpl-social.js?v=1"></script>
 <script>SPStudio.templates.forEach(function (t) { t.group = t.group || "Social & everyday"; });</script>
 <script src="../assets/studio/tpl-poster.js?v=2"></script>
@@ -99,7 +102,9 @@
     var cats = [];
     ST.templates.forEach(function (t) { if (cats.indexOf(t.cat) < 0) cats.push(t.cat); });
     cfg.cats = cats;
+    cfg.pro = true; cfg.ext = ST.Pro.tabs; cfg.tabOrder = ST.Pro.order;
     window.__studio = new ST.Studio(document.getElementById('studio'), cfg);
+    ST.Pro.install(__studio);
     __studio.init().then(function () {
       var k = (location.search.match(/[?&]size=([a-z0-9]+)/) || [])[1];
       if (k && K.SIZES[k]) __studio.newBlank(K.SIZES[k]);
