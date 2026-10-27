@@ -142,8 +142,19 @@
     cardp: { k: 'cardp', label: 'Card sticker vertical (54 × 85.6 mm)', w: 638, h: 1012, mm: [54, 85.6] },
     idl: { k: 'idl', label: 'ID card landscape (85.6 × 54 mm)', w: 1012, h: 638, mm: [85.6, 54] },
     idp: { k: 'idp', label: 'ID card portrait (54 × 85.6 mm)', w: 638, h: 1012, mm: [54, 85.6] },
-    a5p: { k: 'a5p', label: 'A5 portrait (148 × 210 mm)', w: 559, h: 794, mm: [148, 210] }
+    a5p: { k: 'a5p', label: 'A5 portrait (148 × 210 mm)', w: 559, h: 794, mm: [148, 210] },
+    igp: { k: 'igp', label: 'Instagram portrait post (1080 × 1350)', w: 1080, h: 1350, mm: [152.4, 190.5] },
+    fbpost: { k: 'fbpost', label: 'Facebook post / link (1200 × 630)', w: 1200, h: 630, mm: [254, 133.35] },
+    fbcover: { k: 'fbcover', label: 'Facebook cover (1640 × 624)', w: 1640, h: 624, mm: [434, 165] },
+    yt: { k: 'yt', label: 'YouTube thumbnail (1280 × 720)', w: 1280, h: 720, mm: [338.7, 190.5] },
+    ytbanner: { k: 'ytbanner', label: 'YouTube channel banner (2560 × 1440)', w: 2560, h: 1440, mm: [677.3, 381] },
+    a3p: { k: 'a3p', label: 'A3 poster (297 × 420 mm)', w: 1123, h: 1587, mm: [297, 420] },
+    bcard: { k: 'bcard', label: 'Business / visiting card (89 × 51 mm)', w: 1051, h: 602, mm: [89, 51] },
+    logo: { k: 'logo', label: 'Logo (500 × 500)', w: 500, h: 500, mm: [132.3, 132.3] },
+    inv: { k: 'inv', label: 'Invitation 5 × 7 in', w: 960, h: 1344, mm: [127, 177.8] }
   };
+  var SH = { a4p: ['A4 document', '210 × 297 mm'], a4l: ['A4 landscape', '297 × 210 mm'], sq: ['Instagram post', '1080 × 1080'], story: ['Story / Reel / Status', '1080 × 1920'], hd: ['Presentation', '1920 × 1080'], card: ['Card sticker', '85.6 × 54 mm'], idl: ['ID card', '85.6 × 54 mm'], idp: ['ID card (tall)', '54 × 85.6 mm'], a5p: ['A5 flyer', '148 × 210 mm'], igp: ['Instagram portrait', '1080 × 1350'], fbpost: ['Facebook post', '1200 × 630'], fbcover: ['Facebook cover', '1640 × 624'], yt: ['YouTube thumbnail', '1280 × 720'], ytbanner: ['YouTube banner', '2560 × 1440'], a3p: ['A3 poster', '297 × 420 mm'], bcard: ['Visiting card', '89 × 51 mm'], logo: ['Logo', '500 × 500'], inv: ['Invitation', '5 × 7 in'] };
+  Object.keys(SH).forEach(function (k) { K.SIZES[k].short = SH[k][0]; K.SIZES[k].dim = SH[k][1]; });
   // expand layouts × palettes into template entries
   K.expand = function (prefix, layouts, pals) {
     var out = [];
