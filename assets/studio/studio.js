@@ -12,7 +12,18 @@
   var ST = window.SPStudio = window.SPStudio || {};
   var TPL = ST.templates = ST.templates || [];
   ST.register = function (list) { [].push.apply(TPL, list); };
-  var PROPS = ['tpl', 'ph', 'phShape', 'qr', 'bc', 'srcOrig', 'phSrc', 'nm', 'rad', 'stLock', 'art', 'flt', 'fxk'];
+  // fabric 5.3 revives a curved Text's path but not a Textbox's — do it here so curved text survives undo, pages, drafts and export
+  (function () {
+    var Fb = window.fabric; if (!Fb || !Fb.Textbox) return;
+    Fb.Textbox.fromObject = function (object, callback) {
+      var oc = Fb.util.object.clone(object), path = oc.path; delete oc.path;
+      return Fb.Object._fromObject('Textbox', oc, function (t) {
+        if (path && path.path) Fb.Path.fromObject(path, function (pi) { pi.set({ visible: false, fill: '', stroke: '' }); t.set('path', pi); t.initDimensions(); t.setCoords(); callback && callback(t); });
+        else if (callback) callback(t);
+      }, 'text');
+    };
+  })();
+  var PROPS = ['tpl', 'ph', 'phShape', 'qr', 'bc', 'srcOrig', 'phSrc', 'nm', 'rad', 'stLock', 'art', 'flt', 'fxk', 'curve', 'pathAlign', 'pathSide', 'pathStartOffset'];
 
   // ---------- icons ----------
   var I = {
@@ -166,7 +177,7 @@
   function shadowOf(s) { return s ? new F.Shadow({ color: s.c || 'rgba(0,0,0,.3)', blur: s.b == null ? 12 : s.b, offsetX: s.x || 0, offsetY: s.y == null ? 6 : s.y }) : null; }
   function phBox(o) {
     var w = o.w, h = o.h, shape = o.shape || 'rect', r = shape === 'circle' ? Math.min(w, h) / 2 : (o.r || 0);
-    var base = shape === 'circle' ? new F.Circle({ radius: Math.min(w, h) / 2, left: 0, top: 0, fill: o.fill || '#E4E9EF', stroke: o.stroke || '#9AA6B4', strokeWidth: o.sw == null ? 2 : o.sw, strokeDashArray: [8, 6] })
+    var base = FRAMES[shape] ? framePath(shape, w, h, { left: 0, top: 0, fill: o.fill || '#E4E9EF', stroke: o.stroke || '#9AA6B4', strokeWidth: o.sw == null ? 2 : o.sw, strokeDashArray: [8, 6], strokeUniform: true }) : shape === 'circle' ? new F.Circle({ radius: Math.min(w, h) / 2, left: 0, top: 0, fill: o.fill || '#E4E9EF', stroke: o.stroke || '#9AA6B4', strokeWidth: o.sw == null ? 2 : o.sw, strokeDashArray: [8, 6] })
       : new F.Rect({ width: w, height: h, rx: r, ry: r, left: 0, top: 0, fill: o.fill || '#E4E9EF', stroke: o.stroke || '#9AA6B4', strokeWidth: o.sw == null ? 2 : o.sw, strokeDashArray: [8, 6] });
     var lbl = o.label || (o.ph === 'SIGN' ? 'Signature' : o.ph === 'LOGO' ? 'Logo' : 'Photo'), label = new F.Text(lbl, { fontFamily: 'Poppins', fontSize: Math.max(8, Math.min(Math.min(w, h) * 0.16, (shape === 'circle' ? Math.min(w, h) : w) * 1.5 / Math.max(4, lbl.length))), fill: '#7C8896', originX: 'center', originY: 'center', left: (shape === 'circle' ? Math.min(w, h) : w) / 2, top: (shape === 'circle' ? Math.min(w, h) : h) / 2, fontWeight: 600 });
     var g = new F.Group([base, label], { left: o.x, top: o.y, angle: o.angle || 0 });
@@ -244,8 +255,22 @@
       }, { crossOrigin: 'anonymous' });
     });
   }
+  // frame shapes for photos (drawn on a 100 × 100 grid)
+  var FRAMES = {
+    heart: 'M50 92 C 10 64 0 42 4 26 C 9 8 32 2 50 20 C 68 2 91 8 96 26 C 100 42 90 64 50 92 Z',
+    star: 'M50 2 L62 36 L98 37 L69 59 L80 95 L50 74 L20 95 L31 59 L2 37 L38 36 Z',
+    hex: 'M25 4 H75 L99 50 L75 96 H25 L1 50 Z',
+    arch: 'M0 100 V50 A50 50 0 0 1 100 50 V100 Z',
+    blob: 'M52 2 C76 2 98 18 98 46 C98 74 80 98 50 98 C22 98 2 80 2 52 C2 24 24 2 52 2 Z M0 0',
+    diamond: 'M50 0 L100 50 L50 100 L0 50 Z',
+    flower: 'M50 4 C60 4 66 14 64 24 C72 16 86 18 90 28 C94 38 86 48 76 50 C86 52 94 62 90 72 C86 82 72 84 64 76 C66 86 60 96 50 96 C40 96 34 86 36 76 C28 84 14 82 10 72 C6 62 14 52 24 50 C14 48 6 38 10 28 C14 18 28 16 36 24 C34 14 40 4 50 4 Z',
+    pill: 'M25 0 H75 A25 25 0 0 1 75 100 H25 A25 25 0 0 1 25 0 Z'
+  };
+  ST.FRAMES = FRAMES;
+  function framePath(shape, w, h, o) { return new F.Path(FRAMES[shape], Object.assign({ scaleX: w / 100, scaleY: h / 100 }, o)); }
   function applyShape(im, shape, r) {
     im.phShape = shape || 'rect'; im.rad = r || 0;
+    if (FRAMES[shape]) { im.clipPath = framePath(shape, im.width, im.height, { originX: 'center', originY: 'center' }); return; }
     if (shape === 'circle') im.clipPath = new F.Circle({ radius: Math.min(im.width, im.height) / 2, originX: 'center', originY: 'center' });
     else if (r) im.clipPath = new F.Rect({ width: im.width, height: im.height, rx: r / (im.scaleX || 1), ry: r / (im.scaleY || 1), originX: 'center', originY: 'center' });
     else im.clipPath = null;
@@ -343,7 +368,7 @@
       '<button class="st-tb st-main" data-a="print">' + I.print + '<span>Print</span></button>';
     app.appendChild(top);
     var side = el('aside', 'st-side'), tabs = el('div', 'st-tabs'), panel = el('div', 'st-panel');
-    var TABS = [['tpl', 'Templates', I.tpl], ['data', cfg.dataLabel || 'Details', I.data]].concat(cfg.id ? [['db', 'Database', I.db]] : []).concat([['els', 'Elements', I.els], ['ai', 'AI', I.ai], ['page', 'Page', I.page], ['layers', 'Layers', I.layers]]);
+    var TABS = [['tpl', 'Templates', I.tpl]].concat(cfg.noData ? [] : [['data', cfg.dataLabel || 'Details', I.data]]).concat(cfg.id ? [['db', 'Database', I.db]] : []).concat([['els', 'Elements', I.els], ['up', 'Uploads', I.jpg], ['draw', 'Draw', I.edit], ['ai', 'AI', I.ai], ['page', 'Page', I.page], ['layers', 'Layers', I.layers]]);
     tabs.innerHTML = TABS.map(function (t) { return '<button class="st-tab" role="tab" data-t="' + t[0] + '" aria-selected="false">' + t[2] + t[1] + '</button>'; }).join('');
     side.appendChild(tabs); side.appendChild(panel); app.appendChild(side);
     var stage = el('div', 'st-stage'), center = el('div', 'st-center'), box = el('div', 'st-canvasbox'), cnv = document.createElement('canvas');
@@ -404,6 +429,15 @@
       if (Math.abs(b.left) < t) o.left -= b.left; if (Math.abs(b.top) < t) o.top -= b.top;
       if (Math.abs(b.left + b.width - doc.w) < t) o.left += doc.w - b.left - b.width;
       if (Math.abs(b.top + b.height - doc.h) < t) o.top += doc.h - b.top - b.height;
+      // line up with other objects (edges and centres)
+      var sx = null, sy = null;
+      cv.getObjects().forEach(function (x) {
+        if (x === o || x.visible === false || (o.type === 'activeSelection' && o.contains(x))) return;
+        var q = x.getBoundingRect(true, true), b2 = o.getBoundingRect(true, true);
+        [[q.left, b2.left], [q.left + q.width / 2, b2.left + b2.width / 2], [q.left + q.width, b2.left + b2.width], [q.left, b2.left + b2.width], [q.left + q.width, b2.left]].forEach(function (p) { if (sx == null && Math.abs(p[0] - p[1]) < t) { o.left += p[0] - p[1]; sx = p[0]; } });
+        [[q.top, b2.top], [q.top + q.height / 2, b2.top + b2.height / 2], [q.top + q.height, b2.top + b2.height], [q.top, b2.top + b2.height], [q.top + q.height, b2.top]].forEach(function (p) { if (sy == null && Math.abs(p[0] - p[1]) < t) { o.top += p[0] - p[1]; sy = p[0]; } });
+      });
+      if (sx != null) guide(sx); if (sy != null) guide(null, sy);
     });
     cv.on('mouse:up', clearGuides);
 
@@ -446,6 +480,14 @@
     // ---------- load a template ----------
     function tplById(id) { return TPL.find(function (t) { return t.id === id; }); }
     function sizeById(k) { return sizes.find(function (s) { return s.k === k; }) || sizes[0]; }
+    // load the template's fonts first so the auto-fit measures real letter widths, then build it
+    function designReady(t, sz) {
+      var d = designOf(t, sz), objs = [];
+      (d.pages || []).forEach(function (pg) { (pg.objects || []).forEach(function (o) { if (o && o.t === 'text') objs.push({ fontFamily: o.font || 'Poppins', fontWeight: o.bold ? (o.bold === true ? 700 : o.bold) : 400, text: String(K0(o.text)).slice(0, 60) }); }); });
+      if (!objs.length) return Promise.resolve(d);
+      return fontsFor(objs).then(function () { return designOf(t, sz); });
+    }
+    function K0(x) { return String(x || '').replace(/\{\{[^}]*\}\}/g, 'Aa'); }
     function designOf(t, sz) { ST.curVals = withSample(t); var d = t.build(sz.w, sz.h, t.pal || {}, sz); d.w = sz.w; d.h = sz.h; return d; }
     function useDesign(design, meta) {
       var quiet = meta && meta.quiet; if (!quiet) busy(true, 'Opening design…');
@@ -468,9 +510,14 @@
       if (t.sizes && t.sizes.indexOf(sz.k) < 0) sz = sizeById(t.sizes[0]);
       size = sz;
       if (t.vals) { var mv = withSample(t); Object.keys(t.vals).forEach(function (k) { if (mv[k] === t.vals[k]) sampleOf[k] = t.vals[k]; }); Object.assign(vals, mv); saveVals(); }
-      return useDesign(designOf(t, sz), { id: id, mm: sz.mm });
+      busy(true, 'Opening design…');
+      return designReady(t, sz).then(function (d) { return useDesign(d, { id: id, mm: sz.mm }); }, function (e) { busy(false); toast('Could not open this design.'); console.error(e); });
     };
     S.useDesign = useDesign;
+    S.newBlank = function (sz) {
+      if (sz.k !== 'custom') size = sz;
+      return useDesign({ w: sz.w, h: sz.h, mm: sz.mm || [sz.w * 25.4 / 96, sz.h * 25.4 / 96], pages: [{ bg: '#ffffff', objects: [] }] }, {}).then(function () { dirty = false; toast('Blank ' + Math.round(sz.w) + ' × ' + Math.round(sz.h) + ' design ready — add text, photos and elements from the left.'); });
+    };
 
     // ---------- smart details ----------
     function valsFull() { var v = Object.assign({}, vals); return v; }
@@ -532,7 +579,8 @@
       function next() {
         if (i >= doc.pages.length) return Promise.resolve(out);
         busy(true, 'Preparing page ' + (i + 1) + ' of ' + doc.pages.length + '…');
-        return renderJSON(doc.pages[i], doc.w, doc.h, mult, vals).then(function (c) {
+        var pj = doc.pages[i]; if (fmt === 'png' && S.transparent) { pj = clone(pj); delete pj.background; }
+        return renderJSON(pj, doc.w, doc.h, mult, vals).then(function (c) {
           if (fmt !== 'png' && mode === 'print' && window.SPPaper) SPPaper.tune(c);
           out.push({ c: c }); i++; return next();
         });
@@ -662,10 +710,11 @@
         h += '<button class="st-pb" data-p="code">' + I.edit + (o.qr ? 'QR content' : 'Barcode number') + '</button><input type="color" data-p="codecolor" value="' + colorOf((o.qr || o.bc).color) + '" title="Colour">';
       } else if (isImg || isPh) {
         h += '<button class="st-pb" data-p="photo">' + I.photo + (isPh ? 'Add photo' : 'Replace') + '</button>' + (isImg ? '<button class="st-pb" data-p="photoedit">' + I.crop + 'Crop & edit</button><button class="st-pb" data-p="flip">' + I.flip + 'Flip</button>' : '') +
-          '<button class="st-pb" data-p="shape" title="Shape">' + (o.phShape === 'circle' ? I.circle : I.rect) + (o.phShape === 'circle' ? 'Round' : 'Square') + '</button>';
+          '<button class="st-pb" data-p="shape" title="Change frame shape">' + (o.phShape === 'circle' ? I.circle : I.rect) + 'Shape: ' + ({ rect: 'Square', circle: 'Round' }[o.phShape || 'rect'] || (o.phShape[0].toUpperCase() + o.phShape.slice(1))) + '</button>';
       } else if (!multi) {
         h += '<input type="color" data-p="fill" value="' + colorOf(o.fill) + '" title="Fill colour">' + (o.type === 'line' ? '<input type="color" data-p="stroke" value="' + colorOf(o.stroke) + '" title="Line colour">' : '');
       }
+      h += '<button class="st-pb" data-p="cstyle" title="Copy style">Copy style</button>' + (S._style ? '<button class="st-pb" data-p="pstyle" title="Paste style">Paste style</button>' : '');
       if (multi) h += '<button class="st-pb" data-p="group">Group</button>';
       else if (o.type === 'group' && !o.ph) h += '<button class="st-pb" data-p="ungroup">Ungroup</button>';
       h += '<button class="st-pb" data-p="fx">' + I.fx + (isText ? 'Effects' : isImg && !o.art && !o.qr && !o.bc ? 'Filters & effects' : 'Effects') + '</button><button class="st-pb" data-p="pos">Position</button><span class="st-sep"></span>' +
@@ -700,7 +749,7 @@
         case 'photo': photoFlow(o, true); return;
         case 'photoedit': photoFlow(o, false); return;
         case 'flip': o.set('flipX', !o.flipX); break;
-        case 'shape': { var nx = o.phShape === 'circle' ? 'rect' : 'circle'; if (o.type === 'image') { if (nx === 'circle') { var d = Math.min(o.width, o.height); o.set({ cropX: (o.cropX || 0) + (o.width - d) / 2, cropY: (o.cropY || 0) + (o.height - d) / 2, width: d, height: d, scaleY: o.scaleX }); } applyShape(o, nx, o.rad); } else { o.phShape = nx; } break; }
+        case 'shape': { var SHL = ['rect', 'circle'].concat(Object.keys(FRAMES)), nx = SHL[(SHL.indexOf(o.phShape || 'rect') + 1) % SHL.length]; if (o.type === 'image') { if (nx === 'circle') { var d = Math.min(o.width, o.height); o.set({ cropX: (o.cropX || 0) + (o.width - d) / 2, cropY: (o.cropY || 0) + (o.height - d) / 2, width: d, height: d, scaleY: o.scaleX }); } applyShape(o, nx, o.rad); } else { var nb = phBox({ x: o.left, y: o.top, w: o.getScaledWidth(), h: o.getScaledHeight(), shape: nx, ph: o.ph, nm: o.nm, angle: o.angle }); var idx0 = cv.getObjects().indexOf(o); cv.remove(o); cv.insertAt(nb, idx0); cv.setActiveObject(nb); o = nb; } break; }
         case 'code': {
           var c0 = o.qr || o.bc, v = prompt(o.qr ? 'QR code content (text, link, UPI…). Use {{NAME}} style tags to fill from details.' : 'Barcode number / text', c0.data); if (v == null) return;
           c0.data = v; swapSrc(o, o.qr ? qrURL(fillTags(v, vals), c0.color, c0.bgc) : barURL(fillTags(v, vals), c0.color), true).then(function () { cv.requestRenderAll(); record(); }); return;
@@ -712,6 +761,8 @@
         case 'case': each(function (x) { if (x.text == null) return; var t = x.tpl != null ? x.tpl : x.text, up = t === t.toUpperCase() && t !== t.toLowerCase(), nt = up ? t.toLowerCase().replace(/(^|[.!?]\s+|\n)([a-z])/g, function (m, a, b) { return a + b.toUpperCase(); }) : t.toUpperCase(); nt = nt.replace(/\{\{[^}]+\}\}/gi, function (m) { return m.toUpperCase(); }); x.tpl = nt; x.set('text', fillTags(nt, vals)); }); break;
         case 'artc': { var ix = +val.i; o.art.cols[ix] = val.v; swapSrc(o, ST.artURL(o.art.id, o.art.cols), true).then(function () { cv.requestRenderAll(); record(); }); return; }
         case 'flipv': o.set('flipY', !o.flipY); break;
+        case 'cstyle': { var st0 = {}, src = o.type === 'activeSelection' ? o.getObjects()[0] : o; ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'underline', 'fill', 'stroke', 'strokeWidth', 'paintFirst', 'charSpacing', 'lineHeight', 'textAlign', 'backgroundColor', 'opacity', 'fxk'].forEach(function (k) { if (src[k] !== undefined) st0[k] = src[k]; }); st0.shadow = src.shadow ? src.shadow.toObject() : null; S._style = st0; toast('Style copied — select something and tap “Paste style”.'); showProps(); return; }
+        case 'pstyle': if (!S._style) return; each(function (x) { var st1 = S._style; Object.keys(st1).forEach(function (k) { if (k === 'shadow') x.set('shadow', st1.shadow ? new F.Shadow(st1.shadow) : null); else if (k === 'fxk') x.fxk = st1.fxk; else if (x.fontSize || ['fill', 'stroke', 'strokeWidth', 'opacity'].indexOf(k) >= 0) x.set(k, st1[k]); }); if (x.fontFamily) needFont(x.fontFamily); }); fontsFor([o]).then(function () { each(function (x) { x.initDimensions && x.initDimensions(); }); cv.requestRenderAll(); }); break;
         case 'group': { if (o.type !== 'activeSelection') return; var g = o.toGroup(); g.nm = 'Group'; cv.setActiveObject(g); break; }
         case 'ungroup': { if (o.type !== 'group' || o.ph) return; o.toActiveSelection(); break; }
       }
@@ -746,6 +797,7 @@
         h += '<h4>Text effects</h4><div class="st-tfx">' + TFX.map(function (x) { return '<button data-tfx="' + x[0] + '" aria-pressed="' + ((o.fxk || 'none') === x[0]) + '"><span style="font-family:\'' + esc(o.fontFamily) + '\'" class="tfx-' + x[0] + '">Ag</span>' + x[1] + '</button>'; }).join('') + '</div>' +
           '<h4>Colour</h4>' + swatches('fill') +
           '<h4>Gradient colour</h4><div class="st-row"><input type="color" data-fx="tg1" value="' + colorOf(typeof o.fill === 'string' ? o.fill : '#ec4899') + '"><input type="color" data-fx="tg2" value="#8b5cf6"><button class="st-btn" data-fxc="tgrad">Apply gradient</button></div>' +
+          '<h4>Curve</h4>' + rng('curve', 'Curve', -100, 100, 1, o.curve || 0) +
           '<h4>Spacing</h4>' + rng('ls', 'Letter spacing', -100, 800, 10, o.charSpacing || 0) + rng('lh', 'Line height', 0.6, 3, 0.05, o.lineHeight || 1.16) +
           '<label class="st-rng">Highlight<input type="color" data-fx="tbg" value="' + colorOf(o.backgroundColor || '#fff3a3') + '"><button class="st-clear" data-fxc="tbg">Clear</button></label>' +
           '<h4>Outline <button class="st-clear" data-fxc="stroke">Clear</button></h4>' + rng('sw', 'Thickness', 0, 20, 0.5, o.strokeWidth || 0) + '<label class="st-rng">Colour<input type="color" data-fx="stc" value="' + colorOf(o.stroke || '#ffffff') + '"></label>';
@@ -784,6 +836,17 @@
       }
       x.fxk = k;
     }
+    // text along an arc (Canva "Curve")
+    function curveText(x, v) {
+      if (!x.fontSize) return;
+      x.curve = v;
+      if (!v) { x.set({ path: null }); x.initDimensions(); return; }
+      var tw = 0; try { x.set({ path: null }); x.initDimensions(); tw = Math.max.apply(null, (x.__lineWidths || [x.width]).concat([10])); } catch (e) { tw = x.width; }
+      var ang = Math.abs(v) / 100 * Math.PI * 1.9 + 0.05, r = tw / ang, up = v > 0;
+      var d = up ? 'M ' + (-r) + ' 0 A ' + r + ' ' + r + ' 0 0 1 ' + r + ' 0' : 'M ' + (-r) + ' 0 A ' + r + ' ' + r + ' 0 0 0 ' + r + ' 0';
+      x.set({ path: new F.Path(d, { visible: false, fill: '', stroke: '' }), pathAlign: 'center', pathSide: 'left', pathStartOffset: Math.max(0, (Math.PI * r - tw) / 2) });
+      x.initDimensions(); x.setCoords();
+    }
     function hexA(c, a) { c = colorOf(c); return 'rgba(' + parseInt(c.substr(1, 2), 16) + ',' + parseInt(c.substr(3, 2), 16) + ',' + parseInt(c.substr(5, 2), 16) + ',' + a + ')'; }
     // photo filters
     function photoFilters(x, fl) {
@@ -807,7 +870,7 @@
     }
     function recentFonts() { try { return JSON.parse(localStorage.getItem('st-recent-fonts') || '[]'); } catch (e) { return []; } }
     function fontPicker(o) {
-      var groups = [['Recent', recentFonts()]].concat(FONTS.map(function (g) { return [g[0], g[1].map(function (f) { return f[0]; })]; })).filter(function (g) { return g[1].length; });
+      var groups = [['Recent', recentFonts()]].concat(myFonts.length ? [['My fonts', myFonts.slice()]] : []).concat(FONTS.map(function (g) { return [g[0], g[1].map(function (f) { return f[0]; })]; })).filter(function (g) { return g[1].length; });
       var m = modal('Fonts', '<input class="st-in st-fsearch" placeholder="Search fonts…" type="search"><div class="st-chips st-fgroups">' + groups.map(function (g, i) { return '<button class="st-chip" data-g="' + i + '" aria-pressed="' + (i === (groups[0][0] === 'Recent' && groups.length > 1 ? 1 : 0)) + '">' + esc(g[0]) + '</button>'; }).join('') + '</div><div class="st-fontlist"></div>', '', true);
       m.classList.add('st-fontmodal');
       var list = m.querySelector('.st-fontlist'), q = m.querySelector('.st-fsearch'), gi = groups[0][0] === 'Recent' && groups.length > 1 ? 1 : 0;
@@ -840,6 +903,7 @@
           case 'rad': if (x.type === 'rect') x.set({ rx: v, ry: v }); else if (x.type === 'image') applyShape(x, x.phShape === 'circle' ? 'circle' : 'rect', v); else if (x.type === 'group' && x.ph) { var b = x.getObjects()[0]; if (b.type === 'rect') b.set({ rx: v, ry: v }); } x.rad = v; break;
           case 'shx': sh.offsetX = v; x.set('shadow', sh); break; case 'shy': sh.offsetY = v; x.set('shadow', sh); break; case 'shb': sh.blur = v; x.set('shadow', sh); break;
           case 'shc': sh.color = v; x.set('shadow', sh); break;
+          case 'curve': curveText(x, v); break;
           case 'op': x.set('opacity', v); break; case 'ang': x.rotate(v); break;
           case 'fb': case 'fc': case 'fs': case 'fbl': if (x.type === 'image' && !x.art) { var fl = Object.assign({}, x.flt || {}); fl[{ fb: 'b', fc: 'c', fs: 's', fbl: 'bl' }[k]] = v; photoFilters(x, fl); } break;
         }
@@ -1016,9 +1080,10 @@
     }
 
     // ---------- side panels ----------
-    var curTab = null, tplCat = 'All', tplPage = 0;
+    var curTab = null, tplCat = 'All', tplPage = 0, tplSz = cfg.anySize ? 'all' : null, tplQ = '';
     function selectTab(t) {
       if (mobile() && curTab === t && !panel.hidden) { panel.hidden = true; [].forEach.call(tabs.children, function (b) { b.setAttribute('aria-selected', 'false'); }); return; }
+      if (curTab === 'draw' && t !== 'draw') stopDraw();
       curTab = t; panel.hidden = false;
       [].forEach.call(tabs.children, function (b) { b.setAttribute('aria-selected', String(b.dataset.t === t)); });
       renderTab();
@@ -1033,7 +1098,7 @@
     function pump() { while (tRun < 2 && tq.length) { var j = tq.shift(), pr; tRun++; try { pr = Promise.resolve(j[0]()); } catch (e) { pr = Promise.reject(e); } pr.then(j[1], j[2]).then(function () { tRun--; setTimeout(pump, 0); }); } }
     function thumbOf(t, sz) {
       var key = t.id + '@' + sz.k; if (thumbCache[key]) return thumbCache[key];
-      var tv = withSample(t); thumbCache[key] = thumbQ(function () { return buildPages(designOf(t, sz), tv).then(function (pages) { return renderJSON(pages[0], sz.w, sz.h, 300 / Math.max(sz.w, sz.h), tv); }).then(function (c) { return c.toDataURL('image/jpeg', 0.82); }); });
+      var tv = withSample(t); thumbCache[key] = thumbQ(function () { return designReady(t, sz).then(function (d) { ST.curVals = tv; return buildPages(d, tv); }).then(function (pages) { return renderJSON(pages[0], sz.w, sz.h, 300 / Math.max(sz.w, sz.h), tv); }).then(function (c) { return c.toDataURL('image/jpeg', 0.82); }); });
       return thumbCache[key];
     }
     function renderTab() {
@@ -1042,15 +1107,19 @@
       if (t === 'data') return tabData();
       if (t === 'db' && ST.idDatabase) return ST.idDatabase(S, panel);
       if (t === 'els') return tabElements();
+      if (t === 'up') return tabUploads();
+      if (t === 'draw') return tabDraw();
       if (t === 'ai') return tabAI();
       if (t === 'page') return tabPage();
       if (t === 'layers') return tabLayers();
     }
     S.renderTab = renderTab;
     function tabTemplates() {
-      var cats = ['All'].concat(cfg.cats || []), sz = size;
-      panel.innerHTML = '<div class="st-drafts"></div><h3>Templates</h3><div class="st-chips">' + cats.map(function (c) { return '<button class="st-chip" data-c="' + esc(c) + '" aria-pressed="' + (c === tplCat) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
-        '<label class="st-field">Size<select data-k="size">' + sizes.map(function (s) { return '<option value="' + s.k + '"' + (s.k === sz.k ? ' selected' : '') + '>' + esc(s.label) + '</option>'; }).join('') + '</select></label><div class="st-grid"></div><div class="st-pager"></div>';
+      var cats = ['All'].concat(cfg.cats || []), sz = size, all = tplSz === 'all';
+      var start = cfg.start ? '<h3>Create a design</h3><div class="st-start">' + cfg.start.map(function (k) { var s = sizeById(k), r = s.w / s.h, bw = r >= 1 ? 30 : Math.round(30 * r), bh = r >= 1 ? Math.round(30 / r) : 30; return '<button class="st-sz" data-new="' + k + '"><i style="width:' + bw + 'px;height:' + bh + 'px"></i><b>' + esc(s.short || s.label) + '</b><small>' + (s.dim || (s.w + ' × ' + s.h)) + '</small></button>'; }).join('') + '</div>' +
+        '<details class="st-custom"><summary>Custom size</summary><div class="st-row"><label class="st-field">Width<input type="number" data-k="nw" value="1080"></label><label class="st-field">Height<input type="number" data-k="nh" value="1080"></label><label class="st-field">Unit<select data-k="nu"><option>px</option><option>mm</option><option>cm</option><option>in</option></select></label></div><button class="st-btn st-main" data-new="custom">Create blank design</button></details>' : '';
+      panel.innerHTML = start + '<div class="st-drafts"></div><h3>Templates</h3>' + (cfg.start ? '<input class="st-in st-tsearch" type="search" data-k="tq" placeholder="Search ' + TPL.length + ' templates — e.g. wedding, sale, certificate" value="' + esc(tplQ) + '">' : '') + '<div class="st-chips">' + cats.map(function (c) { return '<button class="st-chip" data-c="' + esc(c) + '" aria-pressed="' + (c === tplCat) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
+        '<label class="st-field">Size<select data-k="size">' + (cfg.anySize ? '<option value="all"' + (all ? ' selected' : '') + '>All sizes</option>' : '') + sizes.map(function (s) { return '<option value="' + s.k + '"' + (!all && s.k === sz.k ? ' selected' : '') + '>' + esc(s.label) + '</option>'; }).join('') + '</select></label><div class="st-grid"></div><div class="st-pager"></div>';
       listDrafts().then(function (ds) {
         var box = panel.querySelector('.st-drafts'); if (!box || !ds.length) return;
         box.innerHTML = '<h3>My drafts</h3>' + ds.slice(0, 8).map(function (d) { return '<div class="st-draft" data-d="' + d.id + '"><img src="' + (d.thumb || '') + '" alt=""><em>' + esc(d.name) + '<br><small>' + new Date(d.at).toLocaleString() + '</small></em><button class="st-btn" data-o="open">Open</button><button class="st-btn" data-o="del" title="Delete">' + I.del + '</button></div>'; }).join('');
@@ -1060,21 +1129,34 @@
           else if (confirm('Delete this draft?')) dbDo('drafts', 'readwrite', function (st) { return st.delete(id); }).then(renderTab);
         };
       });
-      var list = TPL.filter(function (x) { return (tplCat === 'All' || x.cat === tplCat) && (!x.sizes || x.sizes.indexOf(sz.k) >= 0); });
+      var q = tplQ.toLowerCase().trim();
+      var list = TPL.filter(function (x) { return (tplCat === 'All' || x.cat === tplCat) && (all || !x.sizes || x.sizes.indexOf(sz.k) >= 0) && (!q || (x.name + ' ' + x.cat + ' ' + (x.group || '')).toLowerCase().indexOf(q) >= 0); });
       var per = 20, pages = Math.max(1, Math.ceil(list.length / per)); tplPage = Math.min(tplPage, pages - 1);
       var grid = panel.querySelector('.st-grid');
       list.slice(tplPage * per, tplPage * per + per).forEach(function (x) {
         var b = el('button', 'st-thumb'); b.type = 'button'; b.innerHTML = '<i></i><div class="st-tim"></div><span>' + esc(x.name) + '</span>'; grid.appendChild(b);
-        b.onclick = function () { if (dirty && !confirm('Open this template? Your current design stays saved as "last work" only until you change it.')) return; S.useTemplate(x.id, sz.k).then(function () { dirty = false; if (mobile()) { panel.hidden = true; } }); };
-        thumbOf(x, sz).then(function (u) { var im = new Image(); im.alt = ''; im.src = u; b.querySelector('.st-tim').appendChild(im); var sk = b.querySelector('i'); sk && sk.remove(); });
+        b.onclick = function () { if (dirty && !confirm('Open this template? Your current design stays saved as "last work" only until you change it.')) return; S.useTemplate(x.id, all ? null : sz.k).then(function () { dirty = false; if (mobile()) { panel.hidden = true; } }); };
+        thumbOf(x, all && x.sizes ? sizeById(x.sizes[0]) : sz).then(function (u) { var im = new Image(); im.alt = ''; im.src = u; b.querySelector('.st-tim').appendChild(im); var sk = b.querySelector('i'); sk && sk.remove(); });
       });
       if (!list.length) grid.innerHTML = '<p class="st-note">No template for this size yet — pick another size, or start from a blank page in “Page”.</p>';
       panel.querySelector('.st-pager').innerHTML = pages > 1 ? '<button class="st-btn" data-pg="-1">‹ Previous</button><span>' + (tplPage + 1) + ' / ' + pages + '</span><button class="st-btn" data-pg="1">Next ›</button>' : '<span>' + list.length + ' templates</span>';
       panel.onclick = function (e) {
         var c = e.target.closest('[data-c]'); if (c && c.classList.contains('st-chip')) { tplCat = c.dataset.c; tplPage = 0; renderTab(); return; }
-        var pg = e.target.closest('[data-pg]'); if (pg) { tplPage += +pg.dataset.pg; renderTab(); }
+        var pg = e.target.closest('[data-pg]'); if (pg) { tplPage += +pg.dataset.pg; renderTab(); return; }
+        var nb = e.target.closest('[data-new]'); if (!nb) return;
+        var ns;
+        if (nb.dataset.new === 'custom') {
+          var u = { mm: 1, cm: 10, in: 25.4, px: 25.4 / 96 }[panel.querySelector('[data-k=nu]').value], wmm = +panel.querySelector('[data-k=nw]').value * u, hmm = +panel.querySelector('[data-k=nh]').value * u;
+          if (!(wmm >= 5 && hmm >= 5)) { toast('Size is too small.'); return; }
+          var pw = wmm / 25.4 * 96, ph = hmm / 25.4 * 96, f = Math.min(1, 4000 / Math.max(pw, ph));
+          ns = { k: 'custom', w: Math.round(pw * f), h: Math.round(ph * f), mm: [wmm, hmm] };
+        } else ns = sizeById(nb.dataset.new);
+        if (dirty && !confirm('Start a new blank design? Your current one stays in “My drafts” after you save it.')) return;
+        S.newBlank(ns).then(function () { if (mobile()) panel.hidden = true; });
       };
-      panel.querySelector('[data-k=size]').onchange = function (e) { size = sizeById(e.target.value); tplPage = 0; renderTab(); };
+      var tq = panel.querySelector('[data-k=tq]'), tqt = null;
+      if (tq) tq.oninput = function () { clearTimeout(tqt); tqt = setTimeout(function () { tplQ = tq.value; tplPage = 0; renderTab(); var n = panel.querySelector('[data-k=tq]'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 350); };
+      panel.querySelector('[data-k=size]').onchange = function (e) { if (e.target.value === 'all') tplSz = 'all'; else { tplSz = null; size = sizeById(e.target.value); } tplPage = 0; renderTab(); };
     }
     function tabData() {
       var f = cfg.fields || [];
@@ -1122,9 +1204,10 @@
       panel.innerHTML = '<h3>Text</h3><div class="st-txtst">' + TXT.map(function (t, i) { return '<button data-txt="' + i + '" style="font-family:\'' + t[1] + '\',sans-serif;font-weight:' + t[2] + ';color:' + t[4] + (t[5] ? ';letter-spacing:.2em' : '') + (i < 3 ? ';font-size:' + [22, 16, 13][i] + 'px' : '') + '">' + esc(t[0]) + '</button>'; }).join('') + '</div>' +
         (ST.ART ? '<h3>Stickers &amp; illustrations</h3><input class="st-in st-asearch" type="search" placeholder="Search: flower, butterfly, heart, book…"><div class="st-chips st-acats">' + cats.map(function (c) { return '<button class="st-chip" data-acat="' + c + '" aria-pressed="' + (c === artCat) + '">' + c + '</button>'; }).join('') + '</div><div class="st-artgrid"></div>' : '') +
         '<h3>Shapes &amp; more</h3><div class="st-els">' +
-        [['head', 'Heading', I.head], ['text', 'Text', I.text], ['photo', 'Photo', I.photo], ['sign', 'Signature', I.sign], ['logo', 'Logo / image', I.jpg], ['qr', 'QR code', I.qr], ['bar', 'Barcode', I.bar], ['rect', 'Box', I.rect], ['round', 'Round box', I.rect], ['circle', 'Circle', I.circle], ['line', 'Line', I.line], ['tri', 'Triangle', I.tri], ['star', 'Star', I.star], ['badge', 'Badge', I.badge]]
+        [['head', 'Heading', I.head], ['text', 'Text', I.text], ['photo', 'Photo', I.photo], ['sign', 'Signature', I.sign], ['logo', 'Logo / image', I.jpg], ['qr', 'QR code', I.qr], ['bar', 'Barcode', I.bar], ['rect', 'Box', I.rect], ['round', 'Round box', I.rect], ['circle', 'Circle', I.circle], ['line', 'Line', I.line], ['tri', 'Triangle', I.tri], ['star', 'Star', I.star], ['badge', 'Badge', I.badge], ['arrow', 'Arrow', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M14 7l5 5-5 5"/></svg>'], ['dline', 'Dashed line', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12h3M10 12h4M18 12h3"/></svg>'], ['table', 'Table', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M3 15h18M9 5v14M15 5v14"/></svg>']]
           .map(function (b) { return '<button class="st-el" data-e="' + b[0] + '">' + b[2] + b[1] + '</button>'; }).join('') + '</div>' +
-        (fm.length ? '<h4>Data fields (fill from Details)</h4><div class="st-chips">' + fm.filter(function (x) { return x.type !== 'photo'; }).map(function (x) { return '<button class="st-chip" data-tag="' + x.k + '">' + esc(x.label) + '</button>'; }).join('') + '<button class="st-chip" data-tag="+">+ Custom field</button></div>' : '') +
+        '<h3>Photo frames</h3><div class="st-frames">' + ['rect', 'circle'].concat(Object.keys(FRAMES)).map(function (k) { var d = FRAMES[k] || (k === 'circle' ? 'M50 0 A50 50 0 1 1 49.9 0 Z' : 'M8 0 H92 Q100 0 100 8 V92 Q100 100 92 100 H8 Q0 100 0 92 V8 Q0 0 8 0 Z'); return '<button data-frame="' + k + '" title="' + k + '"><svg viewBox="-4 -4 108 108"><path d="' + d + '" fill="#E4E9EF" stroke="#9AA6B4" stroke-width="3" stroke-dasharray="8 6"/></svg></button>'; }).join('') + '</div>' +
+        (fm.length && !cfg.noData ? '<h4>Data fields (fill from Details)</h4><div class="st-chips">' + fm.filter(function (x) { return x.type !== 'photo'; }).map(function (x) { return '<button class="st-chip" data-tag="' + x.k + '">' + esc(x.label) + '</button>'; }).join('') + '<button class="st-chip" data-tag="+">+ Custom field</button></div>' : '') +
         '<p class="st-note">Tip: double-tap any text on the page to type. Pinch with two fingers to resize the selected item.</p>';
       drawArt();
       var asr = panel.querySelector('.st-asearch'); if (asr) asr.oninput = drawArt;
@@ -1133,6 +1216,7 @@
         if (tx) { var T0 = TXT[+tx.dataset.txt], s0 = Math.min(doc.w, doc.h); needFont(T0[1]); var tb0 = mkObj({ t: 'text', x: doc.w * 0.1, y: doc.h * 0.42, w: doc.w * 0.8, text: T0[0], size: Math.round(s0 / T0[3]), font: T0[1], bold: T0[2], color: T0[4], ls: T0[5], align: 'center' }, doc.w, doc.h); fontsFor([tb0]).then(function () { tb0.initDimensions(); addObj(tb0); showProps(); }); return; }
         var ac = e.target.closest('[data-acat]'); if (ac) { artCat = ac.dataset.acat; panel.querySelectorAll('[data-acat]').forEach(function (c) { c.setAttribute('aria-pressed', c === ac); }); panel.querySelector('.st-asearch').value = ''; drawArt(); return; }
         var ar = e.target.closest('[data-art]'); if (ar) { addArt(ar.dataset.art); return; }
+        var fr = e.target.closest('[data-frame]'); if (fr) { var sz0 = Math.min(doc.w, doc.h) * 0.4, ph0 = phBox({ x: (doc.w - sz0) / 2, y: (doc.h - sz0) / 2, w: sz0, h: fr.dataset.frame === 'arch' ? sz0 * 1.25 : sz0, shape: fr.dataset.frame, ph: 'PHOTO', nm: 'Photo frame' }); addObj(ph0); photoFlow(ph0, true); return; }
         var tg = e.target.closest('[data-tag]');
         if (tg) {
           var k = tg.dataset.tag;
@@ -1152,10 +1236,100 @@
         else if (k2 === 'line') o = new F.Line([W * 0.2, H * 0.5, W * 0.8, H * 0.5], { stroke: '#1B2330', strokeWidth: Math.max(2, s / 200) });
         else if (k2 === 'tri') o = new F.Triangle({ left: W * 0.4, top: H * 0.4, width: s * 0.2, height: s * 0.18, fill: '#16a34a' });
         else if (k2 === 'star' || k2 === 'badge') { var n = k2 === 'star' ? 5 : 12, R = s * 0.1, r = k2 === 'star' ? R * 0.45 : R * 0.82, pts = []; for (var i = 0; i < n * 2; i++) { var a = Math.PI / n * i - Math.PI / 2, rr = i % 2 ? r : R; pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr }); } o = new F.Polygon(pts, { left: W * 0.4, top: H * 0.4, fill: k2 === 'star' ? '#F5C400' : '#dc2626' }); }
+        else if (k2 === 'arrow') { var al = s * 0.4, hw = Math.max(3, s / 120); o = new F.Group([new F.Line([0, 0, al - hw * 4, 0], { stroke: '#1B2330', strokeWidth: hw, strokeLineCap: 'round' }), new F.Triangle({ left: al, top: 0, width: hw * 6, height: hw * 6, angle: 90, originX: 'center', originY: 'center', fill: '#1B2330' })], { left: W * 0.3, top: H * 0.5 }); o.nm = 'Arrow'; }
+        else if (k2 === 'dline') o = new F.Line([W * 0.2, H * 0.5, W * 0.8, H * 0.5], { stroke: '#1B2330', strokeWidth: Math.max(2, s / 200), strokeDashArray: [s / 60, s / 90], strokeLineCap: 'round' });
+        else if (k2 === 'table') {
+          var nr = +(prompt('Rows?', '4') || 0), nc = +(prompt('Columns?', '3') || 0); if (!(nr > 0 && nc > 0)) return; nr = Math.min(nr, 30); nc = Math.min(nc, 10);
+          var tw = W * 0.8, rh = Math.min(H * 0.7 / nr, s / 12), cw = tw / nc, tx = W * 0.1, ty = (H - rh * nr) / 2, made = [];
+          for (var ri = 0; ri < nr; ri++) for (var ci = 0; ci < nc; ci++) {
+            var cell = new F.Rect({ left: tx + ci * cw, top: ty + ri * rh, width: cw, height: rh, fill: ri === 0 ? '#1B2330' : ri % 2 ? '#ffffff' : '#F3F5F8', stroke: '#CBD5E1', strokeWidth: 1 }); cell.nm = 'Table cell';
+            var tt = new F.Textbox(ri === 0 ? 'Heading ' + (ci + 1) : 'Text', { left: tx + ci * cw + 8, top: ty + ri * rh + (rh - rh * 0.4) / 2, width: cw - 16, fontSize: Math.round(rh * 0.36), fontFamily: 'Poppins', fontWeight: ri === 0 ? 700 : 400, fill: ri === 0 ? '#ffffff' : '#1B2330' }); tt.tpl = tt.text;
+            made.push(cell, tt);
+          }
+          muted++; made.forEach(function (x) { cv.add(x); }); muted--; cv.setActiveObject(new F.ActiveSelection(made, { canvas: cv })); cv.requestRenderAll(); record(); toast('Table added — double-tap a cell to type.'); return;
+        }
         addObj(o);
       };
     }
     var GRADS = [['#fbc2eb', '#a6c1ee'], ['#fdfbfb', '#ebedee'], ['#ffecd2', '#fcb69f'], ['#e0c3fc', '#8ec5fc'], ['#fbe9f0', '#f8c8dc'], ['#d4fc79', '#96e6a1'], ['#a1c4fd', '#c2e9fb'], ['#fff1eb', '#ace0f9'], ['#fdcbf1', '#e6dee9'], ['#f6d365', '#fda085'], ['#ffdde1', '#ee9ca7'], ['#c1dfc4', '#deecdd'], ['#fef9d7', '#d299c2'], ['#ebc0fd', '#d9ded8'], ['#ffffff', '#fce7f3', '#e9d5ff'], ['#0f172a', '#4c1d95']];
+    // ---------- Uploads: your own pictures and fonts, kept on this device ----------
+    var upDB = null;
+    function udb() {
+      if (upDB) return upDB;
+      upDB = new Promise(function (res, rej) { var r = indexedDB.open('sp-uploads', 1); r.onupgradeneeded = function () { r.result.createObjectStore('files', { keyPath: 'id' }); }; r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); }; });
+      return upDB;
+    }
+    function udo(mode, fn) { return udb().then(function (d) { return new Promise(function (res, rej) { var tx = d.transaction('files', mode), st = tx.objectStore('files'), out = fn(st); tx.oncomplete = function () { res(out && out.result !== undefined ? out.result : out); }; tx.onerror = function () { rej(tx.error); }; }); }); }
+    function upList() { return udo('readonly', function (st) { return st.getAll(); }).then(function (l) { return (l || []).sort(function (a, b) { return b.at - a.at; }); }).catch(function () { return []; }); }
+    var myFonts = [];
+    function loadFont(rec) {
+      try { var ff = new FontFace(rec.name, 'url(' + rec.url + ')'); return ff.load().then(function (x) { document.fonts.add(x); if (myFonts.indexOf(rec.name) < 0) myFonts.push(rec.name); }).catch(function () {}); } catch (e) { return Promise.resolve(); }
+    }
+    upList().then(function (l) { l.filter(function (x) { return x.type === 'font'; }).forEach(loadFont); });
+    function tabUploads() {
+      panel.innerHTML = '<h3>Uploads</h3><p class="st-note">Your own photos, logos, PNG stickers and fonts (.ttf, .otf, .woff). They stay on this device only.</p>' +
+        '<div class="st-row"><button class="st-btn st-main" data-u="img">' + I.jpg + 'Upload pictures</button><button class="st-btn" data-u="font">' + I.text + 'Upload a font</button></div><div class="st-upgrid"></div>';
+      function draw() {
+        upList().then(function (l) {
+          var g = panel.querySelector('.st-upgrid'); if (!g) return;
+          g.innerHTML = l.map(function (x) { return x.type === 'font' ? '<div class="st-upf"><b style="font-family:\'' + esc(x.name) + '\'">' + esc(x.name) + '</b><button class="st-x" data-del="' + x.id + '" title="Remove">×</button></div>' : '<div class="st-upi"><button data-add="' + x.id + '"><img alt="" src="' + x.url + '"></button><button class="st-x" data-del="' + x.id + '" title="Remove">×</button></div>'; }).join('') || '<p class="st-note">Nothing uploaded yet.</p>';
+          g._list = l;
+        });
+      }
+      draw();
+      panel.onclick = function (e) {
+        var u = e.target.closest('[data-u]');
+        if (u) {
+          var isFont = u.dataset.u === 'font';
+          var inp = document.createElement('input'); inp.type = 'file'; inp.multiple = true; inp.accept = isFont ? '.ttf,.otf,.woff,.woff2' : 'image/*';
+          inp.onchange = function () {
+            var files = [].slice.call(inp.files || []); if (!files.length) return; busy(true, 'Adding…');
+            Promise.all(files.map(function (fl) {
+              return new Promise(function (res) {
+                var rd = new FileReader(); rd.onload = function () {
+                  var rec = { id: 'u' + Date.now() + Math.random().toString(36).slice(2, 6), type: isFont ? 'font' : 'img', name: isFont ? fl.name.replace(/\.[^.]+$/, '').replace(/[^\w \-]+/g, ' ').trim() : fl.name, url: rd.result, at: Date.now() };
+                  (isFont ? loadFont(rec) : Promise.resolve()).then(function () { return udo('readwrite', function (st) { return st.put(rec); }); }).then(res, res);
+                }; rd.onerror = res; rd.readAsDataURL(fl);
+              });
+            })).then(function () { busy(false); draw(); toast(isFont ? 'Font added — find it under “My fonts” in the font list.' : 'Added. Tap a picture to put it on the page.'); });
+          };
+          inp.click(); return;
+        }
+        var d = e.target.closest('[data-del]');
+        if (d) { udo('readwrite', function (st) { return st.delete(d.dataset.del); }).then(draw); return; }
+        var a = e.target.closest('[data-add]');
+        if (a) {
+          var rec = (panel.querySelector('.st-upgrid')._list || []).filter(function (x) { return x.id === a.dataset.add; })[0]; if (!rec) return;
+          loadImg(rec.url).then(function (im) {
+            var k = Math.min(doc.w * 0.6 / im.width, doc.h * 0.6 / im.height, 1), w = im.width * k, h = im.height * k;
+            imgObj(rec.url, { x: (doc.w - w) / 2, y: (doc.h - h) / 2, w: w, h: h, fit: 'contain' }).then(function (o) { o.nm = rec.name || 'Picture'; addObj(o); showProps(); });
+          });
+        }
+      };
+    }
+    // ---------- Draw: pen, marker, highlighter ----------
+    var pen = { kind: 'pen', color: '#1B2330', size: 6 };
+    function stopDraw() { cv.isDrawingMode = false; }
+    function setBrush() {
+      var b = new F.PencilBrush(cv), c = pen.color;
+      if (pen.kind === 'hl') { b.width = pen.size * 4; b.color = hexA(c, 0.35); b.strokeLineCap = 'square'; }
+      else if (pen.kind === 'marker') { b.width = pen.size * 2; b.color = c; b.strokeLineCap = 'round'; }
+      else { b.width = pen.size; b.color = c; }
+      b.decimate = 2; cv.freeDrawingBrush = b; cv.isDrawingMode = true;
+    }
+    cv.on('path:created', function (e) { if (e.path) { e.path.nm = pen.kind === 'hl' ? 'Highlight' : 'Drawing'; } });
+    function tabDraw() {
+      panel.innerHTML = '<h3>Draw</h3><p class="st-note">Draw with your finger or mouse on the page. Tap another tab to stop drawing.</p>' +
+        '<div class="st-tfx st-pens">' + [['pen', 'Pen'], ['marker', 'Marker'], ['hl', 'Highlighter'], ['off', 'Select']].map(function (x) { return '<button data-pen="' + x[0] + '" aria-pressed="' + (x[0] === (cv.isDrawingMode ? pen.kind : 'off')) + '"><span>' + { pen: '✎', marker: '▮', hl: '▬', off: '⬚' }[x[0]].replace(/[✎▮▬⬚]/, function (m) { return { '✎': '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>', '▮': '<svg viewBox="0 0 24 24" width="22" height="22"><path d="M7 21l2-6h6l2 6z" fill="currentColor"/><rect x="9" y="3" width="6" height="12" rx="2" fill="currentColor" opacity=".6"/></svg>', '▬': '<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="9" width="18" height="7" rx="2" fill="#fde047"/></svg>', '⬚': '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-6 1-3 6z"/></svg>' }[m]; }) + '</span>' + x[1] + '</button>'; }).join('') + '</div>' +
+        '<h4>Colour</h4><div class="st-sw st-sw-sm">' + SWATCH.map(function (c) { return '<button style="background:' + c + '" data-pc="' + c + '" aria-pressed="' + (c === pen.color) + '"></button>'; }).join('') + '<input type="color" data-pcc value="' + pen.color + '"></div>' +
+        rng('pensize', 'Size', 1, 40, 1, pen.size);
+      if (cv.isDrawingMode) setBrush();
+      panel.onclick = function (e) {
+        var b = e.target.closest('[data-pen]'); if (b) { if (b.dataset.pen === 'off') stopDraw(); else { pen.kind = b.dataset.pen; setBrush(); } renderTab(); return; }
+        var c = e.target.closest('[data-pc]'); if (c) { pen.color = c.dataset.pc; if (cv.isDrawingMode) setBrush(); renderTab(); }
+      };
+      panel.oninput = function (e) { if (e.target.dataset.fx === 'pensize') { pen.size = +e.target.value; var out = e.target.nextElementSibling; if (out) out.textContent = pen.size; if (cv.isDrawingMode) setBrush(); } if (e.target.hasAttribute('data-pcc')) { pen.color = e.target.value; if (cv.isDrawingMode) setBrush(); } };
+    }
     function tabPage() {
       var bgv = cv.backgroundColor;
       panel.innerHTML = '<h3>Page</h3><label class="st-field">Size<select data-k="psize">' + sizes.map(function (s) { return '<option value="' + s.k + '"' + (s.w === doc.w && s.h === doc.h ? ' selected' : '') + '>' + esc(s.label) + '</option>'; }).join('') + '<option value="custom">Custom size…</option></select></label>' +
@@ -1166,6 +1340,7 @@
         '<h4>Pretty gradients</h4><div class="st-sw st-gsw">' + GRADS.map(function (g, i) { return '<button data-gp="' + i + '" style="background:linear-gradient(135deg,' + g.join(',') + ')"></button>'; }).join('') + '</div>' +
         '<h4>Your own gradient</h4><div class="st-row"><input type="color" data-k="g1" value="#0098D8"><input type="color" data-k="g2" value="#D6247A"><select data-k="ga" class="st-in" style="width:auto"><option value="90">Top → bottom</option><option value="0">Left → right</option><option value="45">Diagonal</option></select><button class="st-btn" data-k="gapply">Apply</button></div>' +
         '<h4>Background picture</h4><div class="st-row"><button class="st-btn" data-k="bgimg">' + I.jpg + 'Choose picture</button><button class="st-btn" data-k="bgclr">Remove</button></div>' +
+        '<h4>View &amp; download</h4><label class="st-check" style="display:flex;gap:8px;align-items:center;font-size:13px;margin:4px 0"><input type="checkbox" data-k="grid"' + (box.classList.contains('st-gridon') ? ' checked' : '') + '> Show grid while designing</label><label class="st-check" style="display:flex;gap:8px;align-items:center;font-size:13px;margin:4px 0 8px"><input type="checkbox" data-k="transp"' + (S.transparent ? ' checked' : '') + '> PNG with transparent background</label><button class="st-btn" data-k="svg">' + I.jpg + 'Download SVG (vector)</button>' +
         '<h4>Print paper &amp; quality</h4><div class="st-paperslot"></div>' +
         '<h4>Start over</h4><button class="st-btn" data-k="blank">' + I.page + 'Blank page</button>' +
         '<p class="st-note">Printed size: ' + Math.round(doc.mm[0] * 10) / 10 + ' × ' + Math.round(doc.mm[1] * 10) / 10 + ' mm (' + doc.w + ' × ' + doc.h + ' px).</p>';
@@ -1190,6 +1365,8 @@
         var k = e.target.dataset.k;
         if (k === 'psize') { if (e.target.value === 'custom') { panel.querySelector('[data-custom]').hidden = false; return; } var s = sizeById(e.target.value); size = s; resizeTo(s.w, s.h, s.mm || [s.w * 25.4 / 96, s.h * 25.4 / 96]); }
         if (k === 'bgc') setBg(e.target.value);
+        if (k === 'grid') box.classList.toggle('st-gridon', e.target.checked);
+        if (k === 'transp') { S.transparent = e.target.checked; toast(S.transparent ? 'PNG downloads will have a see-through background.' : 'PNG downloads keep the page colour.'); }
       };
       panel.onclick = function (e) {
         var b = e.target.closest('[data-bg],[data-k]'); if (!b) return;
@@ -1198,6 +1375,7 @@
         var k = b.dataset.k;
         if (k === 'capply') { var u = { mm: 1, cm: 10, in: 25.4, px: 25.4 / 96 }[panel.querySelector('[data-k=cu]').value], w = +panel.querySelector('[data-k=cw]').value * u, h = +panel.querySelector('[data-k=ch]').value * u; if (w < 10 || h < 10) { toast('Size is too small.'); return; } var pxw = w / 25.4 * 96, pxh = h / 25.4 * 96, f = Math.min(1, 4000 / Math.max(pxw, pxh)); resizeTo(pxw * f, pxh * f, [w, h]); }
         if (k === 'orient') resizeTo(doc.h, doc.w, [doc.mm[1], doc.mm[0]]);
+        if (k === 'svg') { saveCur(); var sc0 = new F.StaticCanvas(null, { width: doc.w, height: doc.h }); sc0.loadFromJSON(fillJSON(clone(doc.pages[cur]), vals), function () { sc0.getObjects().filter(function (o) { return o.ph && o.type === 'group'; }).forEach(function (o) { sc0.remove(o); }); var svg = sc0.toSVG({ width: doc.mm[0] + 'mm', height: doc.mm[1] + 'mm', viewBox: { x: 0, y: 0, width: doc.w, height: doc.h } }); sc0.dispose(); saveURL(fname('svg', cur), URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))); toast('SVG saved.'); }); }
         if (k === 'gapply') setBg(grad({ angle: +panel.querySelector('[data-k=ga]').value, stops: [panel.querySelector('[data-k=g1]').value, panel.querySelector('[data-k=g2]').value] }, doc.w, doc.h));
         if (k === 'bgimg') pickFile('image/*').then(function (fs) { if (!fs[0]) return; fileToURL(fs[0]).then(function (u) { imgObj(u, { x: 0, y: 0, w: doc.w, h: doc.h }).then(function (im) { im.nm = 'Background picture'; cv.add(im); im.sendToBack(); cv.requestRenderAll(); }); }); });
         if (k === 'bgclr') { cv.getObjects().filter(function (o) { return o.nm === 'Background picture'; }).forEach(function (o) { cv.remove(o); }); setBg('#ffffff'); }
@@ -1295,7 +1473,7 @@
       var first = TPL.filter(function (t) { return !t.sizes || t.sizes.indexOf(sizes[0].k) >= 0; })[0];
       return dbDo('drafts', 'readonly', function (st) { return st.get('auto-' + cfg.tool); }).catch(function () { return null; }).then(function (auto) {
         if (auto && auto.pages && auto.pages.length && Date.now() - auto.at < 1000 * 60 * 60 * 24 * 30) return openSnapshot(auto).then(function () { toast('Your last design is back. Pick a template to start a new one.'); });
-        return first ? S.useTemplate(first.id) : useDesign({ w: sizes[0].w, h: sizes[0].h, pages: [{ bg: '#ffffff', objects: [] }] }, {});
+        return first && !cfg.startBlank ? S.useTemplate(first.id) : useDesign({ w: sizes[0].w, h: sizes[0].h, pages: [{ bg: '#ffffff', objects: [] }] }, {});
       }).then(function () { if (mobile()) setTimeout(function () { selectTab('tpl'); }, 300); });
     };
   }
