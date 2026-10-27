@@ -369,6 +369,9 @@
     app.appendChild(top);
     var side = el('aside', 'st-side'), tabs = el('div', 'st-tabs'), panel = el('div', 'st-panel');
     var TABS = [['tpl', 'Templates', I.tpl]].concat(cfg.noData ? [] : [['data', cfg.dataLabel || 'Details', I.data]]).concat(cfg.id ? [['db', 'Database', I.db]] : []).concat([['els', 'Elements', I.els], ['up', 'Uploads', I.jpg], ['draw', 'Draw', I.edit], ['ai', 'AI', I.ai], ['page', 'Page', I.page], ['layers', 'Layers', I.layers]]);
+    if (cfg.ext) TABS = TABS.concat(cfg.ext.map(function (x) { return [x.k, x.label, x.icon]; }));
+    if (cfg.tabOrder) TABS = cfg.tabOrder.map(function (k) { return TABS.filter(function (t) { return t[0] === k; })[0]; }).filter(Boolean);
+    if (cfg.pro) { app.classList.add('st-pro'); document.body.classList.add('st-probody'); }
     tabs.innerHTML = TABS.map(function (t) { return '<button class="st-tab" role="tab" data-t="' + t[0] + '" aria-selected="false">' + t[2] + t[1] + '</button>'; }).join('');
     side.appendChild(tabs); side.appendChild(panel); app.appendChild(side);
     var stage = el('div', 'st-stage'), center = el('div', 'st-center'), box = el('div', 'st-canvasbox'), cnv = document.createElement('canvas');
@@ -643,6 +646,7 @@
       function go() { document.body.classList.add('st-printing'); var off = function () { document.body.classList.remove('st-printing'); window.removeEventListener('afterprint', off); }; window.addEventListener('afterprint', off); setTimeout(function () { window.print(); setTimeout(off, 1500); }, 60); }
     }
     function doExport(a) {
+      if (S.extExport) { var ep = S.extExport(a); if (ep) return ep; }
       if (a === 'sheetpdf' || a === 'sheetprint') return exportPages('jpg', 'print').then(function (list) {
         var n = sheetPlan().slots.length;
         if (a === 'sheetpdf') { sheetPDF(list).save(fname('pdf').replace('.pdf', '-A4-sheet.pdf')); toast(n + ' copies per A4 page, exact ' + doc.mm[0] + ' × ' + doc.mm[1] + ' mm. Print at 100% / Actual size.'); }
@@ -666,6 +670,7 @@
       else { var p = doExport(a); if (p && p.catch) p.catch(function (er) { busy(false); toast('Could not export: ' + (er && er.message || er)); }); }
     });
     S.exportPages = exportPages; S.doc = doc;
+    Object.assign(S, { record: record, showProps: showProps, setZoom: setZoom, zoom: function () { return zoom; }, saveCur: saveCur, renderPagesBar: renderPagesBar, top: top, app: app, stage: stage, box: box, propsEl: props, fxEl: fx, panel: panel, tabsEl: tabs, sizes: sizes, act: act, undo: undo, redo: redo, lockAll: lockAll, cur: function () { return cur; }, fname: fname, doExport: doExport, renderFx: renderFx, setFxMode: function (m) { fxMode = m; }, PROPS: PROPS, restore: restore, snap: snap, docSnapshot: docSnapshot, openSnapshot: openSnapshot, saveDraft: saveDraft, listDrafts: listDrafts, autosave: autosave, sizeById: sizeById, muted: function (d) { muted += d; }, fillJSON: function (j) { return fillJSON(j, vals); }, renderJSON: function (j, w, h, m) { return renderJSON(j, w, h, m, vals); }, matte: matte, pickFile: pickFile, fileToURL: fileToURL, fontsFor: fontsFor, needFont: needFont, FONTS: FONTS, imgObj: imgObj, editText: editText, mobile: mobile, setTouched: function () { touched = true; } });
 
     // ---------- keyboard ----------
     document.addEventListener('keydown', function (e) {
@@ -720,6 +725,7 @@
       h += '<button class="st-pb" data-p="fx">' + I.fx + (isText ? 'Effects' : isImg && !o.art && !o.qr && !o.bc ? 'Filters & effects' : 'Effects') + '</button><button class="st-pb" data-p="pos">Position</button><span class="st-sep"></span>' +
         '<button class="st-pb" data-p="dup" title="Copy">' + I.dup + '</button><button class="st-pb" data-p="up" title="Bring forward">' + I.up + '</button><button class="st-pb" data-p="down" title="Send backward">' + I.down + '</button>' +
         '<button class="st-pb" data-p="center" title="Centre on page">' + I.center + '</button><button class="st-pb" data-p="lock" aria-pressed="' + !!o.stLock + '" title="Lock">' + I.lock + '</button><button class="st-pb st-danger" data-p="del" title="Delete">' + I.del + '</button>';
+      if (S.propsHook) h = S.propsHook(o, h, { isText: isText, isImg: isImg, isPh: isPh, multi: multi }) || h;
       props.innerHTML = h; props.hidden = false;
       if (!fx.hidden) renderFx();
     }
@@ -765,6 +771,7 @@
         case 'pstyle': if (!S._style) return; each(function (x) { var st1 = S._style; Object.keys(st1).forEach(function (k) { if (k === 'shadow') x.set('shadow', st1.shadow ? new F.Shadow(st1.shadow) : null); else if (k === 'fxk') x.fxk = st1.fxk; else if (x.fontSize || ['fill', 'stroke', 'strokeWidth', 'opacity'].indexOf(k) >= 0) x.set(k, st1[k]); }); if (x.fontFamily) needFont(x.fontFamily); }); fontsFor([o]).then(function () { each(function (x) { x.initDimensions && x.initDimensions(); }); cv.requestRenderAll(); }); break;
         case 'group': { if (o.type !== 'activeSelection') return; var g = o.toGroup(); g.nm = 'Group'; cv.setActiveObject(g); break; }
         case 'ungroup': { if (o.type !== 'group' || o.ph) return; o.toActiveSelection(); break; }
+        default: if (S.extAct) S.extAct(p, o, val); return;
       }
       if (o.setCoords) o.setCoords(); each(function (x) { x.initDimensions && x.initDimensions(); x.dirty = true; });
       cv.requestRenderAll(); record(); showProps();
@@ -1106,12 +1113,13 @@
       if (t === 'tpl') return tabTemplates();
       if (t === 'data') return tabData();
       if (t === 'db' && ST.idDatabase) return ST.idDatabase(S, panel);
-      if (t === 'els') return tabElements();
+      if (t === 'els') { tabElements(); if (S.elsHook) S.elsHook(panel); return; }
       if (t === 'up') return tabUploads();
       if (t === 'draw') return tabDraw();
       if (t === 'ai') return tabAI();
       if (t === 'page') return tabPage();
       if (t === 'layers') return tabLayers();
+      var ex = (cfg.ext || []).filter(function (x) { return x.k === t; })[0]; if (ex) return ex.render(panel, S);
     }
     S.renderTab = renderTab;
     function tabTemplates() {
