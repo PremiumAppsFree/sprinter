@@ -288,12 +288,13 @@
   }
 
   // ---------- Photos tab (free stock photos) ----------
+  function withTimeout(pr, ms) { return Promise.race([pr, new Promise(function (_, no) { setTimeout(function () { no(new Error('timeout')); }, ms); })]); }
   var photoState = { q: '', page: 1, items: [], loading: false };
   var PHOTO_CHIPS = ['Nature', 'Flowers', 'Food', 'Business', 'People', 'Wedding', 'Festival', 'Sky', 'Texture', 'Abstract', 'City', 'Mountains', 'Beach', 'Coffee', 'Books', 'Technology'];
   function tabPhotos(panel) {
     panel.innerHTML = '<h3>Photos</h3><input class="st-in sx-search" type="search" placeholder="Search free photos — e.g. flowers, office, food" value="' + esc(photoState.q) + '">' +
       '<div class="st-chips sx-pchips">' + PHOTO_CHIPS.map(function (c) { return '<button class="st-chip" data-q="' + c + '">' + c + '</button>'; }).join('') + '</div>' +
-      '<div class="sx-masonry"></div><div class="sx-more"></div><p class="st-note">Free photos from <b>Openverse</b> (Creative Commons). The photo credit is kept in the layer name. Tap a photo to add it, or select a photo frame first to fill it.</p>';
+      '<div class="sx-masonry"></div><div class="sx-more"></div><p class="st-note">Free photos from <b>Openverse</b> and <b>Wikimedia Commons</b> (Creative Commons). The photo credit is kept in the layer name. Tap a photo to add it, or select a photo frame first to fill it.</p>';
     var grid = panel.querySelector('.sx-masonry'), more = panel.querySelector('.sx-more'), inp = panel.querySelector('.sx-search');
     function draw() {
       grid.innerHTML = photoState.items.map(function (r, i) { return '<button class="sx-ph" data-i="' + i + '" title="' + esc(r.title || '') + '"><img loading="lazy" referrerpolicy="no-referrer" alt="" src="' + esc(r.thumbnail || r.url) + '"></button>'; }).join('') || (photoState.loading ? '' : '<p class="st-note">No photos found. Try another word.</p>');
@@ -301,10 +302,30 @@
     }
     function search(q, page) {
       photoState.q = q; photoState.page = page; photoState.loading = true; if (page === 1) photoState.items = []; draw();
-      var url = 'https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q || 'nature') + '&page=' + page + '&page_size=30&license_type=commercial&mature=false';
-      fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
-        photoState.items = photoState.items.concat(j.results || []); photoState.more = (j.page_count || 1) > page; photoState.loading = false; if (panel.isConnected) draw();
-      }).catch(function () { photoState.loading = false; if (panel.isConnected) { draw(); grid.innerHTML = '<p class="st-note">Could not reach the free photo library. Check your internet and try again.</p>'; } });
+      var q2 = q || 'nature', done = function (list, more) {
+        photoState.items = photoState.items.concat(list); photoState.more = more; photoState.loading = false; if (panel.isConnected) draw();
+      }, fail = function () { photoState.loading = false; if (panel.isConnected) { draw(); grid.innerHTML = '<p class="st-note">Could not reach the free photo library. Check your internet and try again.</p>'; } };
+      function commons() {
+        photoState.src = 'wm';
+        var u = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=30&gsroffset=' + ((page - 1) * 30) +
+          '&gsrsearch=' + encodeURIComponent(q2 + ' filetype:bitmap') + '&prop=imageinfo&iiprop=url|extmetadata|mime&iiurlwidth=1280&iiextmetadatafilter=Artist|LicenseShortName|ObjectName';
+        return withTimeout(fetch(u), 15000).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
+          var pages = j.query ? Object.values(j.query.pages).sort(function (x, y) { return (x.index || 0) - (y.index || 0); }) : [];
+          done(pages.map(function (pg) {
+            var ii = (pg.imageinfo || [])[0] || {}, m = ii.extmetadata || {}, val = function (k) { return m[k] ? String(m[k].value).replace(/<[^>]*>/g, '').trim() : ''; };
+            if (!/^image\/(jpeg|png|webp)/.test(ii.mime || '')) return null;
+            var big = ii.thumburl || ii.url;
+            return { url: big, thumbnail: big.replace(/\/\d+px-/, '/330px-'), title: val('ObjectName') || pg.title.replace(/^File:|\.\w+$/g, ''), creator: val('Artist').slice(0, 40), license: val('LicenseShortName') || 'cc', alt: [big, ii.url] };
+          }).filter(Boolean), !!j.continue);
+        });
+      }
+      if (photoState.src === 'wm' && page > 1) { commons().catch(fail); return; }
+      photoState.src = 'ov';
+      var url = 'https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q2) + '&page=' + page + '&page_size=30&license_type=commercial&mature=false';
+      withTimeout(fetch(url), 8000).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) {
+        if (!(j.results || []).length && page === 1) return commons();
+        done(j.results || [], (j.page_count || 1) > page);
+      }).catch(function () { return commons().catch(fail); });
     }
     var t = null;
     inp.oninput = function () { clearTimeout(t); t = setTimeout(function () { search(inp.value.trim(), 1); }, 500); };
@@ -313,7 +334,7 @@
       if (e.target.closest('[data-more]')) { search(photoState.q, photoState.page + 1); return; }
       var p = e.target.closest('[data-i]'); if (!p) return;
       var r = photoState.items[+p.dataset.i]; S.busy(true, 'Adding photo…');
-      corsImage([r.url, r.thumbnail]).then(function (u) {
+      corsImage((r.alt || [r.url]).concat([r.thumbnail])).then(function (u) {
         S.busy(false); var nm = 'Photo: ' + (r.title || 'free photo').slice(0, 40) + (r.creator ? ' — ' + r.creator : '') + ' (' + (r.license || 'cc').toUpperCase() + ')';
         placePicture(u, nm);
       }).catch(function (er) { S.busy(false); S.toast(er.message); });
