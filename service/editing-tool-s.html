@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Editing Tool S — free online design editor for posts, posters, cards &amp; more — S Printer</title>
+<meta name="description" content="Editing Tool S: a free design editor in your browser. Instagram, Facebook, YouTube and WhatsApp sizes, posters, flyers, cards and documents. 640+ templates, 170+ fonts, stickers, photo frames, effects, drawing, uploads, PNG/JPG/PDF/SVG download.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=25">
+<script src="../assets/sprinter/sprinter.js?v=39"></script>
+<link rel="stylesheet" href="../assets/vendor/cropper.min.css">
+<link rel="stylesheet" href="../assets/studio/studio.css?v=4">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@400;700;800&display=swap">
+</head>
+<body class="st-body">
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/editing-tool-s.html" aria-current="page">Editing Tool S</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../service/a4-photo-print.html">Photo Print</a>
+      <a href="../service/document-auto-crop.html">Document Crop</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+<main class="st-wrap">
+  <div class="st-head"><svg viewBox="0 0 52 52" aria-hidden="true"><defs><linearGradient id="ets" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#ec4899"/></linearGradient></defs><rect x="1" y="1" width="50" height="50" rx="14" fill="url(#ets)"/><rect x="11" y="12" width="22" height="28" rx="3" fill="#fff" opacity=".95"/><path d="M15 19h14M15 23h10" stroke="#8b5cf6" stroke-width="2.2" stroke-linecap="round"/><circle cx="20" cy="32" r="4" fill="#f9a8d4"/><path d="M36 14l5 5-12 12-6 1 1-6z" fill="#fde047" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg><div><h1>Editing Tool S</h1><p>Design anything — social posts, stories, thumbnails, posters, flyers, cards and documents. Pick a size or a template, then edit every text, photo, sticker, font and colour freely.</p></div></div>
+  <div id="studio"></div>
+</main>
+</main>
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card</a>
+      <a href="../tool/merge-pdf.html">Merge PDF</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/cropper.min.js"></script>
+<script src="../assets/vendor/jspdf.umd.min.js"></script>
+<script src="../assets/vendor/studio/fabric.min.js"></script>
+<script src="../assets/vendor/studio/qrcode.js"></script>
+<script src="../assets/vendor/studio/JsBarcode.all.min.js"></script>
+<script src="../assets/studio/art.js?v=3"></script>
+<script src="../assets/studio/studio.js?v=8"></script>
+<script src="../assets/studio/tpl-kit.js?v=5"></script>
+<script src="../assets/studio/tpl-social.js?v=1"></script>
+<script>SPStudio.templates.forEach(function (t) { t.group = t.group || "Social & everyday"; });</script>
+<script src="../assets/studio/tpl-poster.js?v=2"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Posters & Jobs"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-shop.js?v=2"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Shop & Banners"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-cert.js?v=2"></script>
+<script src="../assets/studio/tpl-cert-aes.js?v=1"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Certificates"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-id.js?v=2"></script>
+<script src="../assets/studio/tpl-id-school.js?v=1"></script>
+<script src="../assets/studio/tpl-id-aes.js?v=1"></script>
+<script src="../assets/studio/tpl-id-pro.js?v=1"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "ID Cards"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-marriage.js?v=3"></script>
+<script src="../assets/studio/tpl-marriage2.js?v=1"></script>
+<script src="../assets/studio/tpl-marriage-aes.js?v=1"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Wedding Cards"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-project.js?v=2"></script>
+<script src="../assets/studio/tpl-project-aes.js?v=1"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Project Papers"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-resume.js?v=2"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Resume / CV"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-letter.js?v=2"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Letters & Applications"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script src="../assets/studio/tpl-cardskin.js?v=1"></script>
+<script>SPStudio.templates.forEach(function (t) { if (!t.group) { t.group = "Card Stickers"; t.sub = t.cat; t.cat = t.group; } });</script>
+<script>
+  (function () {
+    var ST = SPStudio, K = ST.K, cfg = {"tool": "editor", "title": "Design", "file": "Design", "noData": true, "anySize": true, "startBlank": true, "start": ["sq", "igp", "story", "fbpost", "fbcover", "yt", "ytbanner", "hd", "a4p", "a4l", "a3p", "a5p", "bcard", "logo", "inv", "idl", "card"], "fields": [{"k": "SHOP_NAME", "label": "Shop name", "def": "Shree Ganesh Cyber Cafe"}, {"k": "SHOP_PHONE", "label": "Shop phone", "def": "+91 98765 43210"}, {"k": "SHOP_ADDRESS", "label": "Shop address", "def": "Main Market, Near SBI Bank, Jaipur"}, {"k": "JOB_TITLE", "label": "Job / exam title", "def": "Rajasthan Police Constable Bharti 2026"}, {"k": "ORG", "label": "Department / board", "def": "Rajasthan Police Department"}, {"k": "TOTAL_POSTS", "label": "Total posts / seats", "def": "9,617"}, {"k": "QUALIFICATION", "label": "Qualification / course", "def": "12th pass"}, {"k": "AGE_LIMIT", "label": "Age limit / eligibility", "def": "18 \u2013 25 years"}, {"k": "FEE", "label": "Application fee", "def": "\u20b9600 (SC/ST \u20b9400)"}, {"k": "SALARY", "label": "Salary", "def": "Pay level 5 (\u20b921,700+)"}, {"k": "START_DATE", "label": "Start / release date", "def": "01 Nov 2026"}, {"k": "LAST_DATE", "label": "Last date", "def": "30 Nov 2026"}, {"k": "EXAM_DATE", "label": "Exam date", "def": "January 2027"}, {"k": "WEBSITE", "label": "Official website", "def": "https://police.rajasthan.gov.in"}, {"k": "DOCS", "label": "Documents needed", "def": "Aadhaar card, 10th & 12th marksheet, Photo & signature, Caste certificate"}, {"k": "NOTE", "label": "Extra note", "def": "Apply online at our shop \u2014 fast and correct form filling!"}, {"k": "TAGLINE", "label": "Tagline", "def": "Online forms \u00b7 Print \u00b7 Xerox \u00b7 Lamination"}, {"k": "OWNER", "label": "Owner / proprietor", "def": "Ramesh Kumar"}, {"k": "EMAIL", "label": "E-mail", "def": "shreeganeshcyber@gmail.com"}, {"k": "TIMING", "label": "Timing", "def": "9 AM \u2013 9 PM"}, {"k": "UPI", "label": "UPI ID (for the pay QR)", "def": "shopname@upi"}, {"k": "SERVICES", "label": "Services (one per line)", "def": "Aadhaar / PAN services\nOnline job forms\nAdmit card & result\nPassport photo\nColour print & Xerox\nLamination & PVC card\nBill payment & recharge\nBank & money transfer\nTrain / bus tickets\nScholarship forms"}, {"k": "RATES", "label": "Rate list (Service - \u20b9price, one per line)", "def": "B/W print - \u20b92\nColour print - \u20b910\nXerox (A4) - \u20b92\nPassport photo (8) - \u20b950\nLamination - \u20b920\nPVC Aadhaar card - \u20b950\nOnline form - \u20b950\nScanning - \u20b910\nResume / biodata - \u20b930\nPAN apply - \u20b9150"}, {"k": "OFFER", "label": "Offer (big text)", "def": "FLAT 20% OFF"}, {"k": "OFFER_NOTE", "label": "Offer details / message", "def": "On all colour prints and lamination"}, {"k": "VALID_TILL", "label": "Offer valid till", "def": "31 Oct 2026"}, {"k": "GREETING", "label": "Festival greeting", "def": "Happy Diwali"}, {"k": "CANDIDATE", "label": "Candidate name", "def": "Ramesh Kumar"}, {"k": "POST_NAME", "label": "Post (e.g. Sarpanch, Ward Member)", "def": "\u0938\u0930\u092a\u0902\u091a"}, {"k": "WARD", "label": "Ward / panchayat", "def": "Gram Panchayat Rampura"}, {"k": "SYMBOL", "label": "Election symbol (text)", "def": "Ghadi (clock)"}, {"k": "BALLOT_NO", "label": "Ballot number", "def": "3"}, {"k": "ELECTION_DATE", "label": "Voting date", "def": "15 Jan 2027"}, {"k": "SLOGAN", "label": "Slogan", "def": "Saaf neeyat, sahi vikas"}, {"k": "ORG_TAG", "label": "Affiliation / place", "def": "Affiliated to CBSE \u00b7 Jaipur"}, {"k": "CERT_TITLE", "label": "Certificate title (e.g. Certificate of Merit / Participation)", "def": "Certificate of Achievement"}, {"k": "CERT_SUB", "label": "Line before the name", "def": "This certificate is proudly presented to"}, {"k": "NAME", "label": "Name", "def": "Aarav Sharma"}, {"k": "REASON", "label": "For / reason", "def": "for securing First Position in the Annual Science Exhibition held on 15 November 2026. We appreciate the hard work and wish a bright future."}, {"k": "DATE", "label": "Date", "def": "15 November 2026"}, {"k": "PLACE", "label": "Place", "def": "Jaipur"}, {"k": "SIGN1_NAME", "label": "Left signature \u2014 name", "def": "Mrs. Neha Verma"}, {"k": "SIGN1_ROLE", "label": "Left signature \u2014 post", "def": "Class Teacher"}, {"k": "SIGN2_NAME", "label": "Right signature \u2014 name", "def": "Dr. R. K. Sharma"}, {"k": "SIGN2_ROLE", "label": "Right signature \u2014 post", "def": "Principal"}, {"k": "ORG_NAME", "label": "School / company name", "def": "Sunrise Public School"}, {"k": "ORG_ADDRESS", "label": "Address", "def": "Near Bus Stand, Sikar Road, Jaipur 302013"}, {"k": "ORG_PHONE", "label": "Office phone", "def": "0141-2345678"}, {"k": "ORG_WEB", "label": "Website / e-mail", "def": "www.sunriseschool.in"}, {"k": "ID_NO", "label": "ID / roll number", "def": "SPS2026-0142"}, {"k": "ROLE", "label": "Class (e.g. Class VIII) / designation", "def": "Class VIII"}, {"k": "DEPT", "label": "Section / department", "def": "B"}, {"k": "FATHER", "label": "Father's name", "def": "Mr. Rajesh Gupta"}, {"k": "MOTHER", "label": "Mother's name", "def": "Mrs. Sunita Gupta"}, {"k": "DOB", "label": "Date of birth", "def": "05/06/2013"}, {"k": "BLOOD", "label": "Blood group", "def": "B+"}, {"k": "PHONE", "label": "Phone", "def": "+91 98290 55555"}, {"k": "ADDRESS", "label": "Address", "def": "22, Vidhyadhar Nagar, Jaipur"}, {"k": "EMERGENCY", "label": "Emergency contact", "def": "+91 98290 55556"}, {"k": "VALID", "label": "Valid till", "def": "31 March 2027"}, {"k": "SESSION", "label": "Session / year", "def": "2026\u201327"}, {"k": "GROOM", "label": "Groom name", "def": "Rahul"}, {"k": "GROOM_PARENTS", "label": "Groom's parents", "def": "S/o Shri Ramesh Sharma & Smt. Sunita Sharma"}, {"k": "BRIDE", "label": "Bride name", "def": "Priya"}, {"k": "BRIDE_PARENTS", "label": "Bride's parents", "def": "D/o Shri Mahesh Verma & Smt. Kavita Verma"}, {"k": "MESSAGE", "label": "Invitation line", "def": "Together with their families, request the honour of your presence at the wedding of"}, {"k": "WEDDING_DATE", "label": "Wedding date", "def": "Friday, 21 November 2026"}, {"k": "WEDDING_TIME", "label": "Time", "def": "7:00 PM"}, {"k": "VENUE", "label": "Venue", "def": "Hotel Shree Palace, Station Road, Jaipur"}, {"k": "EVENTS", "label": "Functions (one per line)", "def": "Haldi \u2014 20 Nov, 10:00 AM\nMehndi \u2014 20 Nov, 5:00 PM\nBaraat \u2014 21 Nov, 7:00 PM"}, {"k": "INVITER", "label": "Invited by", "def": "Sharma Parivar"}, {"k": "RSVP", "label": "RSVP / contact", "def": "+91 98765 43210"}, {"k": "TOB", "label": "Time of birth", "def": "06:45 AM"}, {"k": "POB", "label": "Place of birth", "def": "Jaipur"}, {"k": "HEIGHT", "label": "Height", "def": "5' 4\""}, {"k": "COMPLEXION", "label": "Complexion", "def": "Fair"}, {"k": "RELIGION", "label": "Religion", "def": "Hindu"}, {"k": "CASTE", "label": "Caste", "def": "Brahmin"}, {"k": "GOTRA", "label": "Gotra", "def": "Bharadwaj"}, {"k": "RASHI", "label": "Rashi", "def": "Kanya"}, {"k": "NAKSHATRA", "label": "Nakshatra", "def": "Hasta"}, {"k": "MANGLIK", "label": "Manglik", "def": "No"}, {"k": "EDUCATION", "label": "Education", "def": "M.Sc. (Chemistry)"}, {"k": "OCCUPATION", "label": "Occupation", "def": "Teacher, Kendriya Vidyalaya"}, {"k": "INCOME", "label": "Annual income", "def": "\u20b96 lakh"}, {"k": "FATHER_OCC", "label": "Father's occupation", "def": "Retired bank officer"}, {"k": "MOTHER_OCC", "label": "Mother's occupation", "def": "Homemaker"}, {"k": "SIBLINGS", "label": "Brothers / sisters", "def": "1 elder brother (married)"}, {"k": "CONTACT", "label": "Contact", "def": "+91 98290 12345"}, {"k": "SCHOOL", "label": "School / college name", "def": "Sunrise Public School"}, {"k": "SCHOOL_TAG", "label": "Affiliation / place", "def": "Affiliated to CBSE \u00b7 Jaipur"}, {"k": "TITLE", "label": "Project title", "def": "Water Conservation"}, {"k": "SUBTITLE", "label": "Sub-title / one line about it", "def": "A project on saving water for our future"}, {"k": "SUBJECT", "label": "Subject", "def": "Environmental Science"}, {"k": "CLASS", "label": "Class", "def": "X"}, {"k": "SECTION", "label": "Section", "def": "A"}, {"k": "ROLL", "label": "Roll number", "def": "21"}, {"k": "TEACHER", "label": "Submitted to (teacher)", "def": "Mrs. Neha Verma"}, {"k": "TEACHER_ROLE", "label": "Teacher's subject / post", "def": "EVS Teacher"}, {"k": "ACK", "label": "Acknowledgement text", "def": "I would like to express my special thanks of gratitude to my teacher Mrs. Neha Verma as well as our principal who gave me the golden opportunity to do this wonderful project on the topic Water Conservation, which also helped me in doing a lot of research, and I came to know about so many new things. I am really thankful to them. Secondly, I would also like to thank my parents and friends who helped me a lot in finalising this project within the limited time frame."}, {"k": "INDEX", "label": "Index topics (one per line)", "def": "Introduction\nObjectives of the project\nWhy save water?\nMethods of water conservation\nRainwater harvesting\nSurvey and data\nPhotos and charts\nConclusion\nBibliography"}, {"k": "SUMMARY", "label": "Profile / career objective", "def": "Detail-oriented accounts professional with 4 years of experience in GST filing, Tally and bank reconciliation. Looking to grow with an organisation that values accuracy and teamwork."}, {"k": "EXPERIENCE", "label": "Work experience (one line each)", "def": "Accounts Executive \u2014 Shree Traders, Jaipur (2022 \u2013 Present)\nGST returns, Tally entries, vendor payments and monthly reports.\n\nAccounts Assistant \u2014 R.K. Enterprises (2020 \u2013 2022)\nBilling, bank reconciliation and petty cash."}, {"k": "SKILLS", "label": "Skills (one per line or comma)", "def": "Tally ERP 9 / Prime\nGST & TDS\nMS Excel (advanced)\nBank reconciliation\nHindi & English typing"}, {"k": "LANGUAGES", "label": "Languages", "def": "Hindi, English, Rajasthani"}, {"k": "HOBBIES", "label": "Hobbies / achievements", "def": "Reading\nCricket\nBest Employee award 2023"}, {"k": "GENDER", "label": "Gender", "def": "Male"}, {"k": "MARITAL", "label": "Marital status", "def": "Unmarried"}, {"k": "NATIONALITY", "label": "Nationality", "def": "Indian"}, {"k": "DECLARATION", "label": "Declaration", "def": "I hereby declare that the information given above is true to the best of my knowledge and belief."}, {"k": "FULL_NAME", "label": "Your name", "def": "Aarav Sharma"}, {"k": "TO_TITLE", "label": "To (post)", "def": "The Branch Manager"}, {"k": "TO_OFFICE", "label": "Office / organisation", "def": "State Bank of India"}, {"k": "TO_ADDRESS", "label": "Place / address", "def": "Jaipur"}, {"k": "FROM_DATE", "label": "From date", "def": "12/10/2026"}, {"k": "TO_DATE", "label": "To date", "def": "14/10/2026"}, {"k": "DAYS", "label": "Number of days / leaves", "def": "3"}, {"k": "ACCOUNT_NO", "label": "Account / consumer / card number", "def": "XXXXXXX1234"}, {"k": "BANK_NAME", "label": "Bank name", "def": "State Bank of India"}, {"k": "BRANCH", "label": "Branch", "def": "MI Road, Jaipur"}, {"k": "FEE_MODE", "label": "RTI fee paid by", "def": "Indian Postal Order No. ______"}, {"k": "POST", "label": "Post / designation", "def": "Accounts Executive"}, {"k": "EMP_ID", "label": "Employee ID", "def": "ST-1042"}, {"k": "COMPANY", "label": "Company", "def": "Shree Traders Pvt. Ltd."}, {"k": "EXPERIENCE_YRS", "label": "Experience", "def": "2 years"}, {"k": "STUDENT", "label": "Student / family member name", "def": "Riya Sharma"}, {"k": "ROLL_NO", "label": "Roll number", "def": "24"}, {"k": "BRAND", "label": "Top title (your brand / shop / any text)", "def": "PREMIUM CARD"}, {"k": "TIER", "label": "Card type (Platinum, Gold, Black\u2026)", "def": "Platinum"}, {"k": "SINCE", "label": "Member since", "def": "09"}, {"k": "BACK_NOTE", "label": "Back side text", "def": "Personal design sticker. Stick it on your own card \u2014 keep the chip uncovered."}], "aiHint": "e.g. Instagram post for a cafe opening, pastel colours, big title and a photo"};
+    cfg.sizes = Object.keys(K.SIZES).map(function (k) { return K.SIZES[k]; });
+    cfg.sizes.sort(function (a, b) { return (cfg.start.indexOf(a.k) + 1 || 99) - (cfg.start.indexOf(b.k) + 1 || 99); });
+    var GO = ['Social & everyday'];
+    ST.templates.forEach(function (t) { if (GO.indexOf(t.group) < 0) GO.push(t.group); });
+    ST.templates.sort(function (a, b) { return GO.indexOf(a.group) - GO.indexOf(b.group); });
+    var cats = [];
+    ST.templates.forEach(function (t) { if (cats.indexOf(t.cat) < 0) cats.push(t.cat); });
+    cfg.cats = cats;
+    window.__studio = new ST.Studio(document.getElementById('studio'), cfg);
+    __studio.init().then(function () {
+      var k = (location.search.match(/[?&]size=([a-z0-9]+)/) || [])[1];
+      if (k && K.SIZES[k]) __studio.newBlank(K.SIZES[k]);
+    });
+  })();
+</script>
+</body>
+</html>
