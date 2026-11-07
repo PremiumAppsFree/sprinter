@@ -710,5 +710,5 @@
     cv.on('selection:updated', function () { if (S.tabsEl.querySelector('[data-t=anim][aria-selected=true]') && !S.panel.hidden) tabAnim(S.panel); });
     setTimeout(S.fit, 300);
   };
-  Pro.buildChart = buildChart; Pro.smartPage = smartPage; Pro.animator = animator;
+  Pro.addIcon = addIcon; Pro.buildChart = buildChart; Pro.smartPage = smartPage; Pro.animator = animator;
 })();
