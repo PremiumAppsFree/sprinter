@@ -75,7 +75,7 @@
     }
     var grid = box.querySelector('.sx-illg'), loaded = false;
     function first() { if (!loaded) { loaded = true; loadIll(ILL[0][1], grid); } }
-    if ('IntersectionObserver' in window) { var io = new IntersectionObserver(function (en) { if (en.some(function (x) { return x.isIntersecting; })) { first(); io.disconnect(); } }); io.observe(grid); } else first();
+    first();
     box.addEventListener('click', function (e) {
       var b;
       if ((b = e.target.closest('[data-illq]'))) { [].forEach.call(box.querySelectorAll('[data-illq]'), function (x) { x.setAttribute('aria-pressed', x === b); }); loaded = true; loadIll(b.dataset.illq, grid); return; }
