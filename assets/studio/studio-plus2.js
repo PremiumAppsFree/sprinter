@@ -47,7 +47,7 @@
   // =====================================================================
   //  ILLUSTRATIONS (free colour icon sets, via the same icon service)
   // =====================================================================
-  var ILL = [['Animals', 'animal'], ['Food', 'food'], ['Fruits', 'fruit'], ['Flowers', 'flower'], ['Nature', 'tree'], ['Weather', 'weather'], ['People', 'person'], ['Faces', 'face'], ['School', 'school'], ['Office', 'office'], ['Travel', 'travel'], ['Sports', 'sport'], ['Music', 'music'], ['Party', 'party'], ['Love', 'heart'], ['Money', 'money'], ['Shopping', 'shopping'], ['Medical', 'medical'], ['Home', 'house'], ['Vehicles', 'car'], ['Tech', 'computer'], ['Space', 'rocket'], ['Festival', 'lamp'], ['Hands', 'hand']];
+  var ILL = [['Animals', 'cat'], ['Dogs', 'dog'], ['Birds', 'bird'], ['Food', 'food'], ['Cakes', 'cake'], ['Flowers', 'flower'], ['Nature', 'tree'], ['Weather', 'cloud'], ['Sun & sky', 'sun'], ['People', 'person'], ['Faces', 'face'], ['School', 'book'], ['Office', 'office'], ['Travel', 'airplane'], ['Sports', 'ball'], ['Music', 'music'], ['Party', 'party'], ['Love', 'heart'], ['Money', 'money'], ['Shopping', 'shopping'], ['Medical', 'medical'], ['Home', 'house'], ['Vehicles', 'car'], ['Phones', 'phone'], ['Stars', 'star'], ['Festival', 'lamp'], ['Hands', 'hand'], ['Fire', 'fire']];
   var illCache = {};
   function loadIll(q, grid) {
     grid.innerHTML = '<p class="st-note">Loading…</p>';
