@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Raj">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Image Check — Is this photo made by AI? | S Printer</title>
+<meta name="description" content="Check if a photo was made by AI (Gemini / Nano Banana, GPT image and others). Free, runs on your device, nothing is uploaded.">
+<meta name="theme-color" content="#1B2330">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<script>try{navigator.serviceWorker&&navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){if(/\/ai\/$/.test(x.scope))x.unregister()})})}catch(e){}</script>
+<link rel="stylesheet" href="../assets/sprinter/sprinter.css?v=25">
+<script src="../assets/sprinter/sprinter.js?v=39"></script>
+<link rel="stylesheet" href="../assets/cardprint/cardprint.css?v=27">
+<link rel="stylesheet" href="../assets/sizer/sizer.css?v=2">
+<link rel="stylesheet" href="../assets/aicheck/aicheck.css?v=1">
+</head>
+<body class="sz-body" data-sp-nofloat>
+<header class="sp-header" id="sp-header">
+  <div class="sp-wrap">
+    <a class="sp-brand" href="../index.html" aria-label="S Printer home">
+      <span class="sp-logo">S</span><span class="sp-name">S&nbsp;Printer</span>
+    </a>
+    <button class="sp-menu-btn" type="button" aria-label="Menu" onclick="document.getElementById('sp-header').classList.toggle('sp-open')">&#9776;</button>
+    <nav class="sp-nav">
+      <a href="../index.html">Home</a>
+      <a href="../service/editing-tool-s.html">Editing Tool S</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/id-card-print.html">ID Card Print</a>
+      <a href="../ai/photo-enhancer.html">AI Enhance</a>
+      <a href="../service/scan-document.html">Scan</a>
+      <a href="../tool/jpg-to-pdf.html">PDF Tools</a>
+    </nav>
+  </div>
+</header>
+
+<main class="cp-wrap">
+  <div class="sz-hero">
+    <svg class="sz-hero-ic" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="ac1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22c1ee"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+      <rect x="6" y="8" width="40" height="40" rx="9" fill="url(#ac1)"/>
+      <circle cx="19" cy="22" r="5" fill="#fff"/><path d="M10 42l11-12 7 6 7-8 11 13v1H10z" fill="#fff" opacity=".9"/>
+      <circle cx="44" cy="44" r="12" fill="#fff" stroke="#7c3aed" stroke-width="4"/><path d="M53 53l7 7" stroke="#7c3aed" stroke-width="5" stroke-linecap="round"/>
+      <text x="44" y="48.5" text-anchor="middle" font-family="Arial" font-weight="800" font-size="11" fill="#7c3aed">AI</text>
+    </svg>
+    <div>
+      <h1>AI image check</h1>
+      <p>Find out if a photo was probably made by AI (Gemini / Nano Banana, GPT image and others). The check runs on this device, so your photo is never uploaded.</p>
+    </div>
+  </div>
+
+  <div class="cp-grid">
+    <div class="cp-col">
+      <section class="cp-card" aria-labelledby="ac-s1">
+        <h2 id="ac-s1"><span class="cp-step">1</span>Add a photo</h2>
+        <label class="cp-drop" id="ac-drop">
+          <input type="file" id="ac-file" accept="image/*">
+          <span class="cp-drop-ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></span>
+          <b>Choose a photo</b>
+          <small>JPG, PNG or WebP · or drop / paste it here</small>
+        </label>
+        <div class="ac-prev" id="ac-prev" hidden><img id="ac-img" alt="Your photo"></div>
+      </section>
+    </div>
+    <div class="cp-col">
+      <section class="cp-card" aria-labelledby="ac-s2">
+        <h2 id="ac-s2"><span class="cp-step">2</span>Result</h2>
+        <button type="button" class="cp-btn cp-btn-main ac-go" id="ac-go" disabled>Check this photo</button>
+        <div class="ac-prog" id="ac-prog" hidden><div class="ac-bar"><i id="ac-barf"></i></div><span id="ac-stat">Getting ready…</span></div>
+        <div class="ac-res" id="ac-res" hidden>
+          <div class="ac-verdict" id="ac-verdict"></div>
+          <div class="ac-meter"><i id="ac-meterf"></i><b class="ac-mark" id="ac-mark"></b></div>
+          <div class="ac-scale"><span>Real photo</span><span>AI made</span></div>
+          <p class="ac-pct" id="ac-pct"></p>
+        </div>
+        <p class="sz-note" id="ac-first">The first check downloads a free AI model once (about 300 MB; it is then kept on this device). Use Wi-Fi. On a phone it needs a recent phone with enough memory.</p>
+      </section>
+    </div>
+  </div>
+
+  <section class="cp-card ac-about">
+    <h2>Good to know</h2>
+    <ul>
+      <li>This is a <b>guess, not proof</b>. The method scored very well in its author's own tests, but those used only about 200 AI images. It can be wrong, especially for edited, filtered, heavily compressed or very small pictures, screenshots, drawings and new AI apps.</li>
+      <li>It does not read Google's hidden SynthID watermark. Google's own SynthID check is in the Gemini app: upload the picture and ask “Was this made with Google AI?”.</li>
+      <li>Never accuse anyone based only on this result.</li>
+    </ul>
+    <p class="sz-note">Method and probe weights: <a href="https://github.com/Rinne414/SynthID-detector" target="_blank" rel="noopener">SynthID-detector</a> (learned detector, MIT licence). Image features: OpenAI CLIP ViT-L/14 (MIT licence), ONNX version by Xenova on Hugging Face, run with ONNX Runtime Web.</p>
+  </section>
+</main>
+<div class="cp-toast" id="ac-toast" role="status" aria-live="polite" hidden></div>
+
+<footer class="sp-footer">
+  <div class="sp-wrap sp-foot">
+    <div><span class="sp-logo sp-logo-sm">S</span> <b>S&nbsp;Printer</b> &mdash; Smart print &amp; photo tools</div>
+    <div class="sp-foot-links">
+      <a href="../index.html">All tools</a>
+      <a href="../service/passport-photo.html">Passport Photo</a>
+      <a href="../service/remove-background.html">Remove background</a>
+      <a href="../service/size-changer.html">Size changer</a>
+    </div>
+    <div class="sp-copy">&copy; <span class="sp-year">2026</span> S Printer. Files are processed in your browser.</div>
+    <div class="sp-dev">Designed &amp; developed with <span class="heart" aria-hidden="true">&#10084;</span> by
+      <svg class="sp-sig" viewBox="0 0 66 40" role="img" aria-label="Raj"><defs><linearGradient id="sp-sig-grad" x1="0" x2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".5" stop-color="#D6247A"/><stop offset="1" stop-color="#F5C400"/></linearGradient></defs><text x="2" y="31">Raj</text></svg>
+    </div>
+  </div>
+</footer>
+<script src="../assets/vendor/ort/ort.webgpu.min.js"></script>
+<script src="../assets/aicheck/aicheck.js?v=1"></script>
+<script src="../assets/aicheck/aicheck-ui.js?v=1"></script>
+</body>
+</html>
