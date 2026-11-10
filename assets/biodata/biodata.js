@@ -93,6 +93,36 @@
   function L(fd) { return fd.l[S.lang] || fd.l.en; }
   function on(fd) { return fd.on.indexOf(TY[S.type]) >= 0; }
 
+  // ---------- icons (drawn by S Printer) ----------
+  var IC = {
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+    id: '<rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="2.4"/><path d="M5.8 16.5c.6-1.6 1.8-2.4 3.2-2.4s2.6.8 3.2 2.4M14.5 10h4M14.5 13.5h3"/>',
+    pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+    cap: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6"/>',
+    bag: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12.5h18"/>',
+    layers: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+    family: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M2.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5M14 15.3c.9-.5 1.9-.8 3-.8 2.6 0 4.5 1.9 4.5 4.8"/>',
+    star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    shield: '<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+    resume: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><circle cx="10" cy="11" r="1.8"/><path d="M7.8 16c.4-1.1 1.2-1.7 2.2-1.7s1.8.6 2.2 1.7M14 11h2M14 14h2"/>',
+    clip: '<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M8.5 10h7M8.5 13.5h7M8.5 17h4"/>',
+    rings: '<circle cx="9" cy="14.5" r="5"/><circle cx="15" cy="14.5" r="5"/><path d="M12 3.2l2 2.3-2 2.3-2-2.3z"/>',
+    eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    download: '<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>',
+    image: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9" r="1.8"/><path d="M3 17l5-5 4 4 3-3 6 6"/>',
+    pdf: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8.5 17v-4h1.3a1.3 1.3 0 0 1 0 2.6H8.5M13 13v4h.8a1.6 1.6 0 0 0 1.6-1.6v-.8A1.6 1.6 0 0 0 13.8 13z"/>',
+    printer: '<path d="M7 9V3h10v6"/><path d="M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/>',
+    camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+    sign: '<path d="M3 16c2.5-.5 3.5-6 5.5-6s1 6 3 6 2.7-3.5 3.8-3.5 1 2 2.2 2H21"/><path d="M3 20.5h18"/>',
+    sparkle: '<path d="M11 3l1.9 4.9L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-2.1z"/><path d="M18.5 14.5l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8z"/>',
+    trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    zip: '<path d="M4 14l4-4 3 3 5-6 4 4"/><path d="M4 20h16"/><path d="M14 4h6v6"/>'
+  };
+  function ic(n) { return '<svg class="bd-i bd-i-' + n + '" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + IC[n].replace(/<(path|circle|rect) /g, '<$1 pathLength="1" ') + '</g></svg>'; }
+  function tile(n) { return '<span class="bd-tile">' + ic(n) + '</span>'; }
+  (function () { try { var d = document.createElement('div'); d.innerHTML = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="bdG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0098D8"/><stop offset=".55" stop-color="#6d5dfc"/><stop offset="1" stop-color="#D6247A"/></linearGradient></defs></svg>'; document.body.insertBefore(d.firstChild, document.body.firstChild); } catch (e) {} })();
+
   // ---------- the form ----------
   function rowsEditor(id, cols, data, ph, lists) {
     return '<div class="bd-rows" data-rows="' + id + '">' + data.map(function (r, i) {
@@ -102,24 +132,24 @@
   }
   function buildForm() {
     var f = $('#bd-form'), h = '';
-    function grp(title, inner, open) { return '<details class="bd-grp"' + (open ? ' open' : '') + '><summary>' + title + '</summary><div class="bd-grid">' + inner + '</div></details>'; }
+    function grp(title, inner, open) { return '<details class="bd-grp"' + (open ? ' open' : '') + '><summary><span class="bd-sumt">' + title + '</span></summary><div class="bd-grid">' + inner + '</div></details>'; }
     function fld(fd) { var v = S.f[fd.k] || ''; return '<label class="' + (fd.t === 'a' ? 'bd-wide' : '') + '"><span>' + esc(L(fd)) + '</span>' + (fd.t === 'a' ? '<textarea rows="3" data-f="' + fd.k + '">' + esc(v) + '</textarea>' : '<input data-f="' + fd.k + '" value="' + esc(v) + '">') + '</label>'; }
     function pick(g) { return F.filter(function (fd) { return fd.g === g && on(fd); }).map(fld).join(''); }
-    h += grp('👤 ' + T('fname') + ' & ' + T('contact'), pick('top') + pick('contact') +
-      '<div class="bd-wide bd-photos"><label class="bd-up"><input type="file" accept="image/*" data-img="photo"><span>' + (S.photo ? '<img src="' + S.photo + '" alt="">' : '📷') + '</span><b>Photo</b></label>' +
-      (S.type !== 'marriage' ? '<label class="bd-up bd-sig"><input type="file" accept="image/*" data-img="sign"><span>' + (S.sign ? '<img src="' + S.sign + '" alt="">' : '✍') + '</span><b>Signature</b></label>' : '') +
-      '<button type="button" class="bd-mini" data-clearimg>Remove photo / signature</button></div>', true);
-    h += grp('🪪 ' + T('personal'), pick('personal') + '<div class="bd-wide"><span class="bd-lbl">Add your own fields (e.g. Aadhaar no., Blood group)</span>' + rowsEditor('extra', ['t', 't'], S.extra.length ? S.extra : [], ['Field name', 'Value']) + '</div>');
-    h += grp('📝 ' + T(S.type === 'marriage' ? 'about' : S.type === 'job' ? 'objective' : 'summary'), F.filter(function (fd) { return fd.k === 'summary'; }).map(fld).join(''));
+    h += grp(tile('user') + T('fname') + ' & ' + T('contact'), pick('top') + pick('contact') +
+      '<div class="bd-wide bd-photos"><label class="bd-up"><input type="file" accept="image/*" data-img="photo"><span>' + (S.photo ? '<img src="' + S.photo + '" alt="">' : ic('camera')) + '</span><b>Photo</b></label>' +
+      (S.type !== 'marriage' ? '<label class="bd-up bd-sig"><input type="file" accept="image/*" data-img="sign"><span>' + (S.sign ? '<img src="' + S.sign + '" alt="">' : ic('sign')) + '</span><b>Signature</b></label>' : '') +
+      '<button type="button" class="bd-mini" data-clearimg>' + ic('trash') + 'Remove photo / signature</button></div>', true);
+    h += grp(tile('id') + T('personal'), pick('personal') + '<div class="bd-wide"><span class="bd-lbl">Add your own fields (e.g. Aadhaar no., Blood group)</span>' + rowsEditor('extra', ['t', 't'], S.extra.length ? S.extra : [], ['Field name', 'Value']) + '</div>');
+    h += grp(tile('pen') + T(S.type === 'marriage' ? 'about' : S.type === 'job' ? 'objective' : 'summary'), F.filter(function (fd) { return fd.k === 'summary'; }).map(fld).join(''));
     if (S.type !== 'marriage') {
-      h += grp('🎓 ' + T('education'), '<div class="bd-wide">' + rowsEditor('edu', ['t', 't', 't', 't'], S.edu, [T('exam') + ' — type or pick', T('board') + ' — type or pick', T('year'), T('marks')], ['bd-l-exam', 'bd-l-board']) + '</div>');
-      h += grp('💼 ' + T('experience'), '<div class="bd-wide"><span class="bd-lbl">Fresher? Leave it empty — it will not be printed. Tip: start each point with an action word (Managed, Built, Increased…) and add numbers.</span>' + rowsEditor('exp', ['t', 't', 't', 'area'], S.exp, ['Post / role', 'Company', 'From – To', 'What you did']) + '</div>');
-      if (S.type === 'cv') h += grp('🧩 ' + T('projects'), '<div class="bd-wide"><span class="bd-lbl">Optional — college / work projects</span>' + rowsEditor('proj', ['t', 't', 'area'], S.proj && S.proj.length ? S.proj : [['', '', '']], ['Project name', 'Tools / link / year', 'What you did and the result']) + '</div>');
+      h += grp(tile('cap') + T('education'), '<div class="bd-wide">' + rowsEditor('edu', ['t', 't', 't', 't'], S.edu, [T('exam') + ' — type or pick', T('board') + ' — type or pick', T('year'), T('marks')], ['bd-l-exam', 'bd-l-board']) + '</div>');
+      h += grp(tile('bag') + T('experience'), '<div class="bd-wide"><span class="bd-lbl">Fresher? Leave it empty — it will not be printed. Tip: start each point with an action word (Managed, Built, Increased…) and add numbers.</span>' + rowsEditor('exp', ['t', 't', 't', 'area'], S.exp, ['Post / role', 'Company', 'From – To', 'What you did']) + '</div>');
+      if (S.type === 'cv') h += grp(tile('layers') + T('projects'), '<div class="bd-wide"><span class="bd-lbl">Optional — college / work projects</span>' + rowsEditor('proj', ['t', 't', 'area'], S.proj && S.proj.length ? S.proj : [['', '', '']], ['Project name', 'Tools / link / year', 'What you did and the result']) + '</div>');
     } else {
-      h += grp('👨‍👩‍👧 ' + T('family'), '<div class="bd-wide">' + rowsEditor('family', ['t', 't', 't'], S.family, [T('relation'), T('fname'), T('focc')]) + '</div>');
+      h += grp(tile('family') + T('family'), '<div class="bd-wide">' + rowsEditor('family', ['t', 't', 't'], S.family, [T('relation'), T('fname'), T('focc')]) + '</div>');
     }
-    h += grp('⭐ ' + (S.type === 'marriage' ? T('hobbies') + ' & ' + T('expect') : T('skills') + ' & ' + T('hobbies')), pick('text').replace(/<label class="bd-wide"><span>[^<]*<\/span><textarea rows="3" data-f="summary">[\s\S]*?<\/textarea><\/label>/, ''));
-    if (S.type !== 'marriage') h += grp('✅ ' + T('declaration'), pick('end'));
+    h += grp(tile('star') + (S.type === 'marriage' ? T('hobbies') + ' & ' + T('expect') : T('skills') + ' & ' + T('hobbies')), pick('text').replace(/<label class="bd-wide"><span>[^<]*<\/span><textarea rows="3" data-f="summary">[\s\S]*?<\/textarea><\/label>/, ''));
+    if (S.type !== 'marriage') h += grp(tile('shield') + T('declaration'), pick('end'));
     f.innerHTML = h + '<datalist id="bd-l-exam">' + EXAMS.map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist><datalist id="bd-l-board">' + BOARDS.map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>';
   }
   function readRows(id) { return $$('[data-rows="' + id + '"] .bd-row').map(function (r) { return $$('[data-c]', r).map(function (i) { return i.value; }); }); }
@@ -195,7 +225,7 @@
 
   // ---------- controls ----------
   function buildControls() {
-    $('#bd-type').innerHTML = [['cv', '📄 Resume / CV'], ['job', '🗂 Job Bio-Data'], ['marriage', '💍 Marriage Bio-Data']].map(function (t) { return '<button type="button" data-type="' + t[0] + '" aria-pressed="' + (S.type === t[0]) + '">' + t[1] + '</button>'; }).join('');
+    $('#bd-type').innerHTML = [['cv', 'resume', 'Resume / CV'], ['job', 'clip', 'Job Bio-Data'], ['marriage', 'rings', 'Marriage Bio-Data']].map(function (t) { return '<button type="button" data-type="' + t[0] + '" aria-pressed="' + (S.type === t[0]) + '">' + ic(t[1]) + t[2] + '</button>'; }).join('');
     $('#bd-lang').innerHTML = [['en', 'English'], ['bn', 'বাংলা'], ['hi', 'हिन्दी']].map(function (t) { return '<button type="button" data-lang="' + t[0] + '" aria-pressed="' + (S.lang === t[0]) + '">' + t[1] + '</button>'; }).join('');
     $('#bd-tpl').innerHTML = TPL.map(function (t) { return '<button type="button" data-tpl="' + t[0] + '" aria-pressed="' + (S.tpl === t[0]) + '"><i class="mini m-' + t[0] + '"></i>' + t[1] + '</button>'; }).join('');
     $('#bd-col').innerHTML = COLORS.map(function (c) { return '<button type="button" data-col="' + c + '" style="background:' + c + '" aria-label="Colour ' + c + '" aria-pressed="' + (S.color === c) + '"></button>'; }).join('') + '<label class="bd-own" title="Any colour"><input type="color" value="' + S.color + '" data-colpick>🎨</label>';
@@ -280,10 +310,10 @@
     var m = $('#bd-exp'); if (!m) {
       m = document.createElement('div'); m.id = 'bd-exp'; m.className = 'bd-modal';
       m.innerHTML = '<div class="bd-sheet" role="dialog" aria-modal="true" aria-labelledby="bd-exp-h"><h2 id="bd-exp-h">Download your file</h2>' +
-        '<div class="bd-lbl">File type</div><div class="bd-seg" id="bd-exp-fmt">' + [['pdf', 'PDF'], ['jpg', 'JPG'], ['png', 'PNG']].map(function (f) { return '<button type="button" data-fmt="' + f[0] + '">' + f[1] + '</button>'; }).join('') + '</div>' +
+        '<div class="bd-lbl">File type</div><div class="bd-seg" id="bd-exp-fmt">' + [['pdf', 'PDF', 'pdf'], ['jpg', 'JPG', 'image'], ['png', 'PNG', 'image']].map(function (f) { return '<button type="button" data-fmt="' + f[0] + '">' + ic(f[2]) + f[1] + '</button>'; }).join('') + '</div>' +
         '<div class="bd-lbl">File size (compress)</div><div class="bd-seg" id="bd-exp-kb">' + [[0, 'Best quality'], [2048, 'Under 2 MB'], [1024, 'Under 1 MB'], [500, 'Under 500 KB'], [300, 'Under 300 KB'], [200, 'Under 200 KB'], [100, 'Under 100 KB'], [50, 'Under 50 KB']].map(function (k) { return '<button type="button" data-kb="' + k[0] + '">' + k[1] + '</button>'; }).join('') +
-        '<label class="bd-kbin">Other: <input type="number" min="20" max="10000" step="10" id="bd-exp-own" placeholder="KB"> KB</label></div>' +
-        '<p class="bd-note" id="bd-exp-note"></p><div class="bd-exp-act"><button type="button" class="bd-mini" data-close>Cancel</button><button type="button" class="bd-go" id="bd-exp-go">⬇ Download</button></div></div>';
+        '<label class="bd-kbin">' + ic('zip') + 'Other: <input type="number" min="20" max="10000" step="10" id="bd-exp-own" placeholder="KB"> KB</label></div>' +
+        '<p class="bd-note" id="bd-exp-note"></p><div class="bd-exp-act"><button type="button" class="bd-mini" data-close>' + ic('x') + 'Cancel</button><button type="button" class="bd-go" id="bd-exp-go">' + ic('download') + '<span>Download</span></button></div></div>';
       document.body.appendChild(m);
       m.addEventListener('click', function (e) {
         var b = e.target.closest('button');
@@ -301,7 +331,7 @@
       $('#bd-exp-note').textContent = m.dataset.fmt === 'png' ? 'PNG keeps every detail but is bigger. For small size choose JPG or PDF.' : (+m.dataset.kb ? 'The file is made as sharp as possible while staying under ' + human(+m.dataset.kb * 1024) + '.' : 'Sharpest file, best for printing.');
     };
     var go = function () {
-      var btn = $('#bd-exp-go'); btn.disabled = true; btn.textContent = 'Making…';
+      var btn = $('#bd-exp-go'), lab = btn.querySelector('span'); btn.disabled = true; btn.classList.add('busy'); lab.textContent = 'Making…';
       setTimeout(function () {
         snap().then(function (r) {
           var out = makeFile(m.dataset.fmt, +m.dataset.kb || 0, r), a = document.createElement('a'), url = URL.createObjectURL(out.blob);
@@ -309,7 +339,7 @@
           $('#bd-exp-note').textContent = '✅ Saved ' + out.name + ' — ' + human(out.blob.size) + (out.pages > 1 ? ' (' + out.pages + ' pages)' : '');
           toast('Downloaded — ' + human(out.blob.size));
         }).catch(function (e) { $('#bd-exp-note').textContent = 'Could not make the file: ' + (e && e.message || e); })
-          .then(function () { btn.disabled = false; btn.textContent = '⬇ Download'; });
+          .then(function () { btn.disabled = false; btn.classList.remove('busy'); lab.textContent = 'Download'; });
       }, 30);
     };
     m.dataset.fmt = fmt; if (m.dataset.kb == null) m.dataset.kb = 0; m.hidden = false; sync();
@@ -323,6 +353,7 @@
   if (ql && FONTS[ql]) S.lang = ql;
   if (!S.f.declaration) S.f.declaration = DECL[S.lang];
   ['edu', 'exp', 'family', 'extra', 'proj'].forEach(function (k) { if (!Array.isArray(S[k])) S[k] = []; });
+  [['#bd-pdf', 'download', 'Download'], ['#bd-jpg', 'image', 'JPG / PNG'], ['#bd-print', 'printer', 'Print'], ['#bd-sample', 'sparkle', 'Fill sample details'], ['#bd-clear', 'trash', 'Clear all'], ['.bd-tabs [data-view="edit"]', 'pen', 'Fill details'], ['.bd-tabs [data-view="preview"]', 'eye', 'Preview & download']].forEach(function (b) { var e = $(b[0]); if (e) e.innerHTML = ic(b[1]) + '<span>' + esc(b[2]) + '</span>'; });
   buildControls(); buildForm(); bind(); render();
   if (document.fonts) document.fonts.ready.then(fit);
   window.SPBioData = { state: function () { return S; }, render: render };

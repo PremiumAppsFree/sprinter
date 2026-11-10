@@ -179,3 +179,28 @@
 .doc .side{font-size:12.2px}.doc .side .sec{margin-bottom:12px}.doc .side li{margin:1px 0}.doc .side ul{padding-left:16px}
 .doc .side .kv tr{display:block;padding:2px 0}.doc .side .kv th,.doc .side .kv td{display:inline!important;padding:0!important}.doc .side .kv th::after{content:': '}
 .doc .side .sec.ct .kv th{display:block!important}.doc .side .sec.ct .kv th::after{content:''}.doc .side .sec.ct .kv tr{padding:3px 0}
+/* ---------- premium icons ---------- */
+.bd-i{width:18px;height:18px;flex:none;display:inline-block;vertical-align:-3px}
+.bd-i g{stroke:url(#bdG)}
+.bd-seg button[aria-pressed=true] .bd-i g,.bd-dl #bd-pdf .bd-i g,.bd-go .bd-i g,.bd-tabs button[aria-pressed=true] .bd-i g{stroke:#fff}
+.bd-mini,.bd-dl button,.bd-tabs button,.bd-go{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.bd-seg button,.bd-mini,.bd-dl button,.bd-go,.bd-tabs button{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,background .18s}
+.bd-seg button:hover,.bd-mini:hover,.bd-dl button:hover,.bd-go:hover{transform:translateY(-1px)}
+.bd-seg button:hover .bd-i,.bd-mini:hover .bd-i,.bd-dl button:hover .bd-i,.bd-go:hover .bd-i{animation:bdNudge .5s ease}
+@keyframes bdNudge{40%{transform:translateY(-2px) scale(1.12)}100%{transform:none}}
+.bd-dl #bd-pdf:hover .bd-i,.bd-go:hover .bd-i-download{animation:bdDrop .7s ease}
+@keyframes bdDrop{30%{transform:translateY(3px)}60%{transform:translateY(-1px)}100%{transform:none}}
+.bd-go.busy .bd-i{animation:bdSpin 1s linear infinite}@keyframes bdSpin{to{transform:rotate(360deg)}}
+.bd-sumt{display:inline-flex;align-items:center;gap:11px}
+.bd-tile{position:relative;width:34px;height:34px;border-radius:10px;display:inline-grid;place-items:center;flex:none;overflow:hidden;
+  background:linear-gradient(135deg,#0098D8,#6d5dfc 55%,#D6247A);box-shadow:0 6px 14px -6px rgba(109,93,252,.75),inset 0 1px 0 rgba(255,255,255,.4);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.bd-tile .bd-i{width:19px;height:19px}.bd-tile .bd-i g{stroke:#fff}
+.bd-tile::after{content:'';position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.6) 50%,transparent 58%);transform:translateX(-120%);animation:bdShine 5s ease-in-out infinite}
+.bd-grp:nth-child(2) .bd-tile::after{animation-delay:.7s}.bd-grp:nth-child(3) .bd-tile::after{animation-delay:1.4s}.bd-grp:nth-child(4) .bd-tile::after{animation-delay:2.1s}.bd-grp:nth-child(5) .bd-tile::after{animation-delay:2.8s}.bd-grp:nth-child(6) .bd-tile::after{animation-delay:3.5s}.bd-grp:nth-child(7) .bd-tile::after{animation-delay:4.2s}
+@keyframes bdShine{0%,72%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.bd-grp>summary:hover .bd-tile{transform:translateY(-2px) rotate(-4deg)}
+.bd-grp[open] .bd-tile .bd-i *{stroke-dasharray:1;stroke-dashoffset:1;animation:bdDraw .9s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes bdDraw{to{stroke-dashoffset:0}}
+.bd-up span .bd-i{width:26px;height:26px}.bd-sig span .bd-i{width:30px}
+.bd-kbin .bd-i{width:16px;height:16px}
+@media (prefers-reduced-motion:reduce){.bd-tile::after,.bd-grp[open] .bd-tile .bd-i *,.bd-i{animation:none!important;stroke-dashoffset:0!important}}
