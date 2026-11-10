@@ -209,17 +209,27 @@
   }
   function fileName() { return (S.f.name || 'My').replace(/[^\wঀ-৿ऀ-ॿ]+/g, '-') + '-' + (S.type === 'cv' ? 'Resume' : 'BioData'); }
   function exportDoc(kind) {
-    if (!window.html2pdf) { toast('Still loading, try again in a moment.'); return; }
-    var src = $('#bd-doc'), clone = src.cloneNode(true); clone.style.transform = 'none'; clone.id = '';
+    var JP = window.jspdf && window.jspdf.jsPDF;
+    if (!window.html2canvas || (kind === 'pdf' && !JP)) { toast('Still loading, try again in a moment.'); return; }
+    var clone = $('#bd-doc').cloneNode(true); clone.style.transform = 'none'; clone.id = '';
     var holder = document.createElement('div'); holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px'; holder.appendChild(clone); document.body.appendChild(holder);
     toast(kind === 'pdf' ? 'Making your PDF…' : 'Making your JPG…');
-    var opt = { margin: 0, filename: fileName() + '.pdf', image: { type: 'jpeg', quality: 0.96 }, html2canvas: { scale: 2.5, useCORS: true, backgroundColor: '#ffffff' }, jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait', hotfixes: ['px_scaling'] }, pagebreak: { mode: ['css', 'avoid-all'], avoid: ['.sec', '.job', 'tr', '.foot'] } };
-    var done = function () { holder.remove(); };
+    var done = function () { holder.remove(); }, SC = 2, PH = 1123;
     (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
-      var w = html2pdf().set(opt).from(clone);
-      if (kind === 'pdf') return w.save().then(done, function (e) { done(); toast('Could not make the PDF: ' + e); });
-      return w.toCanvas().get('canvas').then(function (c) { var a = document.createElement('a'); a.download = fileName() + '.jpg'; a.href = c.toDataURL('image/jpeg', 0.95); a.click(); done(); }, function (e) { done(); toast('Could not make the JPG: ' + e); });
-    });
+      var H = clone.offsetHeight, top0 = clone.getBoundingClientRect().top, cuts = [], breaks = [0], start = 0;
+      $$('.sec,.job,tr,.foot,.two,.hd', clone).forEach(function (el) { var r = el.getBoundingClientRect(); cuts.push(Math.round(r.top - top0), Math.round(r.bottom - top0)); });
+      while (H - start > PH + 2) { var lim = start + PH, best = 0; cuts.forEach(function (c) { if (c > start + 300 && c <= lim && c > best) best = c; }); start = best || lim; breaks.push(start); }
+      return window.html2canvas(clone, { scale: SC, useCORS: true, backgroundColor: '#ffffff' }).then(function (cv) {
+        if (kind === 'jpg') { var a = document.createElement('a'); a.download = fileName() + '.jpg'; a.href = cv.toDataURL('image/jpeg', 0.95); a.click(); done(); return; }
+        var pdf = new JP({ unit: 'px', format: [794, PH], orientation: 'portrait', hotfixes: ['px_scaling'] });
+        breaks.forEach(function (y, i) {
+          var y2 = i + 1 < breaks.length ? breaks[i + 1] : H, pc = document.createElement('canvas'); pc.width = 794 * SC; pc.height = PH * SC;
+          var g = pc.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, pc.width, pc.height); g.drawImage(cv, 0, y * SC, cv.width, (y2 - y) * SC, 0, 0, cv.width, (y2 - y) * SC);
+          if (i) pdf.addPage([794, PH], 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 794, PH);
+        });
+        pdf.save(fileName() + '.pdf'); done();
+      });
+    }).catch(function (e) { done(); toast('Could not make the file: ' + (e && e.message || e)); });
   }
   var tt; function toast(m) { var e = $('#bd-toast'); e.textContent = m; e.hidden = false; clearTimeout(tt); tt = setTimeout(function () { e.hidden = true; }, 3500); }
 
