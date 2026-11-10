@@ -17,6 +17,8 @@
     family: { en: 'Family Details', bn: 'পারিবারিক তথ্য', hi: 'पारिवारिक विवरण' }, expect: { en: 'Partner Expectations', bn: 'পাত্র/পাত্রীর প্রত্যাশা', hi: 'जीवनसाथी से अपेक्षा' },
     declaration: { en: 'Declaration', bn: 'ঘোষণা', hi: 'घोषणा' }, place: { en: 'Place', bn: 'স্থান', hi: 'स्थान' }, date: { en: 'Date', bn: 'তারিখ', hi: 'दिनांक' }, signature: { en: 'Signature', bn: 'স্বাক্ষর', hi: 'हस्ताक्षर' },
     exam: { en: 'Exam / Degree', bn: 'পরীক্ষা / ডিগ্রি', hi: 'परीक्षा / डिग्री' }, board: { en: 'Board / University', bn: 'বোর্ড / বিশ্ববিদ্যালয়', hi: 'बोर्ड / विश्वविद्यालय' }, year: { en: 'Year', bn: 'সাল', hi: 'वर्ष' }, marks: { en: 'Marks / Grade', bn: 'নম্বর / গ্রেড', hi: 'अंक / ग्रेड' },
+    certs: { en: 'Certifications & Training', bn: 'সার্টিফিকেট ও প্রশিক্ষণ', hi: 'प्रमाणपत्र और प्रशिक्षण' }, projects: { en: 'Projects', bn: 'প্রজেক্ট', hi: 'प्रोजेक्ट' },
+    strengths: { en: 'Key Strengths', bn: 'বিশেষ গুণ', hi: 'मुख्य खूबियाँ' }, achieve: { en: 'Achievements', bn: 'অর্জন', hi: 'उपलब्धियाँ' }, refs: { en: 'References', bn: 'রেফারেন্স', hi: 'संदर्भ' }, interests: { en: 'Hobbies & Interests', bn: 'শখ', hi: 'शौक' },
     relation: { en: 'Relation', bn: 'সম্পর্ক', hi: 'संबंध' }, fname: { en: 'Name', bn: 'নাম', hi: 'नाम' }, focc: { en: 'Occupation', bn: 'পেশা', hi: 'व्यवसाय' }
   };
   // fields: k, labels, type, which documents use it, group
@@ -45,21 +47,32 @@
     ['langs', 'Languages known', 'জানা ভাষা', 'ज्ञात भाषाएँ', 't', 'cjm', 'personal'],
     ['summary', 'Profile / objective (2–3 lines)', 'নিজের সম্পর্কে / উদ্দেশ্য', 'परिचय / उद्देश्य', 'a', 'cjm', 'text'],
     ['skills', 'Skills (one per line)', 'দক্ষতা (প্রতি লাইনে একটি)', 'कौशल (हर पंक्ति में एक)', 'a', 'cj', 'text'],
-    ['hobbies', 'Hobbies / achievements', 'শখ / অর্জন', 'शौक / उपलब्धियाँ', 'a', 'cjm', 'text'],
+    ['strengths', 'Key strengths (one per line)', 'বিশেষ গুণ (প্রতি লাইনে একটি)', 'मुख्य खूबियाँ (हर पंक्ति में एक)', 'a', 'cj', 'text'],
+    ['certs', 'Certifications / training (one per line)', 'সার্টিফিকেট / প্রশিক্ষণ', 'प्रमाणपत्र / प्रशिक्षण', 'a', 'cj', 'text'],
+    ['achieve', 'Achievements / awards (one per line)', 'অর্জন / পুরস্কার', 'उपलब्धियाँ / पुरस्कार', 'a', 'c', 'text'],
+    ['hobbies', 'Hobbies / interests', 'শখ', 'शौक', 'a', 'cjm', 'text'],
     ['expect', 'Partner expectations', 'পাত্র/পাত্রীর প্রত্যাশা', 'जीवनसाथी से अपेक्षा', 'a', 'm', 'text'],
+    ['refs', 'References (or “Available on request”)', 'রেফারেন্স', 'संदर्भ', 'a', 'c', 'end'],
     ['declaration', 'Declaration', 'ঘোষণা', 'घोषणा', 'a', 'cj', 'end'],
     ['place', 'Place', 'স্থান', 'स्थान', 't', 'cj', 'end'],
     ['date', 'Date', 'তারিখ', 'दिनांक', 't', 'cj', 'end']
   ].map(function (a) { return { k: a[0], l: { en: a[1], bn: a[2], hi: a[3] }, t: a[4], on: a[5], g: a[6] }; });
   var TY = { cv: 'c', job: 'j', marriage: 'm' };
+  // names offered while typing (anyone can still type their own)
+  var EXAMS = ['Madhyamik (10th)', 'Higher Secondary (12th)', 'Secondary (10th)', 'Senior Secondary (12th)', 'High Madrasah (10th)', 'Alim', 'Fazil', 'ITI', 'Diploma (Polytechnic)', 'Diploma in Engineering', 'B.A.', 'B.A. (Hons.)', 'B.Sc.', 'B.Sc. (Hons.)', 'B.Com.', 'B.Com. (Hons.)', 'BBA', 'BCA', 'B.Tech', 'B.E.', 'B.Pharm', 'D.Pharm', 'B.Ed.', 'D.El.Ed.', 'B.P.Ed.', 'LLB', 'MBBS', 'BDS', 'B.Sc. Nursing', 'GNM', 'ANM', 'M.A.', 'M.Sc.', 'M.Com.', 'MBA', 'MCA', 'M.Tech', 'M.Ed.', 'M.Phil.', 'Ph.D.', 'DCA', 'ADCA', 'PGDCA', 'Tally Certificate', 'NET', 'SET', 'CA', 'CS', 'CMA'];
+  var BOARDS = ['WBBSE — West Bengal Board of Secondary Education', 'WBCHSE — West Bengal Council of Higher Secondary Education', 'WBBME — West Bengal Board of Madrasah Education', 'WBSCVET — West Bengal State Council of Vocational Education & Training', 'WBSCTE — West Bengal State Council of Technical Education', 'Rabindra Mukta Vidyalaya (WBCROS)', 'West Bengal Board of Primary Education', 'CBSE — Central Board of Secondary Education', 'CISCE (ICSE / ISC)', 'NIOS — National Institute of Open Schooling', 'NCVT / SCVT (ITI)', 'BSEB — Bihar School Examination Board', 'JAC — Jharkhand Academic Council', 'BSE Odisha', 'CHSE Odisha', 'ASSEB — Assam State School Education Board', 'UPMSP — Uttar Pradesh Board', 'MPBSE — Madhya Pradesh Board', 'CGBSE — Chhattisgarh Board', 'RBSE — Rajasthan Board', 'MSBSHSE — Maharashtra Board', 'GSEB — Gujarat Board', 'KSEAB — Karnataka Board', 'Kerala Board (KBPE / DHSE)', 'Tamil Nadu State Board', 'BSEAP / BIEAP — Andhra Pradesh', 'BSE Telangana / TSBIE', 'PSEB — Punjab Board', 'HBSE — Haryana Board', 'HPBOSE — Himachal Pradesh Board', 'JKBOSE — Jammu & Kashmir Board', 'UBSE — Uttarakhand Board', 'GBSHSE — Goa Board', 'TBSE — Tripura Board', 'BOSEM / COHSEM — Manipur', 'MBOSE — Meghalaya Board', 'MBSE — Mizoram Board', 'NBSE — Nagaland Board',
+    'University of Calcutta', 'Jadavpur University', 'Presidency University', 'The University of Burdwan', 'Vidyasagar University', 'University of Kalyani', 'University of North Bengal', 'Rabindra Bharati University', 'Visva-Bharati', 'West Bengal State University', 'Bankura University', 'Sidho-Kanho-Birsha University', 'Kazi Nazrul University', 'University of Gour Banga', 'Raiganj University', 'Cooch Behar Panchanan Barma University', 'Diamond Harbour Women\'s University', 'Sadhu Ram Chand Murmu University of Jhargram', 'Harichand Guruchand University', 'Netaji Subhas Open University', 'Aliah University', 'MAKAUT — Maulana Abul Kalam Azad University of Technology', 'WBUHS — West Bengal University of Health Sciences', 'Baba Saheb Ambedkar Education University', 'Bidhan Chandra Krishi Viswavidyalaya', 'Uttar Banga Krishi Viswavidyalaya', 'WBNUJS — National University of Juridical Sciences', 'IIEST Shibpur', 'IIT Kharagpur', 'NIT Durgapur', 'ISI Kolkata', 'IIM Calcutta',
+    'IGNOU — Indira Gandhi National Open University', 'University of Delhi', 'JNU — Jawaharlal Nehru University', 'BHU — Banaras Hindu University', 'AMU — Aligarh Muslim University', 'Jamia Millia Islamia', 'University of Mumbai', 'Savitribai Phule Pune University', 'University of Madras', 'Anna University', 'Osmania University', 'Bangalore University', 'VTU — Visvesvaraya Technological University', 'AKTU — Dr. A.P.J. Abdul Kalam Technical University', 'Gauhati University', 'Patna University', 'Ranchi University', 'Utkal University', 'Sambalpur University', 'Banasthali Vidyapith', 'Annamalai University', 'Amity University', 'Lovely Professional University', 'IIT', 'NIT', 'AIIMS'];
+
   var DECL = { en: 'I hereby declare that the information given above is true to the best of my knowledge and belief.', bn: 'আমি এই মর্মে ঘোষণা করছি যে উপরের সমস্ত তথ্য আমার জ্ঞান ও বিশ্বাস মতে সত্য।', hi: 'मैं घोषणा करता/करती हूँ कि ऊपर दी गई सभी जानकारी मेरी जानकारी के अनुसार सत्य है।' };
 
   var SAMPLE = {
     cv: { name: 'Riya Sen', title: 'Graphic Designer', phone: '+91 98300 12345', email: 'riya.sen@email.com', website: 'behance.net/riyasen', address: '22, Lake Road, Kolkata 700029', father: 'Amit Sen', dob: '12/04/1999', gender: 'Female', marital: 'Unmarried', nationality: 'Indian', langs: 'Bengali, English, Hindi',
       summary: 'Creative designer with 3 years of experience in branding, social media posts and print layouts. I love clean design and meeting deadlines.',
-      skills: 'Adobe Photoshop\nIllustrator\nCanva-style social posts\nPrint layout & pre-press\nMS Office', hobbies: 'Painting\nPhotography\nBest Design award 2024',
+      skills: 'Adobe Photoshop\nIllustrator\nFigma\nPrint layout & pre-press\nMS Office', strengths: 'Creative thinking\nTime management\nClient communication', certs: 'Google UX Design Certificate (2023)\nAdvanced Photoshop — Coursera (2022)', achieve: 'Best Design award 2024', hobbies: 'Painting, Photography',
       edu: [['B.Des (Communication Design)', 'University of Calcutta', '2021', '7.8 CGPA'], ['12th (Arts)', 'WBCHSE', '2018', '82%'], ['10th', 'WBBSE', '2016', '86%']],
-      exp: [['Graphic Designer', 'Pixel Studio, Kolkata', '2022 – Present', 'Brand kits, social media creatives and print ads for 20+ clients.'], ['Design Intern', 'Ad House', '2021 – 2022', 'Posters, flyers and packaging mock-ups.']] },
+      exp: [['Graphic Designer', 'Pixel Studio, Kolkata', '2022 – Present', 'Designed brand kits and social media creatives for 20+ clients\nCut print turnaround time by 30% with ready templates\nTrained 2 junior designers'], ['Design Intern', 'Ad House', '2021 – 2022', 'Posters, flyers and packaging mock-ups']],
+      proj: [['Café rebrand', 'Illustrator · 2024', 'New logo, menu and signage; footfall up 18% in 3 months']] },
     job: { name: 'Rahul Kumar', title: 'Office Assistant', phone: '+91 91234 56789', email: 'rahul.k@email.com', address: 'Vill. Rampur, P.O. Bishnupur, Dist. Bankura, West Bengal 722122', father: 'Suresh Kumar', mother: 'Sunita Devi', dob: '05/01/2000', gender: 'Male', marital: 'Unmarried', religion: 'Hindu', nationality: 'Indian', langs: 'Bengali, Hindi, English',
       summary: 'To work sincerely in a reputed organisation and grow with my skills in computer work and office management.', skills: 'MS Word, Excel\nTally Prime\nTyping (Bengali & English)\nInternet & e-mail',
       hobbies: 'Reading\nCricket', edu: [['B.A.', 'Bankura University', '2021', '61%'], ['12th', 'WBCHSE', '2018', '68%'], ['10th', 'WBBSE', '2016', '72%']], exp: [['Computer Operator', 'Sharma Traders', '2022 – Present', 'Billing, data entry and customer records.']] },
@@ -68,12 +81,12 @@
       family: [['Father', 'Subrata Das', 'Retired Bank Officer'], ['Mother', 'Mita Das', 'Homemaker'], ['Brother', 'Arnab Das', 'Software Engineer, Pune']] }
   };
 
-  var TPL = [['classic', 'Classic'], ['sidebar', 'Modern sidebar'], ['elegant', 'Elegant'], ['bold', 'Bold header'], ['floral', 'Floral'], ['minimal', 'Minimal (no photo)']];
+  var TPL = [['executive', 'Executive'], ['timeline', 'Timeline'], ['classic', 'Classic'], ['sidebar', 'Modern sidebar'], ['elegant', 'Elegant'], ['bold', 'Bold header'], ['floral', 'Floral'], ['minimal', 'Minimal (no photo)']];
   var COLORS = ['#1e3a8a', '#0f766e', '#7c3aed', '#be185d', '#b91c1c', '#c2410c', '#15803d', '#334155', '#a16207', '#0e7490'];
   var FONTS = { en: ['Poppins', 'Playfair Display', 'Lora', 'Montserrat'], bn: ['Hind Siliguri', 'Noto Serif Bengali', 'Baloo Da 2'], hi: ['Hind', 'Martel', 'Mukta'] };
 
   var KEY = 'sp-biodata-v1', S;
-  function blank(type) { return { type: type || 'cv', lang: 'en', tpl: type === 'marriage' ? 'floral' : type === 'job' ? 'classic' : 'sidebar', color: type === 'marriage' ? '#be185d' : '#1e3a8a', font: '', photo: '', sign: '', f: { declaration: DECL.en }, edu: [['', '', '', '']], exp: [['', '', '', '']], family: [['', '', '']], extra: [] }; }
+  function blank(type) { return { type: type || 'cv', lang: 'en', tpl: type === 'marriage' ? 'floral' : type === 'job' ? 'classic' : 'executive', color: type === 'marriage' ? '#be185d' : '#1e3a8a', font: '', photo: '', sign: '', f: { declaration: DECL.en }, edu: [['', '', '', '']], exp: [['', '', '', '']], family: [['', '', '']], extra: [] }; }
   function load() { try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.f) return s; } catch (e) {} return null; }
   var saveT; function save() { clearTimeout(saveT); saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(S)); $('#bd-saved').textContent = 'Saved on this device'; } catch (e) { $('#bd-saved').textContent = 'Photo too big to auto-save — download your file'; } }, 400); }
   function T(k) { return (W[k] || {})[S.lang] || (W[k] || {}).en || k; }
@@ -81,9 +94,9 @@
   function on(fd) { return fd.on.indexOf(TY[S.type]) >= 0; }
 
   // ---------- the form ----------
-  function rowsEditor(id, cols, data, ph) {
+  function rowsEditor(id, cols, data, ph, lists) {
     return '<div class="bd-rows" data-rows="' + id + '">' + data.map(function (r, i) {
-      return '<div class="bd-row" data-i="' + i + '">' + cols.map(function (c, j) { return c === 'area' ? '<textarea rows="2" data-c="' + j + '" placeholder="' + esc(ph[j]) + '">' + esc(r[j]) + '</textarea>' : '<input data-c="' + j + '" value="' + esc(r[j]) + '" placeholder="' + esc(ph[j]) + '">'; }).join('') +
+      return '<div class="bd-row" data-i="' + i + '">' + cols.map(function (c, j) { return c === 'area' ? '<textarea rows="2" data-c="' + j + '" placeholder="' + esc(ph[j]) + '">' + esc(r[j]) + '</textarea>' : '<input data-c="' + j + '" value="' + esc(r[j]) + '" placeholder="' + esc(ph[j]) + '"' + (lists && lists[j] ? ' list="' + lists[j] + '" autocomplete="off"' : '') + '>'; }).join('') +
         '<div class="bd-rowbtn"><button type="button" data-up title="Move up">↑</button><button type="button" data-del title="Remove">✕</button></div></div>';
     }).join('') + '<button type="button" class="bd-add" data-addrow="' + id + '">+ Add row</button></div>';
   }
@@ -99,14 +112,15 @@
     h += grp('🪪 ' + T('personal'), pick('personal') + '<div class="bd-wide"><span class="bd-lbl">Add your own fields (e.g. Aadhaar no., Blood group)</span>' + rowsEditor('extra', ['t', 't'], S.extra.length ? S.extra : [], ['Field name', 'Value']) + '</div>');
     h += grp('📝 ' + T(S.type === 'marriage' ? 'about' : S.type === 'job' ? 'objective' : 'summary'), F.filter(function (fd) { return fd.k === 'summary'; }).map(fld).join(''));
     if (S.type !== 'marriage') {
-      h += grp('🎓 ' + T('education'), '<div class="bd-wide">' + rowsEditor('edu', ['t', 't', 't', 't'], S.edu, [T('exam'), T('board'), T('year'), T('marks')]) + '</div>');
-      h += grp('💼 ' + T('experience'), '<div class="bd-wide"><span class="bd-lbl">Fresher? Leave it empty — it will not be printed.</span>' + rowsEditor('exp', ['t', 't', 't', 'area'], S.exp, ['Post / role', 'Company', 'From – To', 'What you did']) + '</div>');
+      h += grp('🎓 ' + T('education'), '<div class="bd-wide">' + rowsEditor('edu', ['t', 't', 't', 't'], S.edu, [T('exam') + ' — type or pick', T('board') + ' — type or pick', T('year'), T('marks')], ['bd-l-exam', 'bd-l-board']) + '</div>');
+      h += grp('💼 ' + T('experience'), '<div class="bd-wide"><span class="bd-lbl">Fresher? Leave it empty — it will not be printed. Tip: start each point with an action word (Managed, Built, Increased…) and add numbers.</span>' + rowsEditor('exp', ['t', 't', 't', 'area'], S.exp, ['Post / role', 'Company', 'From – To', 'What you did']) + '</div>');
+      if (S.type === 'cv') h += grp('🧩 ' + T('projects'), '<div class="bd-wide"><span class="bd-lbl">Optional — college / work projects</span>' + rowsEditor('proj', ['t', 't', 'area'], S.proj && S.proj.length ? S.proj : [['', '', '']], ['Project name', 'Tools / link / year', 'What you did and the result']) + '</div>');
     } else {
       h += grp('👨‍👩‍👧 ' + T('family'), '<div class="bd-wide">' + rowsEditor('family', ['t', 't', 't'], S.family, [T('relation'), T('fname'), T('focc')]) + '</div>');
     }
     h += grp('⭐ ' + (S.type === 'marriage' ? T('hobbies') + ' & ' + T('expect') : T('skills') + ' & ' + T('hobbies')), pick('text').replace(/<label class="bd-wide"><span>[^<]*<\/span><textarea rows="3" data-f="summary">[\s\S]*?<\/textarea><\/label>/, ''));
     if (S.type !== 'marriage') h += grp('✅ ' + T('declaration'), pick('end'));
-    f.innerHTML = h;
+    f.innerHTML = h + '<datalist id="bd-l-exam">' + EXAMS.map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist><datalist id="bd-l-board">' + BOARDS.map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>';
   }
   function readRows(id) { return $$('[data-rows="' + id + '"] .bd-row').map(function (r) { return $$('[data-c]', r).map(function (i) { return i.value; }); }); }
   function onInput(e) {
@@ -118,7 +132,7 @@
   function onClick(e) {
     var b = e.target.closest('button'); if (!b) return;
     var box = b.closest('[data-rows]');
-    if (b.dataset.addrow) { var id = b.dataset.addrow, n = { edu: 4, exp: 4, family: 3, extra: 2 }[id]; S[id] = readRows(id).concat([new Array(n).fill('')]); buildForm(); openGroupOf(id); render(); save(); return; }
+    if (b.dataset.addrow) { var id = b.dataset.addrow, n = { edu: 4, exp: 4, family: 3, extra: 2, proj: 3 }[id]; S[id] = readRows(id).concat([new Array(n).fill('')]); buildForm(); openGroupOf(id); render(); save(); return; }
     if (box && (b.hasAttribute('data-del') || b.hasAttribute('data-up'))) {
       var rid = box.dataset.rows, rows = readRows(rid), i = +b.closest('.bd-row').dataset.i;
       if (b.hasAttribute('data-del')) rows.splice(i, 1); else if (i > 0) rows.splice(i - 1, 0, rows.splice(i, 1)[0]);
@@ -132,7 +146,7 @@
   }
 
   // ---------- the document ----------
-  function kv(rows) { return '<table class="kv">' + rows.map(function (r) { return '<tr><th>' + esc(r[0]) + '</th><td>' + nl(r[1]) + '</td></tr>'; }).join('') + '</table>'; }
+  function kv(rows, cls) { return '<table class="kv' + (cls ? ' ' + cls : '') + '">' + rows.map(function (r) { return '<tr><th>' + esc(r[0]) + '</th><td>' + nl(r[1]) + '</td></tr>'; }).join('') + '</table>'; }
   function sec(title, body, cls) { return body ? '<section class="sec ' + (cls || '') + '"><h3>' + esc(title) + '</h3>' + body + '</section>' : ''; }
   function list(s) { var a = lines(s); return a.length ? '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ''; }
   function filled(rows) { return (rows || []).filter(function (r) { return r.some(function (x) { return String(x).trim(); }); }); }
@@ -143,24 +157,25 @@
     var personal = F.filter(function (fd) { return fd.g === 'personal' && on(fd) && String(f[fd.k] || '').trim(); }).map(function (fd) { return [L(fd), f[fd.k]]; });
     filled(S.extra).forEach(function (r) { personal.push([r[0], r[1]]); });
     var contact = ['phone', 'email', 'website', 'address'].filter(function (k) { return String(f[k] || '').trim() && on(F.filter(function (x) { return x.k === k; })[0]); }).map(function (k) { return [L(F.filter(function (x) { return x.k === k; })[0]), f[k]]; });
-    var edu = filled(S.edu), exp = filled(S.exp), fam = filled(S.family);
+    var edu = filled(S.edu), exp = filled(S.exp), fam = filled(S.family), proj = type === 'cv' ? filled(S.proj) : [];
+    var projH = proj.map(function (r) { return '<div class="job"><div class="jh"><b>' + esc(r[0]) + '</b><span>' + esc(r[1]) + '</span></div>' + (r[2] ? '<p>' + nl(r[2]) + '</p>' : '') + '</div>'; }).join('');
     var eduH = edu.length ? '<table class="grid"><thead><tr><th>' + T('exam') + '</th><th>' + T('board') + '</th><th>' + T('year') + '</th><th>' + T('marks') + '</th></tr></thead><tbody>' + edu.map(function (r) { return '<tr>' + r.map(function (x) { return '<td>' + esc(x) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>' : '';
-    var expH = exp.map(function (r) { return '<div class="job"><div class="jh"><b>' + esc(r[0]) + '</b>' + (r[1] ? ' — ' + esc(r[1]) : '') + '<span>' + esc(r[2]) + '</span></div>' + (r[3] ? '<p>' + nl(r[3]) + '</p>' : '') + '</div>'; }).join('');
+    var expH = exp.map(function (r) { var pts = lines(String(r[3] || '').replace(/,/g, '\u201a')).map(function (x) { return x.replace(/\u201a/g, ',').replace(/^[-•*]\s*/, ''); }); return '<div class="job"><div class="jh"><b>' + esc(r[0]) + '</b>' + (r[1] ? '<em>' + esc(r[1]) + '</em>' : '') + '<span>' + esc(r[2]) + '</span></div>' + (pts.length > 1 ? '<ul>' + pts.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : pts.length ? '<p>' + esc(pts[0]) + '</p>' : '') + '</div>'; }).join('');
     var famH = fam.length ? '<table class="grid"><thead><tr><th>' + T('relation') + '</th><th>' + T('fname') + '</th><th>' + T('focc') + '</th></tr></thead><tbody>' + fam.map(function (r) { return '<tr>' + r.map(function (x) { return '<td>' + esc(x) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>' : '';
     var sumT = T(type === 'marriage' ? 'about' : type === 'job' ? 'objective' : 'summary');
     var photo = S.tpl !== 'minimal' ? '<div class="ph">' + (S.photo ? '<img src="' + S.photo + '" alt="">' : '<span>Photo</span>') + '</div>' : '';
     var sign = type !== 'marriage' ? '<div class="sign">' + (S.sign ? '<img src="' + S.sign + '" alt="">' : '') + '<i></i><span>' + T('signature') + '</span></div>' : '';
     var foot = type !== 'marriage' ? '<footer class="foot">' + (f.declaration ? sec(T('declaration'), '<p>' + nl(f.declaration) + '</p>', 'decl') : '') + '<div class="pd"><div>' + (f.place ? T('place') + ': ' + esc(f.place) : '') + '<br>' + (f.date ? T('date') + ': ' + esc(f.date) : '') + '</div>' + sign + '</div></footer>' : '';
     var main = sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') +
-      (type === 'marriage' ? '' : sec(T('experience'), expH) + sec(T('education'), eduH)) +
+      (type === 'marriage' ? '' : sec(T('experience'), expH) + sec(T('projects'), projH) + sec(T('education'), eduH) + sec(T('certs'), list(f.certs))) +
       (type === 'marriage' ? sec(T('personal'), kv(personal)) + sec(T('family'), famH) + sec(T('hobbies'), list(f.hobbies)) + sec(T('expect'), f.expect ? '<p>' + nl(f.expect) + '</p>' : '') + sec(T('contact'), kv(contact)) : '');
-    var side = sec(T('skills'), list(f.skills)) + sec(T('languages'), f.langs && type === 'cv' ? list(f.langs) : '') + sec(T('hobbies'), type !== 'marriage' ? list(f.hobbies) : '');
+    var side = sec(T('skills'), list(f.skills)) + sec(T('strengths'), list(f.strengths)) + sec(T('languages'), f.langs && type === 'cv' ? list(f.langs) : '') + sec(T('achieve'), type === 'cv' ? list(f.achieve) : '') + sec(T(type === 'cv' ? 'interests' : 'hobbies'), type !== 'marriage' ? list(f.hobbies) : '') + sec(T('refs'), type === 'cv' && f.refs ? '<p>' + nl(f.refs) + '</p>' : '');
     var html, personalC = type === 'cv' ? personal.filter(function (r) { return r[0] !== L(F[21]); }) : personal;
     var name = '<h1>' + esc(f.name || 'Your Name') + '</h1>', title = f.title && type !== 'marriage' ? '<div class="ti">' + esc(f.title) + '</div>' : '';
     var cline = contact.map(function (r) { return '<span>' + esc(r[1]) + '</span>'; }).join('');
-    if (S.tpl === 'sidebar' && type !== 'marriage') {
+    if ((S.tpl === 'sidebar' || S.tpl === 'executive') && type !== 'marriage') {
       html = '<aside class="side">' + photo + sec(T('contact'), kv(contact), 'ct') + side + (type === 'job' ? '' : sec(T('personal'), kv(personalC))) + '</aside><div class="main"><header class="hd">' + name + title + '</header>' +
-        (type === 'job' ? sec(T('personal'), kv(personal)) + sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') + sec(T('education'), eduH) + sec(T('experience'), expH) : main) + foot + '</div>';
+        (type === 'job' ? sec(T('personal'), kv(personal)) + sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') + sec(T('education'), eduH) + sec(T('experience'), expH) + sec(T('certs'), list(f.certs)) : main) + foot + '</div>';
     } else {
       var kick = S.tpl === 'classic' || S.tpl === 'floral' || S.tpl === 'elegant' ? '<div class="kick">' + esc(heading) + '</div>' : '';
       var centered = S.tpl === 'floral' || S.tpl === 'elegant';
@@ -168,8 +183,8 @@
       var top = '<header class="hd">' + (centered ? kick + photo + name + title + (type !== 'marriage' ? '<div class="cl">' + cline + '</div>' : '') : '<div class="hl">' + kick + name + title + (showCl ? '<div class="cl">' + cline + '</div>' : '') + '</div>' + photo) + '</header>';
       var body;
       if (type === 'marriage') body = main;
-      else if (type === 'job') body = sec(T('personal'), kv(personal)) + sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') + sec(T('education'), eduH) + sec(T('experience'), expH) + '<div class="two">' + sec(T('skills'), list(f.skills)) + sec(T('hobbies'), list(f.hobbies)) + '</div>';
-      else body = main + '<div class="two">' + side + '</div>' + sec(T('personal'), kv(personalC));
+      else if (type === 'job') body = sec(T('personal'), kv(personal)) + sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') + sec(T('education'), eduH) + sec(T('experience'), expH) + sec(T('certs'), list(f.certs)) + '<div class="two">' + sec(T('skills'), list(f.skills)) + sec(T('strengths'), list(f.strengths)) + sec(T('hobbies'), list(f.hobbies)) + '</div>';
+      else body = main + '<div class="two">' + side + '</div>' + sec(T('personal'), kv(personalC, 'k2'));
       html = (S.tpl === 'floral' ? '<div class="orn tl"></div><div class="orn tr"></div><div class="orn bl"></div><div class="orn br"></div>' : '') + top + '<div class="body">' + body + '</div>' + foot;
     }
     d.className = 'doc t-' + S.tpl + ' ty-' + type + ' lg-' + lang;
@@ -186,7 +201,7 @@
     $('#bd-col').innerHTML = COLORS.map(function (c) { return '<button type="button" data-col="' + c + '" style="background:' + c + '" aria-label="Colour ' + c + '" aria-pressed="' + (S.color === c) + '"></button>'; }).join('') + '<label class="bd-own" title="Any colour"><input type="color" value="' + S.color + '" data-colpick>🎨</label>';
     $('#bd-font').innerHTML = FONTS[S.lang].map(function (f) { return '<option' + ((S.font || FONTS[S.lang][0]) === f ? ' selected' : '') + '>' + f + '</option>'; }).join('');
   }
-  function setType(t) { if (t === S.type) return; S.type = t; S.tpl = t === 'marriage' ? 'floral' : t === 'job' ? 'classic' : 'sidebar'; S.color = t === 'marriage' ? '#be185d' : '#1e3a8a'; if (!S.f.declaration) S.f.declaration = DECL[S.lang]; buildControls(); buildForm(); render(); save(); }
+  function setType(t) { if (t === S.type) return; S.type = t; S.tpl = t === 'marriage' ? 'floral' : t === 'job' ? 'classic' : 'executive'; S.color = t === 'marriage' ? '#be185d' : '#1e3a8a'; if (!S.f.declaration) S.f.declaration = DECL[S.lang]; buildControls(); buildForm(); render(); save(); }
   function bind() {
     $('#bd-form').addEventListener('input', onInput);
     $('#bd-form').addEventListener('click', onClick);
@@ -199,47 +214,115 @@
       else if (b.dataset.col) { S.color = b.dataset.col; buildControls(); render(); save(); }
     });
     $('.bd-ctl').addEventListener('input', function (e) { if (e.target.hasAttribute('data-colpick')) { S.color = e.target.value; render(); save(); } if (e.target.id === 'bd-font') { S.font = e.target.value; render(); save(); } });
-    $('#bd-sample').addEventListener('click', function () { var s = SAMPLE[S.type]; S.f = Object.assign({ declaration: DECL[S.lang] }, s); S.edu = (s.edu || [['', '', '', '']]).map(function (r) { return r.slice(); }); S.exp = (s.exp || [['', '', '', '']]).map(function (r) { return r.slice(); }); S.family = (s.family || [['', '', '']]).map(function (r) { return r.slice(); }); buildForm(); render(); save(); });
+    $('#bd-sample').addEventListener('click', function () { var s = SAMPLE[S.type]; S.f = Object.assign({ declaration: DECL[S.lang] }, s); S.proj = (s.proj || [['', '', '']]).map(function (r) { return r.slice(); }); S.edu = (s.edu || [['', '', '', '']]).map(function (r) { return r.slice(); }); S.exp = (s.exp || [['', '', '', '']]).map(function (r) { return r.slice(); }); S.family = (s.family || [['', '', '']]).map(function (r) { return r.slice(); }); buildForm(); render(); save(); });
     $('#bd-clear').addEventListener('click', function () { if (!window.confirm('Clear all details on this device?')) return; var t = S.type, l = S.lang; S = blank(t); S.lang = l; S.f.declaration = DECL[l]; buildControls(); buildForm(); render(); save(); });
-    $('#bd-pdf').addEventListener('click', function () { exportDoc('pdf'); });
-    $('#bd-jpg').addEventListener('click', function () { exportDoc('jpg'); });
+    $('#bd-pdf').addEventListener('click', function () { openExport('pdf'); });
+    $('#bd-jpg').addEventListener('click', function () { openExport('jpg'); });
     $('#bd-print').addEventListener('click', function () { window.print(); });
     $$('.bd-tabs button').forEach(function (b) { b.addEventListener('click', function () { document.body.dataset.view = b.dataset.view; $$('.bd-tabs button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); setTimeout(fit, 50); }); });
     window.addEventListener('resize', fit);
   }
   function fileName() { return (S.f.name || 'My').replace(/[^\wঀ-৿ऀ-ॿ]+/g, '-') + '-' + (S.type === 'cv' ? 'Resume' : 'BioData'); }
-  function exportDoc(kind) {
-    var JP = window.jspdf && window.jspdf.jsPDF;
-    if (!window.html2canvas || (kind === 'pdf' && !JP)) { toast('Still loading, try again in a moment.'); return; }
+  // ---------- download: PDF / JPG / PNG with optional size limit ----------
+  function snap() {
+    if (!window.html2canvas) return Promise.reject(new Error('still loading, try again in a moment'));
     var clone = $('#bd-doc').cloneNode(true); clone.style.transform = 'none'; clone.id = '';
     var holder = document.createElement('div'); holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px'; holder.appendChild(clone); document.body.appendChild(holder);
-    toast(kind === 'pdf' ? 'Making your PDF…' : 'Making your JPG…');
-    var done = function () { holder.remove(); }, SC = 2, PH = 1123;
-    (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
+    var PH = 1123;
+    return (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
       var H = clone.offsetHeight, top0 = clone.getBoundingClientRect().top, cuts = [], breaks = [0], start = 0;
-      $$('.sec,.job,tr,.foot,.two,.hd', clone).forEach(function (el) { var r = el.getBoundingClientRect(); cuts.push(Math.round(r.top - top0), Math.round(r.bottom - top0)); });
+      $$('.sec,.job,tr,.foot,.two,.hd,li', clone).forEach(function (el) { var r = el.getBoundingClientRect(); cuts.push(Math.round(r.top - top0), Math.round(r.bottom - top0)); });
       while (H - start > PH + 2) { var lim = start + PH, best = 0; cuts.forEach(function (c) { if (c > start + 300 && c <= lim && c > best) best = c; }); start = best || lim; breaks.push(start); }
-      return window.html2canvas(clone, { scale: SC, useCORS: true, backgroundColor: '#ffffff' }).then(function (cv) {
-        if (kind === 'jpg') { var a = document.createElement('a'); a.download = fileName() + '.jpg'; a.href = cv.toDataURL('image/jpeg', 0.95); a.click(); done(); return; }
-        var pdf = new JP({ unit: 'px', format: [794, PH], orientation: 'portrait', hotfixes: ['px_scaling'] });
-        breaks.forEach(function (y, i) {
-          var y2 = i + 1 < breaks.length ? breaks[i + 1] : H, pc = document.createElement('canvas'); pc.width = 794 * SC; pc.height = PH * SC;
-          var g = pc.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, pc.width, pc.height); g.drawImage(cv, 0, y * SC, cv.width, (y2 - y) * SC, 0, 0, cv.width, (y2 - y) * SC);
-          if (i) pdf.addPage([794, PH], 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 794, PH);
-        });
-        pdf.save(fileName() + '.pdf'); done();
+      return window.html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(function (cv) {
+        holder.remove();
+        var pages = breaks.map(function (y, i) { var y2 = i + 1 < breaks.length ? breaks[i + 1] : H, pc = document.createElement('canvas'); pc.width = 794 * 2; pc.height = PH * 2; var g = pc.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, pc.width, pc.height); g.drawImage(cv, 0, y * 2, cv.width, (y2 - y) * 2, 0, 0, cv.width, (y2 - y) * 2); return pc; });
+        return { full: cv, pages: pages };
       });
-    }).catch(function (e) { done(); toast('Could not make the file: ' + (e && e.message || e)); });
+    }, function (e) { holder.remove(); throw e; });
+  }
+  function shrink(c, k) { if (k >= 1) return c; var o = document.createElement('canvas'); o.width = Math.max(1, Math.round(c.width * k)); o.height = Math.max(1, Math.round(c.height * k)); var g = o.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(c, 0, 0, o.width, o.height); return o; }
+  function jpgURL(c, q) { return c.toDataURL('image/jpeg', q); }
+  function bytes(u) { return Math.round((u.length - u.indexOf(',') - 1) * 3 / 4); }
+  var SCALES = [1, 0.85, 0.7, 0.58, 0.48, 0.4, 0.33, 0.27];
+  // smallest loss that still fits: try each size step, pick the best quality that fits
+  function fit2(limit, measure) {
+    for (var i = 0; i < SCALES.length; i++) {
+      var k = SCALES[i], lo = 0.3, hi = 0.95, best = null;
+      if (measure(k, lo) > limit) continue;
+      for (var n = 0; n < 7; n++) { var mid = (lo + hi) / 2; if (measure(k, mid) <= limit) { best = mid; lo = mid; } else hi = mid; }
+      return { k: k, q: best || lo };
+    }
+    return { k: SCALES[SCALES.length - 1], q: 0.3 };
+  }
+  function makeFile(fmt, kb, snapR) {
+    var limit = kb ? kb * 1024 : 0, name = fileName();
+    if (fmt === 'pdf') {
+      var JP = window.jspdf && window.jspdf.jsPDF; if (!JP) throw new Error('still loading, try again in a moment');
+      var cache = {}, measure = function (k, q) { var key = k + '|' + q.toFixed(3); if (!cache[key]) cache[key] = snapR.pages.map(function (p) { return jpgURL(shrink(p, k), q); }); return cache[key].reduce(function (t, u) { return t + bytes(u); }, 0) + 4000 * snapR.pages.length; };
+      var pick = limit ? fit2(limit, measure) : { k: 1, q: 0.93 };
+      measure(pick.k, pick.q); var urls = cache[pick.k + '|' + pick.q.toFixed(3)];
+      var pdf = new JP({ unit: 'px', format: [794, 1123], orientation: 'portrait', hotfixes: ['px_scaling'], compress: true });
+      urls.forEach(function (u, i) { if (i) pdf.addPage([794, 1123], 'portrait'); pdf.addImage(u, 'JPEG', 0, 0, 794, 1123, undefined, 'FAST'); });
+      return { blob: pdf.output('blob'), name: name + '.pdf', pages: urls.length };
+    }
+    var src = snapR.pages.length > 1 && fmt !== 'pdf' ? snapR.full : snapR.pages[0], u;
+    if (fmt === 'png') {
+      for (var i = 0; i < SCALES.length; i++) { u = shrink(src, SCALES[i]).toDataURL('image/png'); if (!limit || bytes(u) <= limit) break; }
+    } else {
+      var p2 = limit ? fit2(limit, function (k, q) { return bytes(jpgURL(shrink(src, k), q)); }) : { k: 1, q: 0.93 };
+      u = jpgURL(shrink(src, p2.k), p2.q);
+    }
+    var bin = atob(u.split(',')[1]), arr = new Uint8Array(bin.length); for (var j = 0; j < bin.length; j++) arr[j] = bin.charCodeAt(j);
+    return { blob: new Blob([arr], { type: fmt === 'png' ? 'image/png' : 'image/jpeg' }), name: name + (fmt === 'png' ? '.png' : '.jpg') };
+  }
+  function human(n) { return n >= 1048576 ? (n / 1048576).toFixed(2) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  function openExport(fmt) {
+    var m = $('#bd-exp'); if (!m) {
+      m = document.createElement('div'); m.id = 'bd-exp'; m.className = 'bd-modal';
+      m.innerHTML = '<div class="bd-sheet" role="dialog" aria-modal="true" aria-labelledby="bd-exp-h"><h2 id="bd-exp-h">Download your file</h2>' +
+        '<div class="bd-lbl">File type</div><div class="bd-seg" id="bd-exp-fmt">' + [['pdf', 'PDF'], ['jpg', 'JPG'], ['png', 'PNG']].map(function (f) { return '<button type="button" data-fmt="' + f[0] + '">' + f[1] + '</button>'; }).join('') + '</div>' +
+        '<div class="bd-lbl">File size (compress)</div><div class="bd-seg" id="bd-exp-kb">' + [[0, 'Best quality'], [2048, 'Under 2 MB'], [1024, 'Under 1 MB'], [500, 'Under 500 KB'], [300, 'Under 300 KB'], [200, 'Under 200 KB'], [100, 'Under 100 KB'], [50, 'Under 50 KB']].map(function (k) { return '<button type="button" data-kb="' + k[0] + '">' + k[1] + '</button>'; }).join('') +
+        '<label class="bd-kbin">Other: <input type="number" min="20" max="10000" step="10" id="bd-exp-own" placeholder="KB"> KB</label></div>' +
+        '<p class="bd-note" id="bd-exp-note"></p><div class="bd-exp-act"><button type="button" class="bd-mini" data-close>Cancel</button><button type="button" class="bd-go" id="bd-exp-go">⬇ Download</button></div></div>';
+      document.body.appendChild(m);
+      m.addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (e.target === m || (b && b.hasAttribute('data-close'))) { m.hidden = true; return; }
+        if (!b) return;
+        if (b.dataset.fmt) { m.dataset.fmt = b.dataset.fmt; sync(); }
+        else if (b.dataset.kb != null) { m.dataset.kb = b.dataset.kb; $('#bd-exp-own').value = ''; sync(); }
+        else if (b.id === 'bd-exp-go') go();
+      });
+      $('#bd-exp-own').addEventListener('input', function () { m.dataset.kb = this.value || 0; sync(); });
+    }
+    var sync = function () {
+      $$('#bd-exp-fmt button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.fmt === m.dataset.fmt); });
+      $$('#bd-exp-kb button').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.kb === String(m.dataset.kb) && !$('#bd-exp-own').value); });
+      $('#bd-exp-note').textContent = m.dataset.fmt === 'png' ? 'PNG keeps every detail but is bigger. For small size choose JPG or PDF.' : (+m.dataset.kb ? 'The file is made as sharp as possible while staying under ' + human(+m.dataset.kb * 1024) + '.' : 'Sharpest file, best for printing.');
+    };
+    var go = function () {
+      var btn = $('#bd-exp-go'); btn.disabled = true; btn.textContent = 'Making…';
+      setTimeout(function () {
+        snap().then(function (r) {
+          var out = makeFile(m.dataset.fmt, +m.dataset.kb || 0, r), a = document.createElement('a'), url = URL.createObjectURL(out.blob);
+          a.href = url; a.download = out.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+          $('#bd-exp-note').textContent = '✅ Saved ' + out.name + ' — ' + human(out.blob.size) + (out.pages > 1 ? ' (' + out.pages + ' pages)' : '');
+          toast('Downloaded — ' + human(out.blob.size));
+        }).catch(function (e) { $('#bd-exp-note').textContent = 'Could not make the file: ' + (e && e.message || e); })
+          .then(function () { btn.disabled = false; btn.textContent = '⬇ Download'; });
+      }, 30);
+    };
+    m.dataset.fmt = fmt; if (m.dataset.kb == null) m.dataset.kb = 0; m.hidden = false; sync();
   }
   var tt; function toast(m) { var e = $('#bd-toast'); e.textContent = m; e.hidden = false; clearTimeout(tt); tt = setTimeout(function () { e.hidden = true; }, 3500); }
 
   // ---------- start ----------
   var q = new URLSearchParams(location.search), qt = q.get('type'), ql = q.get('lang');
   S = load() || blank(qt || 'cv');
-  if (qt && TY[qt] && qt !== S.type) { S.type = qt; S.tpl = qt === 'marriage' ? 'floral' : qt === 'job' ? 'classic' : 'sidebar'; S.color = qt === 'marriage' ? '#be185d' : '#1e3a8a'; }
+  if (qt && TY[qt] && qt !== S.type) { S.type = qt; S.tpl = qt === 'marriage' ? 'floral' : qt === 'job' ? 'classic' : 'executive'; S.color = qt === 'marriage' ? '#be185d' : '#1e3a8a'; }
   if (ql && FONTS[ql]) S.lang = ql;
   if (!S.f.declaration) S.f.declaration = DECL[S.lang];
-  ['edu', 'exp', 'family', 'extra'].forEach(function (k) { if (!Array.isArray(S[k])) S[k] = []; });
+  ['edu', 'exp', 'family', 'extra', 'proj'].forEach(function (k) { if (!Array.isArray(S[k])) S[k] = []; });
   buildControls(); buildForm(); bind(); render();
   if (document.fonts) document.fonts.ready.then(fit);
   window.SPBioData = { state: function () { return S; }, render: render };

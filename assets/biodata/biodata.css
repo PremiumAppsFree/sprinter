@@ -144,3 +144,38 @@
   body[data-view=edit] .bd-stagebox{display:block!important}
 }
 .bd-body .sp-arrange{display:none!important}
+.bd-modal{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:60;display:grid;place-items:center;padding:16px}
+.bd-modal[hidden]{display:none}
+.bd-sheet{background:#fff;border-radius:18px;padding:18px;max-width:520px;width:100%;box-shadow:0 20px 50px rgba(15,23,42,.3);max-height:92vh;overflow:auto}
+.bd-sheet h2{margin:0 0 12px;font:800 20px/1.2 'SP Lexend',sans-serif}
+.bd-sheet .bd-lbl{margin:12px 0 6px}
+.bd-kbin{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#3a4554}
+.bd-kbin input{width:90px;border:1.5px solid #dce2e9;border-radius:10px;padding:8px;font:600 14px/1 inherit;font-family:inherit}
+.bd-note{margin:12px 0 0;color:#3a4554;font-size:13.5px;min-height:1.4em}
+.bd-exp-act{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.bd-go{border:0;border-radius:12px;padding:12px 18px;font:700 15px/1 'SP Lexend',sans-serif;background:#1b2330;color:#fff;cursor:pointer;box-shadow:inset 0 -3px 0 #d6247a}
+.bd-go:disabled{opacity:.6}
+/* executive: name on top, light column on the right */
+.doc.t-executive{display:grid;grid-template-columns:1fr 252px;padding:0}
+.doc.t-executive .main{padding:46px 34px 40px 50px;order:1}
+.doc.t-executive .side{order:2;background:#f4f6f9;padding:46px 24px;min-height:1123px;border-left:4px solid var(--a)}
+.doc.t-executive .side .ph{width:150px;height:170px;margin:0 auto 20px;border-radius:12px}
+.doc.t-executive .side .kv th{width:auto;display:block;padding:6px 0 0;color:#64748b}.doc.t-executive .side .kv td{display:block;padding:0 0 4px;word-break:break-word}.doc.t-executive .side .kv tr+tr th,.doc.t-executive .side .kv tr+tr td{border:0}
+.doc.t-executive .hd{display:block;border-bottom:3px solid var(--a)}
+.doc.t-executive h1{font-size:36px;letter-spacing:-.01em;color:#0f172a}
+.doc.t-executive .ti{color:var(--a);text-transform:uppercase;letter-spacing:.18em;font-size:13px}
+.doc.lg-bn.t-executive .ti,.doc.lg-hi.t-executive .ti{letter-spacing:.02em;font-size:15px}
+.doc.t-executive .sec h3{font-size:13px;letter-spacing:.14em}
+/* timeline: dots and a line for jobs and studies */
+.doc.t-timeline .hd{border-bottom:0;background:var(--a7);margin:-46px -50px 22px;padding:36px 50px 24px;border-left:8px solid var(--a)}
+.doc.t-timeline .job{position:relative;padding-left:20px;border-left:2px solid var(--a25);margin-left:5px;padding-bottom:4px}
+.doc.t-timeline .job::before{content:'';position:absolute;left:-7px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--a)}
+.doc.t-timeline .ph{border-radius:50%;width:124px;height:124px}
+/* professional details */
+.doc .jh em{font-style:normal;color:#475569}.doc .jh em::before{content:'— '}
+.doc .job ul{margin-top:3px;color:#475569}
+.doc .kv.k2 tbody{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}.doc .kv.k2 tr{display:flex}.doc .kv.k2 th{width:44%;flex:none}.doc .kv.k2 td{flex:1}.doc .kv.k2 tr+tr th,.doc .kv.k2 tr+tr td{border-top:0}.doc .kv.k2 tr{border-bottom:1px dashed #e2e8f0}
+.doc.ty-cv .sec{margin-bottom:13px}.doc.ty-cv{font-size:12.8px}
+.doc .side{font-size:12.2px}.doc .side .sec{margin-bottom:12px}.doc .side li{margin:1px 0}.doc .side ul{padding-left:16px}
+.doc .side .kv tr{display:block;padding:2px 0}.doc .side .kv th,.doc .side .kv td{display:inline!important;padding:0!important}.doc .side .kv th::after{content:': '}
+.doc .side .sec.ct .kv th{display:block!important}.doc .side .sec.ct .kv th::after{content:''}.doc .side .sec.ct .kv tr{padding:3px 0}
