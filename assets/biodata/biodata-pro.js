@@ -164,8 +164,14 @@
     try { sessionStorage.setItem('sp-biodata-tab', t); } catch (e) {}
     panes(); setTimeout(A.fit, 40);
   }
+  function hdr() {
+    var h = $('.sp-header'), n = 0;
+    if (h && /sticky|fixed/.test(getComputedStyle(h).position)) n = h.offsetHeight;
+    document.documentElement.style.setProperty('--sph', n + 'px');
+  }
   function start(api) {
     A = api; var app = $('#bd-app'); if (!app) return;
+    hdr(); addEventListener('resize', function () { hdr(); A.fit(); });
     $$('[data-pi]').forEach(function (e) { e.insertAdjacentHTML('afterbegin', pi(e.dataset.pi)); });
     app.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return; var S = A.state(), d = b.dataset;
