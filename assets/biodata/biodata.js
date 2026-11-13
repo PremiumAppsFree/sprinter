@@ -222,7 +222,7 @@
     d.style.setProperty('--a', S.color); [7, 8, 12, 20, 25, 35, 45, 50, 60].forEach(function (p) { d.style.setProperty('--a' + p, mix(S.color, p)); }); d.style.fontFamily = '"' + font + '", "Hind Siliguri", "Hind", sans-serif';
     d.innerHTML = html; if (window.SPBioPro) window.SPBioPro.decorate(d, S, !!d0); if (!d0) fit();
   }
-  function fit() { var w = $('#bd-stage').clientWidth - 24, k = Math.min(1, w / 794) * (window.SPBioZoom || 1); $('#bd-doc').style.transform = 'scale(' + k + ')'; $('#bd-sizer').style.height = Math.ceil($('#bd-doc').offsetHeight * k) + 'px'; $('#bd-sizer').style.width = Math.ceil(794 * k) + 'px'; if (window.SPBioPro) window.SPBioPro.fitted(k); }
+  function fit() { var w = $('#bd-stage').clientWidth - 24; if (w <= 0) return; var k = Math.min(1, w / 794) * (window.SPBioZoom || 1); $('#bd-doc').style.transform = 'scale(' + k + ')'; $('#bd-sizer').style.height = Math.ceil($('#bd-doc').offsetHeight * k) + 'px'; $('#bd-sizer').style.width = Math.ceil(794 * k) + 'px'; if (window.SPBioPro) window.SPBioPro.fitted(k); }
 
   // ---------- controls ----------
   function buildControls() {
