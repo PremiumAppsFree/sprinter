@@ -81,14 +81,15 @@
       family: [['Father', 'Subrata Das', 'Retired Bank Officer'], ['Mother', 'Mita Das', 'Homemaker'], ['Brother', 'Arnab Das', 'Software Engineer, Pune']] }
   };
 
-  var TPL = [['executive', 'Executive'], ['timeline', 'Timeline'], ['classic', 'Classic'], ['sidebar', 'Modern sidebar'], ['elegant', 'Elegant'], ['bold', 'Bold header'], ['floral', 'Floral'], ['minimal', 'Minimal (no photo)']];
+  var TPL = [['executive', 'Executive'], ['timeline', 'Timeline'], ['classic', 'Classic'], ['sidebar', 'Modern sidebar'], ['elegant', 'Elegant'], ['bold', 'Bold header'], ['floral', 'Floral'], ['minimal', 'Minimal (no photo)'], ['onyx', 'Onyx dark'], ['ribbon', 'Ribbon'], ['compact', 'Compact pro']];
+  var SIDE = ['sidebar', 'executive', 'onyx'], KICK = ['classic', 'floral', 'elegant'];
   var COLORS = ['#1e3a8a', '#0f766e', '#7c3aed', '#be185d', '#b91c1c', '#c2410c', '#15803d', '#334155', '#a16207', '#0e7490'];
   var FONTS = { en: ['Poppins', 'Playfair Display', 'Lora', 'Montserrat'], bn: ['Hind Siliguri', 'Noto Serif Bengali', 'Baloo Da 2'], hi: ['Hind', 'Martel', 'Mukta'] };
 
   var KEY = 'sp-biodata-v1', S;
   function blank(type) { return { type: type || 'cv', lang: 'en', tpl: type === 'marriage' ? 'floral' : type === 'job' ? 'classic' : 'executive', color: type === 'marriage' ? '#be185d' : '#1e3a8a', font: '', photo: '', sign: '', f: { declaration: DECL.en }, edu: [['', '', '', '']], exp: [['', '', '', '']], family: [['', '', '']], extra: [] }; }
   function load() { try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.f) return s; } catch (e) {} return null; }
-  var saveT; function save() { clearTimeout(saveT); saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(S)); $('#bd-saved').textContent = 'Saved on this device'; } catch (e) { $('#bd-saved').textContent = 'Photo too big to auto-save — download your file'; } }, 400); }
+  var saveT; function save() { clearTimeout(saveT); saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(S)); $('#bd-saved').textContent = 'Saved on this device'; if (window.SPBioPro) window.SPBioPro.changed(S); } catch (e) { $('#bd-saved').textContent = 'Photo too big to auto-save — download your file'; } }, 400); }
   function T(k) { return (W[k] || {})[S.lang] || (W[k] || {}).en || k; }
   function L(fd) { return fd.l[S.lang] || fd.l.en; }
   function on(fd) { return fd.on.indexOf(TY[S.type]) >= 0; }
@@ -181,8 +182,8 @@
   function list(s) { var a = lines(s); return a.length ? '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ''; }
   function filled(rows) { return (rows || []).filter(function (r) { return r.some(function (x) { return String(x).trim(); }); }); }
   function mix(c, p) { var m = /^#?([0-9a-f]{6})$/i.exec(c) || [0, '1e3a8a'], n = parseInt(m[1], 16), k = p / 100; return 'rgb(' + [n >> 16, (n >> 8) & 255, n & 255].map(function (v) { return Math.round(v * k + 255 * (1 - k)); }).join(',') + ')'; }
-  function render() {
-    var f = S.f, d = $('#bd-doc'), type = S.type, lang = S.lang;
+  function render(d0, tp0) {
+    var f = S.f, d = d0 || $('#bd-doc'), tp = tp0 || S.tpl, type = S.type, lang = S.lang;
     var font = S.font || FONTS[lang][0], heading = type === 'marriage' ? T('marriage') : type === 'job' ? T('job') : T('cv');
     var personal = F.filter(function (fd) { return fd.g === 'personal' && on(fd) && String(f[fd.k] || '').trim(); }).map(function (fd) { return [L(fd), f[fd.k]]; });
     filled(S.extra).forEach(function (r) { personal.push([r[0], r[1]]); });
@@ -193,7 +194,7 @@
     var expH = exp.map(function (r) { var pts = lines(String(r[3] || '').replace(/,/g, '\u201a')).map(function (x) { return x.replace(/\u201a/g, ',').replace(/^[-•*]\s*/, ''); }); return '<div class="job"><div class="jh"><b>' + esc(r[0]) + '</b>' + (r[1] ? '<em>' + esc(r[1]) + '</em>' : '') + '<span>' + esc(r[2]) + '</span></div>' + (pts.length > 1 ? '<ul>' + pts.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : pts.length ? '<p>' + esc(pts[0]) + '</p>' : '') + '</div>'; }).join('');
     var famH = fam.length ? '<table class="grid"><thead><tr><th>' + T('relation') + '</th><th>' + T('fname') + '</th><th>' + T('focc') + '</th></tr></thead><tbody>' + fam.map(function (r) { return '<tr>' + r.map(function (x) { return '<td>' + esc(x) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>' : '';
     var sumT = T(type === 'marriage' ? 'about' : type === 'job' ? 'objective' : 'summary');
-    var photo = S.tpl !== 'minimal' ? '<div class="ph">' + (S.photo ? '<img src="' + S.photo + '" alt="">' : '<span>Photo</span>') + '</div>' : '';
+    var photo = tp !== 'minimal' ? '<div class="ph">' + (S.photo ? '<img src="' + S.photo + '" alt="">' : '<span>Photo</span>') + '</div>' : '';
     var sign = type !== 'marriage' ? '<div class="sign">' + (S.sign ? '<img src="' + S.sign + '" alt="">' : '') + '<i></i><span>' + T('signature') + '</span></div>' : '';
     var foot = type !== 'marriage' ? '<footer class="foot">' + (f.declaration ? sec(T('declaration'), '<p>' + nl(f.declaration) + '</p>', 'decl') : '') + '<div class="pd"><div>' + (f.place ? T('place') + ': ' + esc(f.place) : '') + '<br>' + (f.date ? T('date') + ': ' + esc(f.date) : '') + '</div>' + sign + '</div></footer>' : '';
     var main = sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') +
@@ -203,25 +204,25 @@
     var html, personalC = type === 'cv' ? personal.filter(function (r) { return r[0] !== L(F[21]); }) : personal;
     var name = '<h1>' + esc(f.name || 'Your Name') + '</h1>', title = f.title && type !== 'marriage' ? '<div class="ti">' + esc(f.title) + '</div>' : '';
     var cline = contact.map(function (r) { return '<span>' + esc(r[1]) + '</span>'; }).join('');
-    if ((S.tpl === 'sidebar' || S.tpl === 'executive') && type !== 'marriage') {
+    if (SIDE.indexOf(tp) >= 0 && type !== 'marriage') {
       html = '<aside class="side">' + photo + sec(T('contact'), kv(contact), 'ct') + side + (type === 'job' ? '' : sec(T('personal'), kv(personalC))) + '</aside><div class="main"><header class="hd">' + name + title + '</header>' +
         (type === 'job' ? sec(T('personal'), kv(personal)) + sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') + sec(T('education'), eduH) + sec(T('experience'), expH) + sec(T('certs'), list(f.certs)) : main) + foot + '</div>';
     } else {
-      var kick = S.tpl === 'classic' || S.tpl === 'floral' || S.tpl === 'elegant' ? '<div class="kick">' + esc(heading) + '</div>' : '';
-      var centered = S.tpl === 'floral' || S.tpl === 'elegant';
+      var kick = KICK.indexOf(tp) >= 0 ? '<div class="kick">' + esc(heading) + '</div>' : '';
+      var centered = tp === 'floral' || tp === 'elegant';
       var showCl = type !== 'marriage' && !centered;
       var top = '<header class="hd">' + (centered ? kick + photo + name + title + (type !== 'marriage' ? '<div class="cl">' + cline + '</div>' : '') : '<div class="hl">' + kick + name + title + (showCl ? '<div class="cl">' + cline + '</div>' : '') + '</div>' + photo) + '</header>';
       var body;
       if (type === 'marriage') body = main;
       else if (type === 'job') body = sec(T('personal'), kv(personal)) + sec(sumT, f.summary ? '<p>' + nl(f.summary) + '</p>' : '') + sec(T('education'), eduH) + sec(T('experience'), expH) + sec(T('certs'), list(f.certs)) + '<div class="two">' + sec(T('skills'), list(f.skills)) + sec(T('strengths'), list(f.strengths)) + sec(T('hobbies'), list(f.hobbies)) + '</div>';
       else body = main + '<div class="two">' + side + '</div>' + sec(T('personal'), kv(personalC, 'k2'));
-      html = (S.tpl === 'floral' ? '<div class="orn tl"></div><div class="orn tr"></div><div class="orn bl"></div><div class="orn br"></div>' : '') + top + '<div class="body">' + body + '</div>' + foot;
+      html = (tp === 'floral' ? '<div class="orn tl"></div><div class="orn tr"></div><div class="orn bl"></div><div class="orn br"></div>' : '') + top + '<div class="body">' + body + '</div>' + foot;
     }
-    d.className = 'doc t-' + S.tpl + ' ty-' + type + ' lg-' + lang;
+    d.className = 'doc t-' + tp + ' ty-' + type + ' lg-' + lang;
     d.style.setProperty('--a', S.color); [7, 8, 12, 20, 25, 35, 45, 50, 60].forEach(function (p) { d.style.setProperty('--a' + p, mix(S.color, p)); }); d.style.fontFamily = '"' + font + '", "Hind Siliguri", "Hind", sans-serif';
-    d.innerHTML = html; fit();
+    d.innerHTML = html; if (window.SPBioPro) window.SPBioPro.decorate(d, S, !!d0); if (!d0) fit();
   }
-  function fit() { var w = $('#bd-stage').clientWidth - 24, k = Math.min(1, w / 794); $('#bd-doc').style.transform = 'scale(' + k + ')'; $('#bd-sizer').style.height = Math.ceil($('#bd-doc').offsetHeight * k) + 'px'; $('#bd-sizer').style.width = Math.ceil(794 * k) + 'px'; }
+  function fit() { var w = $('#bd-stage').clientWidth - 24, k = Math.min(1, w / 794) * (window.SPBioZoom || 1); $('#bd-doc').style.transform = 'scale(' + k + ')'; $('#bd-sizer').style.height = Math.ceil($('#bd-doc').offsetHeight * k) + 'px'; $('#bd-sizer').style.width = Math.ceil(794 * k) + 'px'; if (window.SPBioPro) window.SPBioPro.fitted(k); }
 
   // ---------- controls ----------
   function buildControls() {
@@ -236,14 +237,14 @@
     $('#bd-form').addEventListener('input', onInput);
     $('#bd-form').addEventListener('click', onClick);
     $('#bd-form').addEventListener('change', function (e) { var t = e.target; if (t.dataset.img && t.files[0]) readImg(t.files[0], t.dataset.img === 'photo' ? 700 : 600, function (u) { S[t.dataset.img] = u; buildForm(); render(); save(); }); });
-    $('.bd-ctl').addEventListener('click', function (e) {
+    $('#bd-app').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.dataset.type) setType(b.dataset.type);
       else if (b.dataset.lang) { var old = S.lang; S.lang = b.dataset.lang; S.font = ''; if (!S.f.declaration || S.f.declaration === DECL[old]) S.f.declaration = DECL[S.lang]; buildControls(); buildForm(); render(); save(); }
       else if (b.dataset.tpl) { S.tpl = b.dataset.tpl; buildControls(); render(); save(); }
       else if (b.dataset.col) { S.color = b.dataset.col; buildControls(); render(); save(); }
     });
-    $('.bd-ctl').addEventListener('input', function (e) { if (e.target.hasAttribute('data-colpick')) { S.color = e.target.value; render(); save(); } if (e.target.id === 'bd-font') { S.font = e.target.value; render(); save(); } });
+    $('#bd-app').addEventListener('input', function (e) { if (e.target.hasAttribute('data-colpick')) { S.color = e.target.value; render(); save(); } if (e.target.id === 'bd-font') { S.font = e.target.value; render(); save(); } });
     $('#bd-sample').addEventListener('click', function () { var s = SAMPLE[S.type]; S.f = Object.assign({ declaration: DECL[S.lang] }, s); S.proj = (s.proj || [['', '', '']]).map(function (r) { return r.slice(); }); S.edu = (s.edu || [['', '', '', '']]).map(function (r) { return r.slice(); }); S.exp = (s.exp || [['', '', '', '']]).map(function (r) { return r.slice(); }); S.family = (s.family || [['', '', '']]).map(function (r) { return r.slice(); }); buildForm(); render(); save(); });
     $('#bd-clear').addEventListener('click', function () { if (!window.confirm('Clear all details on this device?')) return; var t = S.type, l = S.lang; S = blank(t); S.lang = l; S.f.declaration = DECL[l]; buildControls(); buildForm(); render(); save(); });
     $('#bd-pdf').addEventListener('click', function () { openExport('pdf'); });
@@ -356,5 +357,8 @@
   [['#bd-pdf', 'download', 'Download'], ['#bd-jpg', 'image', 'JPG / PNG'], ['#bd-print', 'printer', 'Print'], ['#bd-sample', 'sparkle', 'Fill sample details'], ['#bd-clear', 'trash', 'Clear all'], ['.bd-tabs [data-view="edit"]', 'pen', 'Fill details'], ['.bd-tabs [data-view="preview"]', 'eye', 'Preview & download']].forEach(function (b) { var e = $(b[0]); if (e) e.innerHTML = ic(b[1]) + '<span>' + esc(b[2]) + '</span>'; });
   buildControls(); buildForm(); bind(); render();
   if (document.fonts) document.fonts.ready.then(fit);
-  window.SPBioData = { state: function () { return S; }, render: render };
+  window.SPBioData = { state: function () { return S; }, render: render, fit: fit, save: save, T: T, ic: ic, esc: esc, lines: lines, toast: toast, openExport: openExport, TPL: TPL, sample: function () { $('#bd-sample').click(); },
+    set: function (o) { if (!o || !o.f) return; S = o; if (!TY[S.type]) S.type = 'cv'; if (!FONTS[S.lang]) S.lang = 'en'; ['edu', 'exp', 'family', 'extra', 'proj'].forEach(function (k) { if (!Array.isArray(S[k])) S[k] = []; }); buildControls(); buildForm(); render(); save(); },
+    refresh: function () { buildControls(); buildForm(); render(); save(); } };
+  if (window.SPBioPro) window.SPBioPro.start(window.SPBioData);
 })();
