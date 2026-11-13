@@ -13,9 +13,10 @@
 <script src="../assets/sprinter/sprinter.js?v=39"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Playfair+Display:wght@400;700&family=Lora:wght@400;600&family=Montserrat:wght@400;600;700;800&family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Baloo+Da+2:wght@400;600;700&family=Hind:wght@400;600;700&family=Martel:wght@400;700&family=Mukta:wght@400;600;700&family=Great+Vibes&family=Roboto:wght@400;700&display=swap">
-<link rel="stylesheet" href="../assets/biodata/biodata.css?v=4">
+<link rel="stylesheet" href="../assets/biodata/biodata.css?v=5">
+<link rel="stylesheet" href="../assets/biodata/biodata-pro.css?v=1">
 </head>
-<body class="bd-body" data-sp-nofloat data-view="edit">
+<body class="bd-body" data-sp-nofloat data-view="edit" data-tab="tpl">
 <header class="sp-header" id="sp-header">
   <div class="sp-wrap">
     <a class="sp-brand" href="../index.html" aria-label="S Printer home">
@@ -34,28 +35,53 @@
   </div>
 </header>
 
-<main class="bd-wrap">
-  <div class="bd-hero">
-    <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bdg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0098D8"/><stop offset="1" stop-color="#D6247A"/></linearGradient></defs><rect x="10" y="4" width="44" height="56" rx="7" fill="url(#bdg)"/><rect x="16" y="11" width="13" height="15" rx="3" fill="#fff"/><rect x="33" y="12" width="15" height="4" rx="2" fill="#fff"/><rect x="33" y="20" width="11" height="3" rx="1.5" fill="#fff" opacity=".8"/><rect x="16" y="32" width="32" height="3" rx="1.5" fill="#fff" opacity=".9"/><rect x="16" y="39" width="26" height="3" rx="1.5" fill="#fff" opacity=".8"/><rect x="16" y="46" width="30" height="3" rx="1.5" fill="#fff" opacity=".8"/></svg>
-    <div><h1>CV &amp; Bio-Data Maker</h1><p>Fill a simple form once, choose a design and colour, then download PDF / JPG or print. English, বাংলা and हिन्दी. Your details stay on this device.</p></div>
+<main class="bdp-app" id="bd-app">
+  <div class="bdp-top">
+    <h1>CV &amp; Bio-Data Maker</h1>
+    <button type="button" class="bdp-ib" id="bdp-undo" title="Undo (Ctrl+Z)" aria-label="Undo" data-pi="undo"></button>
+    <button type="button" class="bdp-ib" id="bdp-redo" title="Redo (Ctrl+Y)" aria-label="Redo" data-pi="redo"></button>
+    <small id="bd-saved"></small>
+    <span class="bdp-sp"></span>
+    <span id="bdp-score" class="bdp-sc" title="Strength score"></span>
+    <span id="bdp-pages" class="bdp-pg"></span>
+    <span class="bdp-zoom"><button type="button" class="bdp-ib" data-zoom="-1" aria-label="Zoom out" data-pi="minus"></button><b id="bdp-zv">100%</b><button type="button" class="bdp-ib" data-zoom="1" aria-label="Zoom in" data-pi="plus"></button><button type="button" class="bdp-ib" data-zoom="0" aria-label="Fit to screen" title="Fit to screen" data-pi="fit"></button></span>
+    <button type="button" class="bdp-ghost" id="bd-print">Print</button>
+    <button type="button" class="bdp-cta" id="bd-pdf">Download</button>
+    <button type="button" id="bd-jpg" hidden></button>
   </div>
-
-  <div class="bd-ctl">
-    <div class="row"><b>Make</b><div class="bd-seg" id="bd-type"></div></div>
-    <div class="row"><b>Language</b><div class="bd-seg" id="bd-lang"></div><select id="bd-font" aria-label="Font"></select></div>
-    <div class="row"><b>Design</b><div class="bd-seg" id="bd-tpl"></div></div>
-    <div class="row"><b>Colour</b><div class="bd-cols" id="bd-col"></div></div>
-  </div>
-
-  <div class="bd-tabs"><button type="button" data-view="edit" aria-pressed="true">✏️ Fill details</button><button type="button" data-view="preview" aria-pressed="false">👁 Preview &amp; download</button></div>
-
-  <div class="bd-main">
+  <div class="bdp-work">
+    <nav class="bdp-rail" aria-label="Editor sections">
+      <button type="button" data-tab="tpl" data-pi="grid"><span>Templates</span></button>
+      <button type="button" data-tab="details" data-pi="pen"><span>Details</span></button>
+      <button type="button" data-tab="design" data-pi="palette"><span>Design</span></button>
+      <button type="button" data-tab="sections" data-pi="layers"><span>Sections</span></button>
+      <button type="button" data-tab="tools" data-pi="wand"><span>Tools</span></button>
+      <button type="button" data-tab="preview" class="bdp-prev" data-pi="eye"><span>Preview</span></button>
+    </nav>
     <div class="bd-panel">
-      <div class="bd-acts"><button type="button" class="bd-mini" id="bd-sample">Fill sample details</button><button type="button" class="bd-mini" id="bd-clear">Clear all</button><small id="bd-saved"></small></div>
-      <form id="bd-form" onsubmit="return false"></form>
+      <section data-pane="tpl">
+        <h2>Templates</h2>
+        <div class="bd-lbl">What do you want to make?</div><div class="bd-seg" id="bd-type"></div>
+        <div class="bd-lbl">Language</div><div class="bd-seg" id="bd-lang"></div>
+        <div class="bd-lbl">Pick a design — it shows your own details</div>
+        <div class="bdp-gal" id="bdp-gal"></div>
+        <div id="bd-tpl" hidden></div>
+      </section>
+      <section data-pane="details" hidden>
+        <h2>Your details</h2>
+        <div class="bd-acts"><button type="button" class="bd-mini" id="bd-sample">Fill sample details</button><button type="button" class="bd-mini" id="bd-clear">Clear all</button></div>
+        <form id="bd-form" onsubmit="return false"></form>
+      </section>
+      <section data-pane="design" hidden>
+        <h2>Design</h2>
+        <div class="bd-lbl">Colour</div><div class="bd-cols" id="bd-col"></div>
+        <div class="bd-lbl">Font</div><select id="bd-font" aria-label="Font"></select>
+        <div id="bdp-design"></div>
+      </section>
+      <section data-pane="sections" hidden><h2>Sections</h2><div id="bdp-sections"></div></section>
+      <section data-pane="tools" hidden><h2>Tools</h2><div id="bdp-tools"></div></section>
     </div>
     <div class="bd-stagebox">
-      <div class="bd-dl"><button type="button" id="bd-pdf">⬇ Download PDF</button><button type="button" id="bd-jpg">JPG</button><button type="button" id="bd-print">🖨 Print</button></div>
       <div id="bd-stage"><div id="bd-sizer"><div id="bd-doc" class="doc"></div></div></div>
     </div>
   </div>
@@ -79,6 +105,7 @@
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-<script src="../assets/biodata/biodata.js?v=4"></script>
+<script src="../assets/biodata/biodata-pro.js?v=1"></script>
+<script src="../assets/biodata/biodata.js?v=5"></script>
 </body>
 </html>
