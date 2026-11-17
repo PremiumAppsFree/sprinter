@@ -114,6 +114,7 @@
     pdf: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8.5 17v-4h1.3a1.3 1.3 0 0 1 0 2.6H8.5M13 13v4h.8a1.6 1.6 0 0 0 1.6-1.6v-.8A1.6 1.6 0 0 0 13.8 13z"/>',
     printer: '<path d="M7 9V3h10v6"/><path d="M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/>',
     camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+    crop: '<path d="M6 2v16h16"/><path d="M2 6h16v16"/>',
     sign: '<path d="M3 16c2.5-.5 3.5-6 5.5-6s1 6 3 6 2.7-3.5 3.8-3.5 1 2 2.2 2H21"/><path d="M3 20.5h18"/>',
     sparkle: '<path d="M11 3l1.9 4.9L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-2.1z"/><path d="M18.5 14.5l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8z"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
@@ -139,6 +140,8 @@
     h += grp(tile('user') + T('fname') + ' & ' + T('contact'), pick('top') + pick('contact') +
       '<div class="bd-wide bd-photos"><label class="bd-up"><input type="file" accept="image/*" data-img="photo"><span>' + (S.photo ? '<img src="' + S.photo + '" alt="">' : ic('camera')) + '</span><b>Photo</b></label>' +
       (S.type !== 'marriage' ? '<label class="bd-up bd-sig"><input type="file" accept="image/*" data-img="sign"><span>' + (S.sign ? '<img src="' + S.sign + '" alt="">' : ic('sign')) + '</span><b>Signature</b></label>' : '') +
+      (S.photo ? '<button type="button" class="bd-mini" data-cropimg="photo">' + ic('crop') + 'Crop / rotate photo</button>' : '') +
+      (S.sign ? '<button type="button" class="bd-mini" data-cropimg="sign">' + ic('crop') + 'Crop signature</button>' : '') +
       '<button type="button" class="bd-mini" data-clearimg>' + ic('trash') + 'Remove photo / signature</button></div>', true);
     h += grp(tile('id') + T('personal'), pick('personal') + '<div class="bd-wide"><span class="bd-lbl">Add your own fields (e.g. Aadhaar no., Blood group)</span>' + rowsEditor('extra', ['t', 't'], S.extra.length ? S.extra : [], ['Field name', 'Value']) + '</div>');
     h += grp(tile('pen') + T(S.type === 'marriage' ? 'about' : S.type === 'job' ? 'objective' : 'summary'), F.filter(function (fd) { return fd.k === 'summary'; }).map(fld).join(''));
@@ -169,9 +172,32 @@
       if (b.hasAttribute('data-del')) rows.splice(i, 1); else if (i > 0) rows.splice(i - 1, 0, rows.splice(i, 1)[0]);
       S[rid] = rows; buildForm(); openGroupOf(rid); render(); save(); return;
     }
+    if (b.dataset.cropimg) { pickImg(b.dataset.cropimg, null, null, S[b.dataset.cropimg]); return; }
     if (b.hasAttribute('data-clearimg')) { S.photo = ''; S.sign = ''; buildForm(); render(); save(); }
   }
   function openGroupOf(id) { var r = $('[data-rows="' + id + '"]'); if (r) r.closest('details').open = true; }
+  function pickImg(key, file, input, src) {
+    var photo = key === 'photo';
+    if (input) input.value = '';
+    if (!window.SPCrop) { if (file) readImg(file, photo ? 700 : 600, function (u) { S[key] = u; buildForm(); render(); save(); }); return; }
+    window.SPCrop.open({
+      file: file, src: src,
+      title: photo ? 'Your photo' : 'Your signature',
+      round: photo && (S.photoShape === 'round' || S.tpl === 'sidebar' || S.tpl === 'onyx'),
+      presets: photo
+        ? [{ label: 'Passport 3:4', w: 600, h: 800 }, { label: 'Square 1:1', w: 640, h: 640 }, { label: 'Portrait 4:5', w: 640, h: 800 }, { label: 'Wide 4:3', w: 800, h: 600 }]
+        : [{ label: 'Signature 3:1', w: 900, h: 300 }, { label: 'Wide 4:1', w: 1000, h: 250 }],
+      maxKB: photo ? 120 : 60,
+      minPx: photo ? { w: 300, h: 400 } : { w: 300, h: 100 },
+      bg: '#ffffff',
+      note: photo ? 'Keep your face in the middle of the box. The photo is resized and compressed for you.'
+        : 'Sign on white paper and photograph it in good light, then crop just the signature.'
+    }).then(function (r) {
+      if (!r) return;
+      S[key] = r.url; buildForm(); render(); save();
+      toast((photo ? 'Photo' : 'Signature') + ' added — ' + r.w + '×' + r.h + ', ' + Math.round(r.bytes / 1024) + ' KB.');
+    });
+  }
   function readImg(file, max, cb) {
     var rd = new FileReader(); rd.onload = function () { var im = new Image(); im.onload = function () { var k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', 0.88)); }; im.src = rd.result; }; rd.readAsDataURL(file);
   }
@@ -236,7 +262,7 @@
   function bind() {
     $('#bd-form').addEventListener('input', onInput);
     $('#bd-form').addEventListener('click', onClick);
-    $('#bd-form').addEventListener('change', function (e) { var t = e.target; if (t.dataset.img && t.files[0]) readImg(t.files[0], t.dataset.img === 'photo' ? 700 : 600, function (u) { S[t.dataset.img] = u; buildForm(); render(); save(); }); });
+    $('#bd-form').addEventListener('change', function (e) { var t = e.target; if (t.dataset.img && t.files[0]) pickImg(t.dataset.img, t.files[0], t); });
     $('#bd-app').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.dataset.type) setType(b.dataset.type);
